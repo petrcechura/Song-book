@@ -18,11 +18,22 @@ int add(Database* database)
 	
 	std::cout << "Type a song name\n\t>>";
 	std::getline(std::cin, name);
+	if (name.size() > NAME_WIDTH)  {
+		std::cout << "name '" << name << "' is too long! Max width is " 
+				  << NAME_WIDTH << " chars, your's " << name.size() << std::endl;
+
+		return 1;
+	}
 
 	std::cout << "Type an author's name\n\t>>";
 	std::getline(std::cin, author);
 
-	// TODO check validity
+	if (author.size() > AUTHOR_WIDTH)  {
+		std::cout << "author's name '" << author << "' is too long! Max width is " 
+				  << AUTHOR_WIDTH << " chars, your's " << author.size() << std::endl;
+
+		return 1;
+	}
 
 	Song* song = new Song(name, author);
 	database->addSong(song);
@@ -39,15 +50,26 @@ int remove(Database* database)
 	std::getline(std::cin, str_id);
 
 	int id = std::stoi(str_id);
+
+	
 	Song* song = database->getSong(id);
 
-	// TODO: remove method shall be implemented, which is not currently...
-	// and maybe remove it by id, not by pointer (safer option)
 	if (song)  {
 		std::string name = song->getName();
-		database->removeSong(song);
-		std::cout << "Song '" << name << "' removed succesfully" << std::endl;
-		return 0;
+		int rm_success = database->removeSong(id);
+
+		if (!rm_success) {
+			std::cout << "Song '" << name << "' removed succesfully" << std::endl;
+			return 0;
+		}
+		else if (rm_success == 1 )  {
+			// element does not exist, cant be removed
+			return 1;
+		}
+		else  {
+			// FATAL ERROR (multiple elements with same id)
+			return 2;
+		}
 	}	
 	else  {
 		std::cout << "Invalid song id '" << id << "' ..." << std::endl;
@@ -63,6 +85,27 @@ int help()
 }
 
 
+/** This function returns number of characters inside string variable, regardless of character format (UNICODE/ASCII) */
+inline int countStringChars(const std::string& _str)
+{
+	std::wstring str = std::wstring_convert<std::codecvt_utf8<wchar_t>>()
+					   .from_bytes(_str);
+	return str.size();
+}
+
+/** This function returns an aligned string with set width, regardless of characters format (UNICODE/ASCII) */
+inline std::string alignString(const std::string& _str, char fill = ' ', int maxWidth = 30)
+{	
+	std::string str = "CANT DISPLAY (too long)" + std::string(maxWidth-23, fill);
+	
+	if (_str.size() < maxWidth)  {
+		str = _str + std::string(NAME_WIDTH - countStringChars(_str), fill);
+	}
+
+	return str;
+}
+
+
 // TODO does not work well with unicode characters...
 int list(Database* database)
 {
@@ -71,20 +114,18 @@ int list(Database* database)
 
 	std::cout << std::string(4 + NAME_WIDTH + AUTHOR_WIDTH, '+')
 			  << std::endl;
-	std::cout << std::setw(4) << std::left << "No. "
+	std::cout << std::setw(4) << std::left << "ID"
 			  << std::setw(NAME_WIDTH) << "Name "
 			  << std::setw(AUTHOR_WIDTH) << "Author "
 			  << std::endl;
 	std::cout << std::string(4 + NAME_WIDTH + AUTHOR_WIDTH, '+')
 			  << std::endl;
-	int i = 1;
-
-	for(auto& item : data)  {
-		std::cout << std::setw(4) << std::left << std::to_string(i).append(". ")
-				  << std::setw(NAME_WIDTH) << std::left << std::string(item.at("name"))
-				  << std::setw(AUTHOR_WIDTH) << std::left << std::string(item.at("author"))
+	
+	for(const auto& [key, item] : data.items())  {
+		std::cout << std::setw(4) << std::left << std::string(key)
+				  << std::left << alignString(item.at("name"), ' ', NAME_WIDTH)
+				  << std::left << alignString(item.at("author"), ' ', AUTHOR_WIDTH)
 				  << std::endl;
-		i++;
 	}
 
 
@@ -94,6 +135,9 @@ int list(Database* database)
 
 	return 0;
 }
+
+
+
 
 int latex()
 {
@@ -122,6 +166,12 @@ int main(int argc, char *argv[])
 		.help("provide a -do command that is executed after app launch");
 
 
+	countStringChars("čšěčšěčšě");
+	countStringChars("dsadasasa");
+
+
+
+
 	try {
   		prog.parse_args(argc, argv);
 	}
@@ -133,7 +183,7 @@ int main(int argc, char *argv[])
 
 	// create the database object
 	Database* database = new Database;
-	if (!database->loadJsonFile("database.json"))  {
+	if (database->loadJsonFile("database.json"))  {
 		std::cout << "Error while trying to load 'database.json' file! Terminating..." << std::endl;
 		exit(1);
 	}

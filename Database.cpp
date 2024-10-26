@@ -88,12 +88,17 @@ int Database::loadJsonFile(std::string fname)
 
 	// TODO check proper format
 
+	if (data.is_discarded())  {
+		std::cout << "Error while parsing file ' " << fname 
+				  << "'... Check its format please " << std::endl;
+	}
+
 	for (auto &el : data.items())  {
 		Song* song = new Song();
 		song->loadJson(el.value());
 		addSong(song);
 	}
-
+	
 	return 0;
 
 }
@@ -102,15 +107,27 @@ int Database::loadJsonFile(std::string fname)
 // TODO
 int Database::removeSong(Song* song)
 {
-	
-
-
+	//TODO
+	return 1;
 }
 
 
 // TODO
 int Database::removeSong(int id)
 {
+	int removed = song_container.erase(id);
 
+	if (removed == 1)  {
+		// remove was successfull
+		return 0;
+	}
+	else if (removed == 0)  {
+		// element with this ID does not exist!
+		return 1;
+	}
+	else  {
+		// more than one element removed! FATAL ERROR
+		return 2;
+	}
 
 }
