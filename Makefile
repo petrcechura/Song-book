@@ -23,7 +23,7 @@ debug: compile-with-debug link
 
 .PHONY: run
 run:
-	./$(OUTPUT_FILE)
+	@./$(OUTPUT_FILE)
 
 .PHONY: compile-with-debug
 compile-with-debug:

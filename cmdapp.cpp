@@ -91,7 +91,14 @@ int remove(Database* database)
 
 int help()
 {
-	std::cout << "TODO" << std::endl;
+	std::cout << "Available commands:" << std::endl;
+	std::cout << "> help: Shows this message" << std::endl;
+	std::cout << "> add:  Adds a new song to database" << std::endl;
+	std::cout << "> remove: Removes a song from database" << std::endl;
+	std::cout << "> list: Shows all songs from database" << std::endl;
+	std::cout << "> modify: Modifies songs in database" << std::endl;
+	std::cout << "> latex: Exports database to a LaTeX file" << std::endl;
+	std::cout << "> exit: Saves database into json file and exits program" << std::endl;
 
 	return 0;
 }
@@ -226,13 +233,11 @@ int main(int argc, char *argv[])
 		.help("when true, json file is not loaded into database");
 	prog.add_argument("-do")
 		.help("provide a -do command that is executed after app launch");
-
-
-	countStringChars("čšěčšěčšě");
-	countStringChars("dsadasasa");
-
-
-
+	prog.add_argument("-h", "--help")
+		.default_value(false)
+		.implicit_value(true)
+		.nargs(0)
+		.help("Displays a help message");
 
 	try {
   		prog.parse_args(argc, argv);
@@ -245,13 +250,19 @@ int main(int argc, char *argv[])
 
 	// create the database object
 	Database* database = new Database;
-	if (database->loadJsonFile("database.json"))  {
-		std::cout << "Error while trying to load 'database.json' file! Terminating..." << std::endl;
-		exit(1);
+	if (prog.get<bool>("--no-json-load") == false)  {
+		if (database->loadJsonFile("database.json"))  {
+			std::cout << "Error while trying to load 'database.json' file! Terminating..." << std::endl;
+			exit(1);
+		}
 	}
 
 
-	// TODO
+	if (prog.get<bool>("-h") == true)  {
+		std::cout << "TODO" << std::endl;
+		exit(0);
+	}
+
 	// check arguments, do their job
 	if (auto fn= prog.present("-do"))  {
 		user_input = prog.get<std::string>("-do");
