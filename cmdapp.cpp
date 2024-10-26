@@ -24,6 +24,10 @@ int add(Database* database)
 
 		return 1;
 	}
+	else if (name == "")  {
+		std::cout << "name field shall not be empty string!" << std::endl;
+		return 2;
+	} 
 
 	std::cout << "Type an author's name\n\t>>";
 	std::getline(std::cin, author);
@@ -48,9 +52,17 @@ int remove(Database* database)
 	std::string str_id;
 	std::cout << "Type a song ID to remove\n\t>> ";
 	std::getline(std::cin, str_id);
+	
+	int id;
 
-	int id = std::stoi(str_id);
-
+	try {
+		id = std::stoi(str_id);
+	}
+	catch (const std::invalid_argument& e)  {
+		std::cout << "'" << str_id << "' does not contain valid ID to parse!" << std::endl;
+		return 1;
+	}
+	
 	
 	Song* song = database->getSong(id);
 
@@ -106,7 +118,6 @@ inline std::string alignString(const std::string& _str, char fill = ' ', int max
 }
 
 
-// TODO does not work well with unicode characters...
 int list(Database* database)
 {
 	json_t data = database->getJson();
@@ -134,6 +145,57 @@ int list(Database* database)
 
 
 	return 0;
+}
+
+int modify(Database* database)
+{
+	std::string str_id;
+	std::cout << "Type an ID of song you want to modify\n\t>>";
+	std::getline(std::cin, str_id);
+
+	int id;
+
+	try {
+		id = std::stoi(str_id);
+	}
+	catch (const std::invalid_argument& e)  {
+		std::cout << "'" << str_id << "' does not contain valid ID to parse!" << std::endl;
+		return 1;
+	}
+
+	
+	Song* song = database->getSong(id);
+	
+	if (song)  {
+		std::cout << "++++ MODIFY ++++" << std::endl;
+		std::cout << "NAME: " << song->getName() << std::endl;
+		std::cout << "AUTHOR: " << song->getAuthor() << '\n' << std::endl;
+		
+		std::string name = "";
+		std::string author = "";
+		std::cout << "\tType new song name (leave blank for no modification)\n\t>>";
+		std::getline(std::cin, name);
+		std::cout << "\tType new author name (leave blank for no modification)\n\t>>";
+		std::getline(std::cin, author);
+
+		if (name != "")  {
+			song->setName(name);
+		}
+		if (author != "")  {
+			song->setAuthor(author);
+		}
+
+		std::cout << "TODO" << std::endl;
+		
+		return 0;
+
+	}
+	else  {
+		std::cout << "Song with ID " << id << " does not exist!" << std::endl;
+		return 1;
+	}
+
+
 }
 
 
@@ -216,6 +278,9 @@ int main(int argc, char *argv[])
 			}
 			else if (user_input == "remove")  {
 					remove(database);
+			}
+			else if (user_input == "modify")  {
+					modify(database);
 			}
 			else if (user_input == "list")  {
 					list(database);
