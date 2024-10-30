@@ -8,6 +8,7 @@
 
 #define NAME_WIDTH 30
 #define AUTHOR_WIDTH 30
+#define EXIT_STR "-"
 
 using json_t = nlohmann::json;
 
@@ -27,7 +28,10 @@ int add(Database* database)
 	else if (name == "")  {
 		std::cout << "name field shall not be empty string!" << std::endl;
 		return 2;
-	} 
+	}
+	else if (name == EXIT_STR)  {
+		return 0;
+	}
 
 	std::cout << "Type an author's name\n\t>>";
 	std::getline(std::cin, author);
@@ -37,6 +41,9 @@ int add(Database* database)
 				  << AUTHOR_WIDTH << " chars, your's " << author.size() << std::endl;
 
 		return 1;
+	}
+	else if (author == EXIT_STR)  {
+		return 0;
 	}
 
 	Song* song = new Song(name, author);
@@ -252,8 +259,7 @@ int main(int argc, char *argv[])
 	Database* database = new Database;
 	if (prog.get<bool>("--no-json-load") == false)  {
 		if (database->loadJsonFile("database.json"))  {
-			std::cout << "Error while trying to load 'database.json' file! Terminating..." << std::endl;
-			exit(1);
+			std::cout << "Error while trying to load 'database.json' file (It's either corrupted or does not exist)!" << std::endl;
 		}
 	}
 

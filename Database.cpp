@@ -83,14 +83,17 @@ int Database::saveJsonFile()
 int Database::loadJsonFile(std::string fname)
 {	
 	std::ifstream file(fname);
+
+	if (file.fail())  {
+		return 1;
+	}
 	
 	json_t data = json_t::parse(file);
 
 	// TODO check proper format
 
 	if (data.is_discarded())  {
-		std::cout << "Error while parsing file ' " << fname 
-				  << "'... Check its format please " << std::endl;
+		return 2;
 	}
 
 	for (auto &el : data.items())  {
