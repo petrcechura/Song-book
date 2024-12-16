@@ -27,6 +27,7 @@ public:
 	 **/
 	virtual int setItems(T items[]);
 
+
 	/** Return a LaTeX line of a <T> instance
 	 *
 	 *  Simple implementation of this function is provided by default,
@@ -43,7 +44,7 @@ public:
 	 *  
 	 * 	Function returns 0 if parse was successful, 1 otherwise
 	 */
-	int void loadHeaders(std::string json_file);
+	int loadHeaders(std::string json_file);
 
 private:
 	/** Filepath of an output LaTeX file */
@@ -51,6 +52,9 @@ private:
 
 	/** A json container that contains custom headers to be displayed in LaTeX generated pdf file */
 	json_t headers;
+
+  T items[];
+
 
 }
 

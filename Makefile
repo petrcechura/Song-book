@@ -14,6 +14,12 @@ all: compile link run
 compile-lib:
 	g++ -c $(H_FILES)
 
+
+# TODO
+.PHONY: lib
+lib:
+	g++ -shared $(H_FILES) Song.cpp Database.cpp -o Database.so
+
 .PHONY: build
 build: compile-lib compile link
 
@@ -38,8 +44,9 @@ clean:
 	rm *.gch
 	rm ./$(OUTPUT_FILE)
 
+.PHONY: doxygen
+doxygen:
+	doxygen cmdapp.cpp
 
-# TODO
 link:
-	g++ Song.o Database.o cmdapp.o -o $(OUTPUT_FILE)
-	
+	g++ $(foreach file, $(SOURCES), $(basename $(file)).o) -o $(OUTPUT_FILE)

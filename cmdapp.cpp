@@ -12,6 +12,26 @@
 
 using json_t = nlohmann::json;
 
+/** This function returns number of characters inside string variable, regardless of character format (UNICODE/ASCII) */
+inline int countStringChars(const std::string& _str)
+{
+	std::wstring str = std::wstring_convert<std::codecvt_utf8<wchar_t>>()
+					   .from_bytes(_str);
+	return str.size();
+}
+
+/** This function returns an aligned string with set width, regardless of characters format (UNICODE/ASCII) */
+inline std::string alignString(const std::string& _str, char fill = ' ', int maxWidth = 30)
+{	
+	std::string str = "CANT DISPLAY (too long)" + std::string(maxWidth-23, fill);
+	
+	if (_str.size() < maxWidth)  {
+		str = _str + std::string(NAME_WIDTH - countStringChars(_str), fill);
+	}
+
+	return str;
+}
+
 int add(Database* database)
 {	
 	std::string name;
@@ -52,6 +72,42 @@ int add(Database* database)
 	std::cout << "Song '" << name << "' added..." << std::endl;
 
 	return 0;
+}
+
+void sort(Database* database)
+{
+  std::string criteria;
+
+  std::cout << "Type a sorting criteria\n\t>>";
+  std::getline(std::cin, criteria);
+
+  int i = database->sort(criteria);
+
+  if (!i)  {
+    std::cout << "Sort made succesfully..." << std::endl;
+  }  
+  else  {
+    std::cout << "Unavailable sort criteria..." << std::endl;
+  }
+}
+
+void find(Database* database)
+{
+  std::string regex;
+  json_t data;
+
+  std::cout << "Type a regex expression\n\t>>";
+  std::getline(std::cin, regex);
+  
+  data = database->findSong(regex);
+
+  std::cout << "Matched songs..." << std::endl;
+	for(const auto& [key, item] : data.items())  {
+		std::cout << std::setw(4) << std::left << std::string(key)
+				  << std::left << alignString(item.at("name"), ' ', NAME_WIDTH)
+				  << std::left << alignString(item.at("author"), ' ', AUTHOR_WIDTH)
+				  << std::endl;
+	}
 }
 
 int remove(Database* database)
@@ -109,28 +165,6 @@ int help()
 
 	return 0;
 }
-
-
-/** This function returns number of characters inside string variable, regardless of character format (UNICODE/ASCII) */
-inline int countStringChars(const std::string& _str)
-{
-	std::wstring str = std::wstring_convert<std::codecvt_utf8<wchar_t>>()
-					   .from_bytes(_str);
-	return str.size();
-}
-
-/** This function returns an aligned string with set width, regardless of characters format (UNICODE/ASCII) */
-inline std::string alignString(const std::string& _str, char fill = ' ', int maxWidth = 30)
-{	
-	std::string str = "CANT DISPLAY (too long)" + std::string(maxWidth-23, fill);
-	
-	if (_str.size() < maxWidth)  {
-		str = _str + std::string(NAME_WIDTH - countStringChars(_str), fill);
-	}
-
-	return str;
-}
-
 
 int list(Database* database)
 {
@@ -305,6 +339,23 @@ int main(int argc, char *argv[])
 			else if (user_input == "latex")  {
 					//TODO
 			}
+      else if (user_input == "sort")  {
+          sort(database);
+      }
+      else if (user_input == "find")  {
+          find(database);
+      }
+      else if (user_input == "backup")  {
+          database->saveJsonFile();
+
+          int i = database->makeBackup();
+          if (!i)  {
+            std::cout << "backup file has been created..." << std::endl;
+          }
+          else  {
+            std::cout << "error while creating backup file..." << std::endl;
+          }
+      }
 			else if (user_input == "exit")  {
 				database->saveJsonFile();
 				std::cout << "exiting program..." << std::endl;
