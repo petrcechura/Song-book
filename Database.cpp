@@ -123,7 +123,7 @@ Database::json_t Database::getJson()  {
     return j;
 }
 
-const Song* Database::getSong(int id)
+Song* Database::getSong(int id)
 {
     if (auto search = song_container.find(id); search != song_container.end())  {
         return search->second;

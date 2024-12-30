@@ -52,7 +52,7 @@ int add(Database* database)
 	else if (name == EXIT_STR)  {
 		return 0;
 	}
-  else if (Song* s = database->getSong(name); s != nullptr)  {
+  else if (const Song* s = database->getSong(name); s != nullptr)  {
     std::cout << "Song with this name already exists!\n" << 
     s->getId() << " : " << s->getName() << " : " << s->getAuthor() << 
     "\n... you sure you want to proceed? (y/n)" << std::endl;
@@ -136,7 +136,7 @@ int remove(Database* database)
 	}
 	
 	
-	Song& song = database->getSong(id);
+	const Song* song = database->getSong(id);
 
 	if (song)  {
 		std::string name = song->getName();

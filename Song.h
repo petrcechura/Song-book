@@ -6,15 +6,6 @@
 #include "json/json.hpp"
 
 
-//TODO
-struct t_flags {
-    bool folk;
-    bool metal;
-    int difficulty; 
-};
-
-
-//TODO make it virtual class with main methods as pure virtual
 class Song
 {   
 
@@ -27,12 +18,12 @@ class Song
 
         ~Song();
 
-        int getId() { return id; };
-        std::string getName() { return name; };
-        std::string getAuthor() { return author; };
+        int getId() const { return id; };
+        std::string getName() const { return name; };
+        std::string getAuthor() const { return author; };
 
-        json_t getJson();
-		std::string getJsonString() { return this->getJson().dump(); };
+        json_t getJson() const;
+		std::string getJsonString() const { return this->getJson().dump(); };
 
         void setId(int id);
         void setName(std::string name);

@@ -17,7 +17,7 @@ Song::~Song()  {
         delete this;
 }
 
-Song::json_t Song::getJson()  {
+Song::json_t Song::getJson() const {
     json_t j;
 
     j["name"] = getName();

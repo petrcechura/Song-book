@@ -43,9 +43,10 @@ class Database
          * returns json representation of songs that match this regex */
         json_t findSong(std::string pattern);
 		    int removeSong(Song* song);
+        
 
         Song* getSong(int id);
-        Song* getSong(std::string name)
+        Song* getSong(std::string name);
 
         int sort(std::string criteria);
 
