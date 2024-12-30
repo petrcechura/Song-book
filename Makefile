@@ -11,6 +11,10 @@ all: compile link run
 compile-lib:
 	g++ -c $(H_FILES)
 
+.PHONY: test
+test:
+	g++ Cmd.cpp SongBookApp.cpp
+
 
 # TODO
 .PHONY: lib
