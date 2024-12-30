@@ -39,16 +39,18 @@ class Database
          *  Backup file has the following name format: <backup-(current time&date)>
          */
         int makeBackup();
-        /** Takes a `regex` as a argument, returns json representation of songs that match this regex */
-        json_t findSong(std::string regex);
-		int removeSong(Song* song);
+        /** Takes a `regex` as a argument, 
+         * returns json representation of songs that match this regex */
+        json_t findSong(std::string pattern);
+		    int removeSong(Song* song);
 
         Song* getSong(int id);
+        Song* getSong(std::string name)
 
         int sort(std::string criteria);
 
         int loadJsonFile(std::string fname);
-		int saveJsonFile();
+		    int saveJsonFile();
 
         json_t getJson();
         std::string getJsonString() {return this->getJson().dump(); };

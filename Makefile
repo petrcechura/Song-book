@@ -4,9 +4,6 @@ OUTPUT_FILE=songbook
 O_FILES=
 H_FILES=./json/json.hpp ./argparse/argparse.hpp
 
-DEBUG_FLAG=
-
-
 .PHONY: all
 all: compile link run
 
@@ -36,7 +33,7 @@ compile-with-debug:
 	g++ -g -c $(H_FILES) $(SOURCES)
 
 compile:
-	g++ $(DEBUG_FLAG) -c $(SOURCES)
+	g++ -c $(SOURCES)
 
 .PHONY: clean
 clean:

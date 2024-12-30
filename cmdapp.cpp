@@ -52,6 +52,18 @@ int add(Database* database)
 	else if (name == EXIT_STR)  {
 		return 0;
 	}
+  else if (Song* s = database->getSong(name); s != nullptr)  {
+    std::cout << "Song with this name already exists!\n" << 
+    s->getId() << " : " << s->getName() << " : " << s->getAuthor() << 
+    "\n... you sure you want to proceed? (y/n)" << std::endl;
+    
+    std::string response;
+	  std::getline(std::cin, response);
+    
+    if (response != "y")  {
+        return 2;
+    }
+  }
 
 	std::cout << "Type an author's name\n\t>>";
 	std::getline(std::cin, author);
@@ -96,17 +108,14 @@ void find(Database* database)
   std::string regex;
   json_t data;
 
-  std::cout << "Type a regex expression\n\t>>";
+  std::cout << "Type a pattern to find\n\t>>";
   std::getline(std::cin, regex);
   
   data = database->findSong(regex);
 
-  std::cout << "Matched songs..." << std::endl;
+  std::cout << "Matched songs:" << std::endl;
 	for(const auto& [key, item] : data.items())  {
-		std::cout << std::setw(4) << std::left << std::string(key)
-				  << std::left << alignString(item.at("name"), ' ', NAME_WIDTH)
-				  << std::left << alignString(item.at("author"), ' ', AUTHOR_WIDTH)
-				  << std::endl;
+    std::cout << key << " - " << item << std::endl;
 	}
 }
 
@@ -127,7 +136,7 @@ int remove(Database* database)
 	}
 	
 	
-	Song* song = database->getSong(id);
+	Song& song = database->getSong(id);
 
 	if (song)  {
 		std::string name = song->getName();
@@ -162,8 +171,20 @@ int help()
 	std::cout << "> modify: Modifies songs in database" << std::endl;
 	std::cout << "> latex: Exports database to a LaTeX file" << std::endl;
 	std::cout << "> exit: Saves database into json file and exits program" << std::endl;
+  std::cout << "> backup: Saves database into json file and makes a backup (saving current database into separate directory)" << std::endl;
+  std::cout << "> sort: Sorts database by chosen criteria (available criteria: 'name', 'author')" << std::endl;
+  std::cout << "> find: Tries to find a song matching given Regular Expression" << std::endl;
 
 	return 0;
+}
+
+void printSong(const std::string& id, const std::string& name, const std::string& author)
+{
+  
+	std::cout << std::setw(4) << std::left << id
+				    << std::left << alignString(name, ' ', NAME_WIDTH)
+				    << std::left << alignString(author, ' ', AUTHOR_WIDTH)
+				    << std::endl;
 }
 
 int list(Database* database)
@@ -181,10 +202,7 @@ int list(Database* database)
 			  << std::endl;
 	
 	for(const auto& [key, item] : data.items())  {
-		std::cout << std::setw(4) << std::left << std::string(key)
-				  << std::left << alignString(item.at("name"), ' ', NAME_WIDTH)
-				  << std::left << alignString(item.at("author"), ' ', AUTHOR_WIDTH)
-				  << std::endl;
+    printSong(key.c_str(), item.at("name"), item.at("author"));
 	}
 
 
@@ -202,6 +220,10 @@ int modify(Database* database)
 	std::getline(std::cin, str_id);
 
 	int id;
+
+  if (str_id == EXIT_STR)  {
+    return 0;
+  }
 
 	try {
 		id = std::stoi(str_id);
@@ -233,7 +255,7 @@ int modify(Database* database)
 			song->setAuthor(author);
 		}
 
-		std::cout << "TODO" << std::endl;
+		std::cout << "Song " << song->getName() << " has been modified succesfully..."  << std::endl;
 		
 		return 0;
 

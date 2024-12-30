@@ -1,9 +1,6 @@
 #include "json/json.hpp"
-#include <vector>
 #include <map>
 #include "Song.h"
-#include <algorithm>
-#include <regex>
 #include <string>
 #include <iostream>
 #include <fstream>
@@ -23,9 +20,7 @@ Database::~Database()  {
         delete this;
 }
 
-
-// TODO handle 'Ch' character somehow...
-int Database::compare(std::string firstString, std::string secondString)  {
+inline std::string convert_to_ascii(std::string str)  {
 std::map<wchar_t, char> cz_chars = {
     {L'Á', 'a'}, {L'á', 'a'},
     {L'Č', 'c'}, {L'č', 'c'},
@@ -44,28 +39,43 @@ std::map<wchar_t, char> cz_chars = {
     {L'ů', 'u'}
 };
     std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-    std::wstring str1 = converter.from_bytes(firstString);
-    std::wstring str2 = converter.from_bytes(secondString);
+    std::wstring wstr = converter.from_bytes(str);
 
-    for (int i = 0; i < str1.size(); i++)  {
-      
-      // convert czech characters to ascii
-      if (cz_chars.count(str1[i]))  {
-        std::cout << cz_chars[str1[i]] << " " << str1[i] << std::endl;
-        str1[i] = cz_chars[str1[i]];
-      }
-      if (cz_chars.count(str2[i]))  {
-
-        std::cout << cz_chars[str2[i]] << " " << str2[i] << std::endl;
-        str2[i] = cz_chars[str2[i]];
+    for (int i = 0; i < wstr.size(); i++)  {
+      // convert cz characters to ascii
+      if (cz_chars.count(wstr[i]))  {
+        wstr[i] = cz_chars[wstr[i]];
       }
       
       // convert capitals into low letters
-      if (str1[i] > 64 && str1[i] < 91)  {
-        str1[i] += 32; 
+      if (wstr[i] > 64 && wstr[i] < 91)  {
+        wstr[i] += 32; 
       }
-      if (str2[i] > 64 && str2[i] < 91)  {
-        str2[i] += 32; 
+    }
+
+  std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converter2;
+  return converter2.to_bytes(wstr);
+} 
+
+
+int Database::compare(std::string firstString, std::string secondString)  {
+
+    std::string str1 = convert_to_ascii(firstString);
+    std::string str2 = convert_to_ascii(secondString);
+
+
+    for (int i = 0; i < str1.size(); i++)  {
+      
+      // tranform 'ch' character to 'h'+1 (i)
+      if (str1[i] == 'c' && i < str1.size()-1)  {
+        if (str1[i+1] == 'h')  {
+          str1[i] = 'h' + 1;
+        }
+      }
+      if (str2[i] == 'c' && i < str2.size()-1)  {
+        if (str2[i+1] == 'h')  {
+          str2[i] = 'h' + 1;
+        }
       }
 
       if (str1[i] < str2[i])  {
@@ -113,7 +123,7 @@ Database::json_t Database::getJson()  {
     return j;
 }
 
-Song* Database::getSong(int id)
+const Song* Database::getSong(int id)
 {
     if (auto search = song_container.find(id); search != song_container.end())  {
         return search->second;
@@ -121,6 +131,16 @@ Song* Database::getSong(int id)
     else  {
 		return nullptr;
     }
+}
+
+Song* Database::getSong(std::string name)
+{
+    for (auto &s : this->song_container)  {
+        if (s.second->getName() == name)  {
+            return s.second;
+        }
+    }
+    return nullptr;
 }
 
 
@@ -195,18 +215,17 @@ int Database::saveJsonFile()
 
 }
 
-Database::json_t Database::findSong(std::string regex)
+Database::json_t Database::findSong(std::string pattern)
 {
-  Database::json_t json;
-  int i = 0;
-  std::regex const e{regex};
-  std::smatch m;
-  for (const auto& song : this->song_container)  {
-    std::string txt = song.second->getName();
-    
+  pattern = convert_to_ascii(pattern);
 
-    if (std::regex_match(txt, m, e))  {
-      json[i++] = txt;
+  json_t json;
+  for (const auto& song : this->song_container)  {
+    std::string txt = convert_to_ascii(song.second->getName());
+
+    if (txt.find(pattern) != std::string::npos)  {
+      json[std::to_string(song.second->getId())] = song.second->getName();
+
     }
   }
 
