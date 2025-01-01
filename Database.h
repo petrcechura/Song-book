@@ -12,8 +12,7 @@ class Database
     using json_t = nlohmann::json;
 
     private:
-        int song_count;
-        std::map<int, Song*> song_container;
+        std::vector<Song*> song_container;
 		    /** File name for a `database` json */
         std::string fname;
         /** Folder name for backup json files */

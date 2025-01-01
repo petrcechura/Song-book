@@ -190,6 +190,8 @@ void printSong(const std::string& id, const std::string& name, const std::string
 int list(Database* database)
 {
 	json_t data = database->getJson();
+
+  std::cout << "JSON: " << data << std::endl;
 	
 
 	std::cout << std::string(4 + NAME_WIDTH + AUTHOR_WIDTH, '+')
@@ -281,7 +283,7 @@ int latex()
 int main(int argc, char *argv[])
 {	
 	std::string user_input = "";
-	
+
 	argparse::ArgumentParser prog("songbook");
 	// TODO
 	prog.add_argument("-a");
@@ -311,8 +313,10 @@ int main(int argc, char *argv[])
   		std::exit(1);
 	}
 
+
 	// create the database object
 	Database* database = new Database;
+
 	if (prog.get<bool>("--no-json-load") == false)  {
 		if (database->loadJsonFile("database.json"))  {
 			std::cout << "Error while trying to load 'database.json' file (It's either corrupted or does not exist)!" << std::endl;

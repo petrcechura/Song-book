@@ -1,5 +1,6 @@
 #include "json/json.hpp"
 #include <map>
+#include <vector>
 #include "Song.h"
 #include <string>
 #include <iostream>
@@ -9,8 +10,7 @@
 #include "Database.h"
 
 Database::Database(std::string fname, std::string backupDir)  {
-    this->song_container = std::map<int, Song*>();
-    this->song_count = 0;
+    this->song_container = std::vector<Song*>();
 	  this->fname = fname;
     this->backupDir = backupDir;
 }
@@ -99,9 +99,8 @@ int Database::addSong(Song* song)  {
         // TODO
     }
 
-    song->setId(song_count);
-    this->song_container[song_count] = song;
-    song_count++;
+    song->setId(song_container.size());
+    this->song_container.push_back(song);
 
     return 0;
 }
@@ -114,10 +113,13 @@ Database::json_t Database::getJson()  {
 
     Database::json_t j = json_t();
 
-    for (auto song : song_container)  {
-        Database::json_t _j  = song.second->getJson();
+    
+    int i = 0;
+    for (const auto& song : song_container)  {
+
+        Database::json_t _j  = song->getJson();
             // TODO throw an error, if smth went wrong
-        j[song.first] = _j;
+        j[i++] = _j;
     }
 
     return j;
@@ -125,19 +127,19 @@ Database::json_t Database::getJson()  {
 
 Song* Database::getSong(int id)
 {
-    if (auto search = song_container.find(id); search != song_container.end())  {
-        return search->second;
-    }
-    else  {
-		return nullptr;
-    }
+  if (id >= song_container.size())  {
+    return nullptr;
+  }
+  else  {
+    return song_container[id];
+  }
 }
 
 Song* Database::getSong(std::string name)
 {
     for (auto &s : this->song_container)  {
-        if (s.second->getName() == name)  {
-            return s.second;
+        if (s->getName() == name)  {
+            return s;
         }
     }
     return nullptr;
@@ -221,10 +223,10 @@ Database::json_t Database::findSong(std::string pattern)
 
   json_t json;
   for (const auto& song : this->song_container)  {
-    std::string txt = convert_to_ascii(song.second->getName());
+    std::string txt = convert_to_ascii(song->getName());
 
     if (txt.find(pattern) != std::string::npos)  {
-      json[std::to_string(song.second->getId())] = song.second->getName();
+      json[std::to_string(song->getId())] = song->getName();
 
     }
   }
@@ -271,21 +273,14 @@ int Database::removeSong(Song* song)
 // TODO
 int Database::removeSong(int id)
 {
-	int removed = song_container.erase(id);
+  if (id < song_container.size() && id >= 0)  {
+	  song_container.erase(song_container.begin()+id);
+    return 0;
+  }
 
-	if (removed == 1)  {
-		// remove was successfull
-		return 0;
-	}
-	else if (removed == 0)  {
-		// element with this ID does not exist!
-		return 1;
-	}
-	else  {
-		// more than one element removed! FATAL ERROR
-		return 2;
-	}
-
+  else  {
+    return 1;
+  }
 }
 
 
