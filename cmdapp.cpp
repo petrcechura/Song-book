@@ -2,6 +2,7 @@
 #include "json/json.hpp"
 #include <exception>
 #include <iostream>
+#include <fstream>
 #include <string>
 #include "Database.h"
 #include <iomanip>
@@ -270,12 +271,92 @@ int modify(Database* database)
 
 }
 
-
-
-
-int latex()
+int latex(Database* database)
 {
-	std::cout << "TODO" << std::endl;
+  const int SONGS_PER_PAGE = 25;
+
+  const char* title_page = R"(
+    \begin{titlingpage}
+    \titleM
+    \end{titlingpage}
+  )";
+
+  const char* header = R"(
+    \documentclass[17pt]{memoir}
+    \usepackage[czech]{babel}
+    \usepackage{bookman}
+    \usepackage[none]{hyphenat}
+    \usepackage[T1]{fontenc}
+    \fontfamily{georgia}\selectfont
+    \usepackage{csvsimple}
+    \pagenumbering{gobble}
+    \usepackage{booktabs}    
+    \usepackage[utf8]{inputenc}  
+    \usepackage{calc}
+    \usepackage{layout}
+    \usepackage{graphicx}  
+    \usepackage{amsmath, amssymb} 
+    \usepackage{ marvosym }
+    \usepackage{threeparttable}
+    
+    \newlength\drop
+    \makeatletter
+    \newcommand*\titleM{\begingroup% Misericords, T&H p 153
+    \setlength\drop{0.08\textheight}
+    \centering
+    \vspace*{\drop}
+    {\Huge\bfseries Písničkovník}\\[\baselineskip]
+    {\scshape Co asi tak budeme hrát...}\\[\baselineskip]
+    \vfill
+    {\large\scshape Iči}\par
+    \vfill
+    {\scshape Vytvořeno dne \@date}\par
+    \vspace*{2\drop}
+    \endgroup}
+    \makeatother
+
+    \begin{document})";
+
+  const char* table_begin = R"(
+    \begin{table}[htbp]
+    \centering
+    \begin{tabular}{p{1.2cm}|p{8.5cm}|p{6cm}}
+    \toprule
+    \textbf{ID} & \textbf{Název písně} & \textbf{Autor písně} \\
+    \midrule)";
+
+  const char* table_end = R"(
+    \bottomrule
+    \end{tabular} 
+    \end{table} 
+    \pagebreak)";
+  
+  const char* ending = R"(
+    \end{document})";
+
+  std::ofstream file("database.tex");
+
+  file << header;
+  file << title_page;
+  file << table_begin;
+
+	json_t data = database->getJson();
+  for (int i = 0; i < database->getSongCount(); i++)  {
+
+    const auto& song = database->getSong(i);
+    file << i << " & " << song->getName(true) << " & " << song->getAuthor(true) << R"( \\)";
+
+    if (i % SONGS_PER_PAGE == 0 && i > 0 && i < database->getSongCount()-1)  {
+      file << table_end;
+      file << table_begin;
+    }
+  }
+  file << table_end;
+  file << ending;
+	
+	file.close();
+
+  system("pdflatex database.tex");
 
 	return 0;
 }
@@ -363,7 +444,7 @@ int main(int argc, char *argv[])
 					list(database);
 			}
 			else if (user_input == "latex")  {
-					//TODO
+          latex(database);
 			}
       else if (user_input == "sort")  {
           sort(database);

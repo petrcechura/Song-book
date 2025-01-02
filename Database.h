@@ -47,6 +47,8 @@ class Database
         Song* getSong(int id);
         Song* getSong(std::string name);
 
+        int getSongCount() { return song_container.size(); };
+
         int sort(std::string criteria);
 
         int loadJsonFile(std::string fname);

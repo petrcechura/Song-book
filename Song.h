@@ -18,9 +18,9 @@ class Song
 
         ~Song();
 
-        int getId() const { return id; };
-        std::string getName() const { return name; };
-        std::string getAuthor() const { return author; };
+        int getId(bool latexFormat = false) const;
+        std::string getName(bool latexFormat = false) const;
+        std::string getAuthor(bool latexFormat = false) const;
 
         json_t getJson() const;
 		std::string getJsonString() const { return this->getJson().dump(); };
@@ -38,6 +38,8 @@ class Song
         std::string name;
         std::string author;
         json_t flags;
+
+        inline void replace(std::string& str, const std::string& subj, const std::string& replace_by) const;
 };
 
 #endif
