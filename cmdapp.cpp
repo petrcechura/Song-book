@@ -276,9 +276,7 @@ int latex(Database* database)
   const int SONGS_PER_PAGE = 25;
 
   const char* title_page = R"(
-    \begin{titlingpage}
-    \titleM
-    \end{titlingpage}
+    \maketitle
   )";
 
   const char* header = R"(
@@ -291,6 +289,7 @@ int latex(Database* database)
     \usepackage{csvsimple}
     \pagenumbering{gobble}
     \usepackage{booktabs}    
+    \usepackage{titling}
     \usepackage[utf8]{inputenc}  
     \usepackage{calc}
     \usepackage{layout}
@@ -298,23 +297,18 @@ int latex(Database* database)
     \usepackage{amsmath, amssymb} 
     \usepackage{ marvosym }
     \usepackage{threeparttable}
-    
-    \newlength\drop
-    \makeatletter
-    \newcommand*\titleM{\begingroup% Misericords, T&H p 153
-    \setlength\drop{0.08\textheight}
-    \centering
-    \vspace*{\drop}
-    {\Huge\bfseries Písničkovník}\\[\baselineskip]
-    {\scshape Co asi tak budeme hrát...}\\[\baselineskip]
-    \vfill
-    {\large\scshape Iči}\par
-    \vfill
-    {\scshape Vytvořeno dne \@date}\par
-    \vspace*{2\drop}
-    \endgroup}
-    \makeatother
 
+    % Define custom title page
+    \pretitle{\begin{center}\Huge\bfseries} % Format title
+    \posttitle{\par\end{center}}
+    \preauthor{\begin{center}\Large\itshape} % Format author
+    \postauthor{\par\end{center}}
+    \predate{\begin{center}\normalsize} % Format date
+    \postdate{\par\end{center}}
+
+    \title{Písničkovník}
+    \author{Iči}
+    
     \begin{document})";
 
   const char* table_begin = R"(
