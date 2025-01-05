@@ -4,6 +4,7 @@
 
 #include <string>
 #include "json/json.hpp"
+#include <set>
 
 
 class Song
@@ -12,7 +13,7 @@ class Song
     using json_t = nlohmann::json;
     
     public:
-        Song(std::string name, std::string author, json_t flags = "");
+        Song(std::string name, std::string author, json_t flags = nullptr);
 		// for some reason, the std::map requires constructor with 0 args
 		Song() {};
 
@@ -23,12 +24,14 @@ class Song
         std::string getAuthor(bool latexFormat = false) const;
 
         json_t getJson() const;
-		std::string getJsonString() const { return this->getJson().dump(); };
+		    std::string getJsonString() const { return this->getJson().dump(); };
 
         void setId(int id);
         void setName(std::string name);
         void setAuthor(std::string author);
+        void setFlag(std::string flag);
         void setFlags(json_t flags);
+        int deleteFlag(std::string flag);
 
 		void loadJson(json_t j);
 
@@ -37,7 +40,7 @@ class Song
         int id;
         std::string name;
         std::string author;
-        json_t flags;
+        std::set<std::string> flags;
 
         inline void replace(std::string& str, const std::string& subj, const std::string& replace_by) const;
 };

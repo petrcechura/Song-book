@@ -2,13 +2,15 @@
 #include <string>
 #include <iostream>
 #include "Song.h"
+#include <set>
 
 
 Song::Song(std::string name, std::string author, json_t flags)  {
     this->setName(name);
     this->setAuthor(author);
-
-    this->setFlags(flags);
+    
+    if (!flags)
+        this->flags = std::set<std::string>();
 }
 
 
@@ -22,6 +24,14 @@ Song::json_t Song::getJson() const {
 
     j["name"] = getName();
     j["author"] = getAuthor();
+    
+    json_t _j = json_t();
+    int i = 0;
+    for (auto const& flag : flags)  {
+        _j[i] = flag;
+    }
+
+    j["flags"] = _j;
 
     return j;
 }
@@ -37,9 +47,21 @@ void Song::setAuthor(std::string author)  {
     this->author = author;
 }
 
+void Song::setFlag(std::string flag)  {
+    if (flag != "")  {
+        this->flags.insert(flag);
+    }
+}
+
 void Song::setFlags(json_t flags)  {
-    // TODO maybe convert to an array and check supported and unsupported flags
-    this->flags = flags;
+    for (const auto& flag : flags)  {
+        this->flags.insert(flag);
+    }
+}
+
+int Song::deleteFlag(std::string flag)  {
+    this->flags.erase(this->flags.find(flag));
+    return 0;
 }
 
 void Song::loadJson(json_t j)
@@ -51,6 +73,9 @@ void Song::loadJson(json_t j)
 		else if (el.key() == "author")  {
 			this->setAuthor(el.value());
 		}
+    else if (el.key() == "flags")  {
+      this->setFlags(el.value());
+    }
 		else  {
 			// TODO
 		}
