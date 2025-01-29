@@ -5,12 +5,9 @@
 #include <set>
 
 
-Song::Song(std::string name, std::string author, json_t flags)  {
+Song::Song(std::string name, std::string author)  {
     this->setName(name);
     this->setAuthor(author);
-    
-    if (!flags)
-        this->flags = std::set<std::string>();
 }
 
 

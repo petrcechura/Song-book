@@ -37,6 +37,7 @@ int add(Database* database)
 {	
 	std::string name;
 	std::string author;
+
 	
 	std::cout << "Type a song name\n\t>>";
 	std::getline(std::cin, name);
