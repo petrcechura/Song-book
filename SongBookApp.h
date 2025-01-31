@@ -4,18 +4,25 @@
 
 
 /** Adds a song to a database */
-class Add : public Task
+class AddTask : public Task
 {
+  using Task::Task;
+
+  virtual int Start();
+
+};
+
+class ModifyTask : public Task
+{
+  using Task::Task;
+ 
   virtual int Start();
 };
 
-class Modify : public Task
+class RemoveTask : public Task
 {
-  virtual int Start();
-};
+  using Task::Task;
 
-class Remove : public Task
-{
   virtual int Start();
 };
 

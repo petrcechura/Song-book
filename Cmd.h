@@ -14,7 +14,6 @@ class Task
 
     std::string getCmd() { return cmd; };
 
-
   private:
     std::string cmd;
 };
@@ -24,7 +23,7 @@ class Cmd
 {
   // API
   public:
-    int addTask(Task task);
+    int addTask(Task* task);
     int startLoop();
     int stopLoop();
 
@@ -37,18 +36,10 @@ class Cmd
     virtual std::string getInput();
     virtual void unknownInput();
 
-    std::map<std::string, Task> tasks;
+    std::map<std::string, Task*> tasks;
     std::string user_input;
     bool loop_on;
 
-
-
-
     int loop();
-
-
-
-
-
 
 };

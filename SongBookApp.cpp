@@ -5,9 +5,9 @@
 
 SongBookApp::SongBookApp()
 {
-  Add add = Add();
-  Remove remove = Remove();
-  Modify modify = Modify();
+  AddTask* add = new AddTask("add");
+  RemoveTask* remove = new RemoveTask("remove");
+  ModifyTask* modify = new ModifyTask("modify");
 
   this->addTask(add);
   this->addTask(remove);
@@ -15,21 +15,21 @@ SongBookApp::SongBookApp()
 }
 
 
-int Add::Start()
+int AddTask::Start()
 {
   std::cout << "TO BE IMPLEMENTED" << std::endl;
   return 1;
 }
 
 
-int Modify::Start()
+int ModifyTask::Start()
 {
   std::cout << "TO BE IMPLEMENTED" << std::endl;
   return 1;
 }
 
 
-int Remove::Start()
+int RemoveTask::Start()
 {
   std::cout << "TO BE IMPLEMENTED" << std::endl;
   return 1;
