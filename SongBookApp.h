@@ -1,34 +1,41 @@
 #include "Cmd.h"
 #include <string>
+#include <filesystem>
 #include <iostream>
+#include "Database.h"
 
 
 /** Adds a song to a database */
 class AddTask : public Task
 {
   using Task::Task;
+  
+  const int NAME_WIDTH = 30;
+  const int AUTHOR_WIDTH = 30;
 
-  virtual int Start();
-
+  int Start() override;
 };
 
+/** Modify a song inside a database */
 class ModifyTask : public Task
 {
   using Task::Task;
  
-  virtual int Start();
+  int Start() override;
 };
 
+/** Remove a song inside a database */
 class RemoveTask : public Task
 {
   using Task::Task;
 
-  virtual int Start();
+  int Start() override;
 };
 
 
-class SongBookApp : Cmd
+class SongBookApp : public Cmd
 {
+  using Cmd::Cmd;
 
   public:
     SongBookApp();
@@ -55,10 +62,20 @@ class SongBookApp : Cmd
 
 	    return str;
     }
+    
+
+    //====================
+    // DATABASE MANAGEMENT
+    //====================
+    /** TODO descr */
+    Database* database;
+
+    Database* getDatabase();
+
+    // list of tasks allowed to access database property
+    friend AddTask;
+    friend ModifyTask;
+    friend RemoveTask;
   
 };
-
-
-
-
 

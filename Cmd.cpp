@@ -4,9 +4,10 @@
 
 
 
-Task::Task(std::string cmd)
+Task::Task(std::string cmd, Cmd* parent)
 {
   this->cmd = cmd;
+  this->parent = parent;
 }
 
 int Task::Start()
@@ -24,7 +25,7 @@ int Cmd::addTask(Task* task)
   return 0;
 }
 
-std::string getInput()
+std::string Cmd::getInput()
 {
   std::string user_input;
 
@@ -39,12 +40,22 @@ void Cmd::unknownInput()
   std::cout << "Unknown input '" << user_input << "'!" << std::endl;
 }
 
+Cmd::Cmd()
+{
+
+}
+
+Cmd::~Cmd()
+{
+
+}
+
 int Cmd::loop()
 {
   while(loop_on)  {
     user_input = getInput();
 
-    if (user_input == std::to_string(EXIT_CHAR))  {
+    if (user_input == std::string(1, EXIT_CHAR))  {
       stopLoop();
     }
 
