@@ -13,7 +13,8 @@ compile-lib:
 
 .PHONY: test
 test:
-	g++ Cmd.cpp SongBookApp.cpp
+	g++ Song.cpp Database.cpp Cmd.cpp SongBookApp.cpp main.cpp -o test.o
+	./test.o
 
 
 # TODO
