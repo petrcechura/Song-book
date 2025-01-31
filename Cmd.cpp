@@ -4,7 +4,7 @@
 
 
 
-Task::Task(const char* cmd)
+Task::Task(std::string cmd)
 {
   this->cmd = cmd;
 }
@@ -17,9 +17,9 @@ int Task::Start()
 }
 
 
-int Cmd::addTask(Task task)
+int Cmd::addTask(Task* task)
 {
-  tasks[task.getCmd()] = task;
+  tasks[task->getCmd()] = task;
 
   return 0;
 }
@@ -53,7 +53,7 @@ int Cmd::loop()
     }
     else  {
       if (auto it = tasks.find(user_input); it != tasks.end())  {
-        it->second.Start();
+        it->second->Start();
       }
       else  {
         unknownInput();
