@@ -13,14 +13,6 @@
 
 using json_t = nlohmann::json;
 
-/** This function returns number of characters inside string variable, regardless of character format (UNICODE/ASCII) */
-inline int countStringChars(const std::string& _str)
-{
-	std::wstring str = std::wstring_convert<std::codecvt_utf8<wchar_t>>()
-					   .from_bytes(_str);
-	return str.size();
-}
-
 /** This function returns an aligned string with set width, regardless of characters format (UNICODE/ASCII) */
 inline std::string alignString(const std::string& _str, char fill = ' ', int maxWidth = 30)
 {	

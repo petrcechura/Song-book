@@ -1,36 +1,11 @@
-#include "Cmd.h"
 #include <string>
 #include <filesystem>
 #include <iostream>
 #include "Database.h"
+#include "lib/cmdapp/cmdapp.h"
 
-
-/** Adds a song to a database */
-class AddTask : public Task
-{
-  using Task::Task;
-  
-  const int NAME_WIDTH = 30;
-  const int AUTHOR_WIDTH = 30;
-
-  int Start() override;
-};
-
-/** Modify a song inside a database */
-class ModifyTask : public Task
-{
-  using Task::Task;
- 
-  int Start() override;
-};
-
-/** Remove a song inside a database */
-class RemoveTask : public Task
-{
-  using Task::Task;
-
-  int Start() override;
-};
+#ifndef SONGBOOKAPP_H
+#define SONGBOOKAPP_H
 
 
 class SongBookApp : public Cmd
@@ -40,7 +15,9 @@ class SongBookApp : public Cmd
   public:
     SongBookApp();
 
-  private:
+    Database* getDatabase() { return database; };
+
+  protected:
     const int NAME_WIDTH = 30;
 
     /** This function returns number of characters inside string variable, regardless of character format (UNICODE/ASCII) */
@@ -62,7 +39,6 @@ class SongBookApp : public Cmd
 
 	    return str;
     }
-    
 
     //====================
     // DATABASE MANAGEMENT
@@ -70,12 +46,7 @@ class SongBookApp : public Cmd
     /** TODO descr */
     Database* database;
 
-    Database* getDatabase();
-
-    // list of tasks allowed to access database property
-    friend AddTask;
-    friend ModifyTask;
-    friend RemoveTask;
-  
 };
 
+
+#endif
