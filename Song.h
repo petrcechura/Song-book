@@ -1,9 +1,8 @@
-
 #ifndef SONG_H
 #define SONG_H
 
 #include <string>
-#include "json/json.hpp"
+#include "lib/json/json.hpp"
 
 
 class Song

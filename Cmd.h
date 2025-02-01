@@ -1,43 +1,18 @@
 #include <string>
 #include <iostream>
 #include <map>
+#include "TaskBase.h"
 
-// forward decl.
-class Cmd;
+#ifndef CMD_H
+#define CMD_H
 
-class Task
-{
-
-  public:
-    Task(
-        /** A command string for which this task should be called inside main loop */
-        std::string cmd,
-        /** A reference to a parent class */
-        // TODO replace with inner class inside `Cmd`, to obtain access only to database
-        Cmd* parent);
-    
-    /** This function contains all behaviour the task is supposed to do when called */
-    virtual int Start();
-
-    void setDescr(std::string d) { this->descr = d; };
-
-    std::string getCmd() { return cmd; };
-    std::string getDescr() { return descr; };
-
-  private:
-
-    Cmd* parent;
-    std::string cmd;
-    std::string descr;
-};
-
-
+/** TODO descr. */
 class Cmd
 {
 
   // API
   public:
-    int addTask(Task* task);
+    int addTask(TaskBase* task);
     int startLoop();
     int stopLoop();
     
@@ -48,7 +23,7 @@ class Cmd
     char getExitChar() { return EXIT_CHAR; };
 
   // Private properties
-  private:
+  protected:
 
     const int EXIT_RET_VAL = 2;
     const char EXIT_CHAR = '-';
@@ -56,10 +31,12 @@ class Cmd
     std::string getInput();
     void unknownInput();
 
-    std::map<std::string, Task*> tasks;
+    std::map<std::string, TaskBase*> tasks;
     std::string user_input;
     bool loop_on;
 
     int loop();
 
 };
+
+#endif
