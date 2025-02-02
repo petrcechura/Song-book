@@ -34,6 +34,9 @@ SongBookApp::SongBookApp()
   LatexTask* latex = new LatexTask("latex", this);
   latex->setDescr("Exports a database into a LaTeX file");
 
+  ExitTask* exit = new ExitTask("exit", this);
+  latex->setDescr("Exits a program");
+
   this->addTask(add);
   this->addTask(remove);
   this->addTask(modify);
@@ -42,6 +45,7 @@ SongBookApp::SongBookApp()
   this->addTask(list);
   this->addTask(find);
   this->addTask(latex);
+  this->addTask(exit);
 }
 
 
