@@ -17,7 +17,9 @@ class Task : public TaskBase
         std::string cmd,
         /** A reference to a parent class */
         // TODO replace with inner class inside `Cmd`, to obtain access only to database
-        t_cmd* parent);
+        t_cmd* parent,
+
+        std::string descr="no description provided");
     
     /** This function contains all behaviour the task is supposed to do when called */
     int Start() override;
@@ -25,7 +27,7 @@ class Task : public TaskBase
     void setDescr(std::string d) { this->descr = d; };
 
     std::string getCmd() override { return cmd; };
-    std::string getDescr() { return descr; };
+    std::string getDescr() override { return descr; };
 
   protected:
     t_cmd* parent;
@@ -34,10 +36,11 @@ class Task : public TaskBase
 };
 
 template<class t_cmd>
-Task<t_cmd>::Task(std::string cmd, t_cmd* parent)
+Task<t_cmd>::Task(std::string cmd, t_cmd* parent, std::string descr)
 {
     this->cmd = cmd;
     this->parent = parent;
+    this->descr = descr;
 }
 
 template<class t_cmd>
