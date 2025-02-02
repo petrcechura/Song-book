@@ -31,6 +31,9 @@ SongBookApp::SongBookApp()
   ListTask* list = new ListTask("list", this);
   list->setDescr("Shows all songs in a database");
 
+  LatexTask* latex = new LatexTask("latex", this);
+  latex->setDescr("Exports a database into a LaTeX file");
+
   this->addTask(add);
   this->addTask(remove);
   this->addTask(modify);
@@ -38,6 +41,7 @@ SongBookApp::SongBookApp()
   this->addTask(sort);
   this->addTask(list);
   this->addTask(find);
+  this->addTask(latex);
 }
 
 

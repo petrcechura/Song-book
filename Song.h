@@ -3,6 +3,7 @@
 
 #include <string>
 #include "lib/json/json.hpp"
+#include <set>
 
 
 class Song

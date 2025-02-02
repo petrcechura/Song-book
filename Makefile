@@ -1,24 +1,19 @@
-
-SOURCES=Song.cpp Database.cpp cmdapp.cpp
+SOURCES=Song.cpp Database.cpp lib/cmdapp/cpp/TaskBase.cpp \
+			  lib/cmdapp/cpp/Task.cpp lib/cmdapp/cpp/Cmd.cpp \
+			  $(foreach TASK,$(wildcard tasks/cpp/*.cpp), $(TASK)) \
+			  SongBookApp.cpp main.cpp
 OUTPUT_FILE=songbook
 O_FILES=
-H_FILES=./json/json.hpp ./argparse/argparse.hpp
+H_FILES=lib/json/json.hpp lib/argparse/argparse.hpp
 
 TASK_NAME?=
 
 .PHONY: all
-all: compile link run
+all: gen_tests compile link run
 
 .PHONY: compile-lib
 compile-lib:
-	g++ -c $(H_FILES)
-
-.PHONY: test
-test: gen_tests
-	g++ Song.cpp Database.cpp lib/cmdapp/cpp/TaskBase.cpp \
-			lib/cmdapp/cpp/Task.cpp lib/cmdapp/cpp/Cmd.cpp \
-			tasks/cpp/*.cpp SongBookApp.cpp main.cpp -o test.o
-	./test.o
+	@g++ -c $(H_FILES)
 
 .PHONY: create_task
 create_task:
@@ -77,7 +72,7 @@ compile-with-debug:
 	g++ -g -c $(H_FILES) $(SOURCES)
 
 compile:
-	g++ -c $(SOURCES)
+	@g++ -c $(SOURCES)
 
 .PHONY: clean
 clean:
@@ -90,4 +85,4 @@ doxygen:
 	doxygen cmdapp.cpp
 
 link:
-	g++ $(foreach file, $(SOURCES), $(basename $(file)).o) -o $(OUTPUT_FILE)
+	@g++ $(foreach file, $(SOURCES), $(notdir $(basename $(file)).o)) -o $(OUTPUT_FILE)

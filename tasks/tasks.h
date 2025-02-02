@@ -3,6 +3,7 @@
 #include "h/AddTask.h"
 #include "h/FindTask.h"
 #include "h/HelpTask.h"
+#include "h/LatexTask.h"
 #include "h/ListTask.h"
 #include "h/ModifyTask.h"
 #include "h/RemoveTask.h"
