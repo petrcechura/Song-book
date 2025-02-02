@@ -4,7 +4,13 @@
 #define TASKBASE_H
 
 
-/** TODO descr. */
+/** An abstract base class that contains all the default behaviour tasks are supposed to have
+ *  in all implementations.
+ *
+ *  `TaskBase` is immediately inherited by `Task` class, which is fairly similar class expect
+ *  for the fact its a *template class*. The intent of having these two similar classes is to
+ *  differ *template* and *non-template* methods, which greetly simplifes further management.
+ */
 class TaskBase {
   public:
     virtual int Start() = 0;

@@ -3,13 +3,15 @@ SOURCES=Song.cpp Database.cpp lib/cmdapp/cpp/TaskBase.cpp \
 			  $(foreach TASK,$(wildcard tasks/cpp/*.cpp), $(TASK)) \
 			  SongBookApp.cpp main.cpp
 OUTPUT_FILE=songbook
-O_FILES=
 H_FILES=lib/json/json.hpp lib/argparse/argparse.hpp
 
+# shall be overriden in CLI 
 TASK_NAME?=
+# Default html open
+BROWSER=xdg-open
 
 .PHONY: all
-all: gen_tests compile link run
+all: gen_tests compile link clean run
 
 .PHONY: compile-lib
 compile-lib:
@@ -59,6 +61,7 @@ lib:
 .PHONY: build
 build: compile-lib compile link
 
+# TODO remove
 .PHONY: debug
 debug: compile-with-debug link
 	gdb ./$(OUTPUT_FILE)
@@ -67,6 +70,7 @@ debug: compile-with-debug link
 run:
 	@./$(OUTPUT_FILE)
 
+# TODO remove
 .PHONY: compile-with-debug
 compile-with-debug:
 	g++ -g -c $(H_FILES) $(SOURCES)
@@ -76,13 +80,17 @@ compile:
 
 .PHONY: clean
 clean:
-	rm *.o
-	rm *.gch
-	rm ./$(OUTPUT_FILE)
+	@rm *.o
+	@rm ./$(OUTPUT_FILE)
 
 .PHONY: doxygen
 doxygen:
-	doxygen cmdapp.cpp
+	$(if $(wildcard docs),,$(shell mkdir docs))
+	@doxygen doxygen.conf
+
+.PHONY: docs
+docs:
+	@$(BROWSER) docs/html/index.html
 
 link:
 	@g++ $(foreach file, $(SOURCES), $(notdir $(basename $(file)).o)) -o $(OUTPUT_FILE)

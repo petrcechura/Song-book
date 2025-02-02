@@ -6,7 +6,10 @@
 #ifndef TASK_H
 #define TASK_H
 
-/** TODO descr. */
+/** Default `TaskBase` implementation and a natural top-class to all `Task` subclasses. This
+ *  class provides default method implementations for `TestBase`
+ *  and introduces `template` methods, used in top-level class `CmdApp`
+ */
 template<class t_cmd>
 class Task : public TaskBase
 {
@@ -16,17 +19,21 @@ class Task : public TaskBase
         /** A command string for which this task should be called inside main loop */
         std::string cmd,
         /** A reference to a parent class */
-        // TODO replace with inner class inside `Cmd`, to obtain access only to database
         t_cmd* parent,
-
+        /** A description to be printed when calling `help` */
         std::string descr="no description provided");
     
-    /** This function contains all behaviour the task is supposed to do when called */
+    /** This method shall be overriden and contains an implementation of a specific `Task`,
+     *  thus shall "do everything a task is supposed to do"
+     */
     int Start() override;
-
+    
+    /** An aux. setter for a description */
     void setDescr(std::string d) { this->descr = d; };
-
+    
+    /** A getter for `cmd` string */
     std::string getCmd() override { return cmd; };
+    /** A getter for a description */
     std::string getDescr() override { return descr; };
 
   protected:
