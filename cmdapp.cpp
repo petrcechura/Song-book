@@ -1,3 +1,16 @@
+
+
+// ********************
+// * IMPORTANT NOTICE *
+// ********************
+// This is an obsolete piece of code is no longer used!
+// The only reason to keep it there is to have an information
+// what the previous implementation had so it can be added
+// to the newest one, too.
+//
+// It will be removed soon...
+
+
 #include "argparse/argparse.hpp"
 #include "json/json.hpp"
 #include <exception>
