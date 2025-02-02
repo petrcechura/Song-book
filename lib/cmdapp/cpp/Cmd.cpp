@@ -62,6 +62,8 @@ int Cmd::loop()
 
 int Cmd::startLoop()
 {
+  startHook();
+
   loop_on = true;
   
   return loop();
@@ -70,6 +72,8 @@ int Cmd::startLoop()
 int Cmd::stopLoop()
 {
   loop_on = false;
+
+  stopHook();
 
   return 0;
 }

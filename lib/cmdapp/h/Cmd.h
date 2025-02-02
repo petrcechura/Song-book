@@ -37,6 +37,9 @@ class Cmd
 
     int loop();
 
+    virtual void startHook() {};
+    virtual void stopHook() {};
+
 };
 
 #endif

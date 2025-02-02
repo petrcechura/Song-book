@@ -30,6 +30,9 @@ class SongBookApp : public Cmd
     /** This function returns an aligned string with set width, regardless of characters format (UNICODE/ASCII) */
     inline std::string alignString(const std::string& _str, char fill = ' ', int maxWidth = 30);
 
+    void startHook() override;
+    void stopHook() override;
+
     //====================
     // DATABASE MANAGEMENT
     //====================

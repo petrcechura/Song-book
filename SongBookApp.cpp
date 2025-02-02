@@ -65,6 +65,20 @@ std::string SongBookApp::alignString(const std::string& _str, char fill, int max
   return str;
 }
 
+void SongBookApp::startHook()
+{
+	if (database->loadJsonFile("database.json"))  {
+			std::cout << "Error while trying to load 'database.json' file (It's either corrupted or does not exist)!" << std::endl;
+	}
+}
+
+void SongBookApp::stopHook()
+{
+	database->saveJsonFile();
+	std::cout << "exiting program..." << std::endl;
+	exit(0);
+}
+
 
 
 
