@@ -2,7 +2,7 @@ SOURCES=Song.cpp Database.cpp lib/cmdapp/cpp/TaskBase.cpp \
 			  lib/cmdapp/cpp/Task.cpp lib/cmdapp/cpp/Cmd.cpp \
 			  $(foreach TASK,$(wildcard tasks/cpp/*.cpp), $(TASK)) \
 			  SongBookApp.cpp main.cpp
-OUTPUT_FILE=songbook
+OUTPUT_FILE=songbook.out
 H_FILES=lib/json/json.hpp lib/argparse/argparse.hpp
 
 # shall be overriden in CLI 
@@ -11,7 +11,7 @@ TASK_NAME?=
 BROWSER=xdg-open
 
 .PHONY: all
-all: gen_tests compile link clean run
+all: gen_tests compile link run
 
 .PHONY: compile-lib
 compile-lib:
@@ -94,3 +94,4 @@ docs:
 
 link:
 	@g++ $(foreach file, $(SOURCES), $(notdir $(basename $(file)).o)) -o $(OUTPUT_FILE)
+	rm *.o
