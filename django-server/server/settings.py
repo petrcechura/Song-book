@@ -41,7 +41,8 @@ INSTALLED_APPS = [
     'api.apps.ApiConfig',
     'rest_framework',
     'rest_framework_simplejwt',
-    'corsheaders'
+    'corsheaders',
+    'users'
 ]
 
 MIDDLEWARE = [
@@ -95,10 +96,17 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
+    },
+    'user_db': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'user_db.sqlite3',
     }
 }
 
-DATABASE_ROUTERS = ['path.to.UserDatabaseRouter']
+DATABASE_ROUTERS = ['users.db_router.UserRouter']
+
+AUTH_USER_MODEL = 'users.CustomUser'
+
 
 
 # Password validation

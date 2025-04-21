@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.contrib.auth.models import User
+from .models import CustomUser
 from rest_framework import serializers, status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
@@ -13,26 +13,32 @@ import string
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
-        model = User
+        model = CustomUser
         fields = ['email', 'password']
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
-        user = User.objects.create_user(
+        user = CustomUser.objects.create_user(
             email=validated_data['email'],
             password=validated_data['password'],
         )
         return user
 
-
 @api_view(['POST'])
 def registerUser(request):
-    if request.method == 'POST':
-        serializer = UserSerializer(data=request.data)
-        if serializer.is_valid():
-            user = serializer.save()
-            return Response({'message': 'User created successfully!'}, status=status.HTTP_201_CREATED)
+    print(request.data)
+    serializer = UserSerializer(data=request.data)
+    print(type(serializer))
+    print('POST')
+    print(serializer.is_valid())
+    if serializer.is_valid():
+        print('IS VALID!')
+        serializer.save()
+        return Response({'message': 'User created successfully!'}, status=status.HTTP_201_CREATED)
+    else:
+        print("NOT VALID!")
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 @api_view(['POST'])
 def loginUser(request):
