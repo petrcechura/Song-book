@@ -8,6 +8,7 @@ import 'package:flutter_app/urls.dart';
 import 'package:flutter_app/create.dart';
 import 'package:flutter_app/update.dart';
 import 'package:flutter_app/register.dart'; // <-- Added
+import 'package:url_launcher/url_launcher.dart';
 
 void main() {
   runApp(const MyApp());
@@ -156,6 +157,8 @@ class _LoginPageState extends State<LoginPage> {
   }
 }
 
+enum SortBy { nameAsc, nameDesc, authorAsc, authorDesc }
+
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
   final String title;
@@ -167,6 +170,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   Client client = http.Client();
   List<Song> songs = [];
+  SortBy sortBy = SortBy.nameAsc; // <-- Add sorting state
 
   @override
   void initState() {
@@ -196,6 +200,7 @@ class _MyHomePageState extends State<MyHomePage> {
         for (var element in jsonResponse) {
           songs.add(Song.fromMap(element));
         }
+        _sortSongs(); // Apply sorting after fetching
         setState(() {});
       } else if (response.statusCode == 401) {
         _logoutAndRedirect(); // Token expired / invalid
@@ -208,6 +213,144 @@ class _MyHomePageState extends State<MyHomePage> {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('Failed to load songs')));
+    }
+  }
+
+  void _showManualUrlDialog(Song song) async {
+    final TextEditingController urlController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Chords not found'),
+          content: TextField(
+            controller: urlController,
+            decoration: const InputDecoration(
+              hintText: 'Enter custom chords URL',
+            ),
+          ),
+          actions: [
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+            TextButton(
+              child: const Text('Save'),
+              onPressed: () async {
+                final customUrl = urlController.text.trim();
+
+                if (customUrl.isNotEmpty) {
+                  final headers = await _getAuthHeaders();
+
+                  final updateResponse = await http.put(
+                    updateLsUrl(song.id),
+                    headers: headers,
+                    body: jsonEncode({'chords_url': customUrl}),
+                  );
+
+                  if (updateResponse.statusCode == 200) {
+                    setState(() {
+                      song.chordsUrl = customUrl;
+                    });
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Custom URL saved!')),
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Failed to save custom URL'),
+                      ),
+                    );
+                  }
+                }
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _openChordsUrl(String url) async {
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    } else {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Could not open URL')));
+    }
+  }
+
+  void _findChordsForSong(Song song) async {
+    final headers = await _getAuthHeaders();
+
+    try {
+      final response = await http.get(
+        Uri.parse('$api/get_chords_url/?song_id=${song.id}'),
+        headers: headers,
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final newUrl = data['url'];
+
+        final updateResponse = await http.put(
+          updateLsUrl(song.id),
+          headers: headers,
+          body: jsonEncode({'chords_url': newUrl}),
+        );
+
+        if (updateResponse.statusCode == 200) {
+          setState(() {
+            song.chordsUrl = newUrl;
+          });
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('Chords URL saved!')));
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Failed to save chords URL')),
+          );
+        }
+      } else if (response.statusCode == 404) {
+        _showManualUrlDialog(song); // <-- When no valid URL is found
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: ${response.statusCode}')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Error finding chords')));
+    }
+  }
+
+  void _sortSongs() {
+    switch (sortBy) {
+      case SortBy.nameAsc:
+        songs.sort(
+          (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()),
+        );
+        break;
+      case SortBy.nameDesc:
+        songs.sort(
+          (a, b) => b.name.toLowerCase().compareTo(a.name.toLowerCase()),
+        );
+        break;
+      case SortBy.authorAsc:
+        songs.sort(
+          (a, b) => a.author.toLowerCase().compareTo(b.author.toLowerCase()),
+        );
+        break;
+      case SortBy.authorDesc:
+        songs.sort(
+          (a, b) => b.author.toLowerCase().compareTo(a.author.toLowerCase()),
+        );
+        break;
     }
   }
 
@@ -267,6 +410,32 @@ class _MyHomePageState extends State<MyHomePage> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(widget.title),
         actions: [
+          DropdownButton<SortBy>(
+            value: sortBy,
+            underline: const SizedBox(),
+            icon: const Icon(Icons.sort, color: Colors.white),
+            dropdownColor: Colors.deepPurple.shade100,
+            onChanged: (SortBy? newValue) {
+              if (newValue != null) {
+                setState(() {
+                  sortBy = newValue;
+                  _sortSongs(); // Apply sorting immediately
+                });
+              }
+            },
+            items: const [
+              DropdownMenuItem(value: SortBy.nameAsc, child: Text('Name ↑')),
+              DropdownMenuItem(value: SortBy.nameDesc, child: Text('Name ↓')),
+              DropdownMenuItem(
+                value: SortBy.authorAsc,
+                child: Text('Author ↑'),
+              ),
+              DropdownMenuItem(
+                value: SortBy.authorDesc,
+                child: Text('Author ↓'),
+              ),
+            ],
+          ),
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: _fetchSongs,
@@ -361,26 +530,36 @@ class _MyHomePageState extends State<MyHomePage> {
                           flex: 4,
                           child: Text(
                             song.name,
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w500,
-                            ),
+                            style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
                         ),
                         Expanded(
                           flex: 4,
                           child: Text(
                             song.author,
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w500,
-                            ),
+                            style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
+                        ),
+                        IconButton(
+                          icon: Icon(
+                            Icons.music_note,
+                            color:
+                                song.chordsUrl != null
+                                    ? Colors.green
+                                    : Colors.blue,
+                          ),
+                          onPressed:
+                              song.chordsUrl != null
+                                  ? () => _openChordsUrl(song.chordsUrl!)
+                                  : () => _findChordsForSong(song),
+                          tooltip:
+                              song.chordsUrl != null
+                                  ? 'View Chords'
+                                  : 'Find Chords',
                         ),
                         IconButton(
                           icon: const Icon(Icons.delete, color: Colors.red),
                           onPressed: () => _deleteSong(song.id),
-                          tooltip: 'Delete Song',
                         ),
                       ],
                     ),
@@ -391,21 +570,10 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ],
       ),
-      floatingActionButton: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          FloatingActionButton(
-            onPressed: _fetchSongs,
-            tooltip: 'Refresh songs',
-            child: const Icon(Icons.refresh),
-          ),
-          const SizedBox(height: 10),
-          FloatingActionButton(
-            onPressed: _addSong,
-            tooltip: 'Add song',
-            child: const Icon(Icons.add),
-          ),
-        ],
+      floatingActionButton: FloatingActionButton(
+        onPressed: _addSong,
+        tooltip: 'Add Song',
+        child: const Icon(Icons.add),
       ),
     );
   }

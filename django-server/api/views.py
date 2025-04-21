@@ -1,9 +1,11 @@
 from django.shortcuts import get_object_or_404
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
+from rest_framework.permissions import AllowAny
 from rest_framework import status
 from .models import Song
 from .serializers import SongSerializer
+from googlesearch import search
 from django.db.models import Q
 import re
 import locale
@@ -51,7 +53,6 @@ def createSong(request):
 
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
 @api_view(['DELETE'])
 def deleteSong(request, id):
     song = get_object_or_404(Song, id=id)  # Fixed lookup
@@ -81,8 +82,6 @@ def editSong(request, id):
 
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
-
 @api_view(['GET'])
 def findSongs(request):
     query = request.GET.get('query', None)
@@ -102,8 +101,6 @@ def findSongs(request):
     serializer = SongSerializer(filtered, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
-
-
 @api_view(['POST'])
 def sortSongs(request):
     sort_by = request.data.get('field', None)  # Should be 'name' or 'author'
@@ -121,6 +118,43 @@ def sortSongs(request):
 
     serializer = SongSerializer(songs, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
+
+ALLOWED_CHORD_SITES = [
+    'pisnicky-akordy.cz',
+    'supermusic.cz'
+]
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def getChordsUrl(request):
+    song_id = request.GET.get('song_id')
+
+    if not song_id:
+        return Response({'error': 'Song ID not provided.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        song = Song.objects.get(pk=song_id)
+
+        if song.url:
+            return Response({'url': song.url}, status=status.HTTP_200_OK)
+
+        query = f"{song.author} {song.name} chords"
+        results = search(query, num_results=5)  # Check top 5
+
+        for url in results:
+            if any(allowed_site in url for allowed_site in ALLOWED_CHORD_SITES):
+                song.url = url
+                song.save()
+                return Response({'url': url}, status=status.HTTP_200_OK)
+
+        return Response({'error': 'No valid chords URL found in top 5 results.'}, status=status.HTTP_404_NOT_FOUND)
+
+    except Song.DoesNotExist:
+        return Response({'error': 'Song not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+    except Exception as e:
+        return Response({'error': f'An error occurred: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 
 
