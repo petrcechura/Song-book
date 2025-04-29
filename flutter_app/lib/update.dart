@@ -47,8 +47,8 @@ class _UpdatePageState extends State<UpdatePage> {
       updateLsUrl(widget.song.id),
       headers: headers,
       body: jsonEncode({
-        'name': nameController.text,
-        'author': authorController.text,
+        'title': nameController.text,
+        'artist': authorController.text,
       }),
     );
 
