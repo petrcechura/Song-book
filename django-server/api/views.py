@@ -121,6 +121,7 @@ ALLOWED_CHORD_SITES = [
 @permission_classes([IsAuthenticated])
 def getChordsUrl(request):
     song_id = request.GET.get('song_id')
+    print(song_id)
 
     if not song_id:
         return Response({'error': 'Song ID not provided.'}, status=status.HTTP_400_BAD_REQUEST)
@@ -131,7 +132,7 @@ def getChordsUrl(request):
         if song.url:
             return Response({'url': song.url}, status=status.HTTP_200_OK)
 
-        query = f"{song.author} {song.name} chords"
+        query = f"{song.artist} {song.title} chords"
         results = search(query, num_results=5)
 
         for url in results:
@@ -146,4 +147,5 @@ def getChordsUrl(request):
         return Response({'error': 'Song not found.'}, status=status.HTTP_404_NOT_FOUND)
 
     except Exception as e:
+        print('Exception' + str(e))
         return Response({'error': f'An error occurred: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

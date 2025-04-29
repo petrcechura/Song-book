@@ -54,4 +54,46 @@ def loginUser(request):
         })
     return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def sendResetCode(request):
+    email = request.data.get('email')
+    print(email)
+    try:
+        user = CustomUser.objects.get(email=email)
+        code = ''.join(random.choices(string.digits, k=6))
+        user.reset_code = code
+        user.save()
+
+        print(code)
+        
+        send_mail(
+            'Password Reset Code',
+            f'Your password reset code is: {code}',
+            'no-reply@example.com',
+            [email],
+            fail_silently=False,
+        )
+        return Response({'message': 'Reset code sent to your email.'})
+    except CustomUser.DoesNotExist:
+        return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+    
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def resetPassword(request):
+    email = request.data.get('email')
+    code = request.data.get('code')
+    new_password = request.data.get('new_password')
+    
+    try:
+        user = CustomUser.objects.get(email=email, reset_code=code)
+        user.set_password(new_password)
+        user.reset_code = None  # Clear the code
+        user.save()
+        return Response({'message': 'Password reset successful'})
+    except CustomUser.DoesNotExist:
+        return Response({'error': 'Invalid email or code'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
 

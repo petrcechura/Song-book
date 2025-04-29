@@ -5,9 +5,9 @@ import 'package:http/http.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_app/song.dart';
 import 'package:flutter_app/urls.dart';
+import 'package:flutter_app/login.dart';
 import 'package:flutter_app/create.dart';
 import 'package:flutter_app/update.dart';
-import 'package:flutter_app/register.dart'; // <-- Added
 import 'package:url_launcher/url_launcher.dart';
 
 void main() {
@@ -45,113 +45,6 @@ class MyApp extends StatelessWidget {
             return const LoginPage();
           }
         },
-      ),
-    );
-  }
-}
-
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
-
-  @override
-  State<LoginPage> createState() => _LoginPageState();
-}
-
-class _LoginPageState extends State<LoginPage> {
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
-  bool isLoading = false;
-  String error = '';
-
-  Future<void> login() async {
-    setState(() {
-      isLoading = true;
-      error = '';
-    });
-
-    try {
-      final response = await http.post(
-        loginLsUrl,
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'email': emailController.text,
-          'password': passwordController.text,
-        }),
-      );
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('access_token', data['access']);
-        await prefs.setString('refresh_token', data['refresh']);
-
-        if (!mounted) return;
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder:
-                (context) =>
-                    const MyHomePage(title: 'Django Song-book Application'),
-          ),
-        );
-      } else {
-        setState(() {
-          error = 'Invalid email or password';
-        });
-      }
-    } catch (e) {
-      setState(() {
-        error = 'Connection failed';
-      });
-    } finally {
-      setState(() {
-        isLoading = false;
-      });
-    }
-  }
-
-  void goToRegister() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const RegisterPage()),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Login')),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            TextField(
-              controller: emailController,
-              decoration: const InputDecoration(labelText: 'Email'),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: passwordController,
-              decoration: const InputDecoration(labelText: 'Password'),
-              obscureText: true,
-            ),
-            const SizedBox(height: 20),
-            if (error.isNotEmpty)
-              Text(error, style: const TextStyle(color: Colors.red)),
-            ElevatedButton(
-              onPressed: isLoading ? null : login,
-              child:
-                  isLoading
-                      ? const CircularProgressIndicator()
-                      : const Text('Login'),
-            ),
-            TextButton(
-              onPressed: goToRegister,
-              child: const Text('Create new account'),
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -208,6 +101,7 @@ class _MyHomePageState extends State<MyHomePage> {
         print('2');
         List jsonResponse = json.decode(decoded);
         print('3');
+
         for (var element in jsonResponse) {
           print(element);
           songs.add(Song.fromMap(element));

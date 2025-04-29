@@ -1,3 +1,4 @@
+// login.dart
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -5,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_app/main.dart';
 import 'package:flutter_app/register.dart';
 import 'package:flutter_app/urls.dart';
+import 'reset_password_request.dart'; // Import the reset password request page
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -76,6 +78,13 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
+  void goToResetPasswordRequest() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const ResetPasswordRequestPage()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -113,6 +122,11 @@ class _LoginPageState extends State<LoginPage> {
             TextButton(
               onPressed: isLoading ? null : goToRegister,
               child: const Text('Create new account'),
+            ),
+            const SizedBox(height: 12),
+            TextButton(
+              onPressed: isLoading ? null : goToResetPasswordRequest,
+              child: const Text('Forgot Password?'),
             ),
           ],
         ),

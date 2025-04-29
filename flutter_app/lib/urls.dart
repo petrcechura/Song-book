@@ -7,3 +7,5 @@ Uri createLsUrl = Uri.parse("$api/songs/create");
 Uri updateLsUrl(int id) => Uri.parse("$api/songs/edit/$id");
 Uri loginLsUrl = Uri.parse("$api/login");
 Uri registerLsUrl = Uri.parse("$api/register");
+Uri resetPasswordRequestUrl = Uri.parse('$api/send-reset-code');
+Uri resetPasswordUrl = Uri.parse('$api/reset-password');
