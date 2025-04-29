@@ -25,12 +25,14 @@ The application usage:
   cd django-server && python3 manage.py runserver
   ```
 ### RUN A FLUTTER APP
+ 
   * Open VS Code
   * install `Flutter` extension
   * run `flutter/lib/main.dart`
 ## DEVELOPMENT NOTES
 Please note that this repository was initially used for CLI application written in C++, providing similar functionality, but locally, without server. The CLI application is still part of this repository and it is planned to synchronize its functionality with Django-backend. However right now, its database is rather simple (JSON file only), thus this task remains for the future.
 ### GOALS FOR CLI APP
+
   [x] CRUD operations over song database
   [x] Features to sort/backup database
   [x] LaTeX conversion feature
