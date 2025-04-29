@@ -28,17 +28,14 @@ class UserSerializer(serializers.ModelSerializer):
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def registerUser(request):
-    print(request.data)
+    print("dsdsa")
     serializer = UserSerializer(data=request.data)
-    print(type(serializer))
-    print('POST')
-    print(serializer.is_valid())
+    print("dsdsa")
     if serializer.is_valid():
-        print('IS VALID!')
+        print("dsdsa")
         serializer.save()
         return Response({'message': 'User created successfully!'}, status=status.HTTP_201_CREATED)
     else:
-        print("NOT VALID!")
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -56,27 +53,5 @@ def loginUser(request):
             'access': str(refresh.access_token),
         })
     return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
-
-@api_view(['POST'])
-def resetPassword(request):
-    email = request.data.get('email')
-    
-    try:
-        user = User.objects.get(email=email)
-    except User.DoesNotExist:
-        return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
-    
-    reset_code = ''.join(random.choices(string.ascii_letters + string.digits, k=6))
-    
-    # Save the reset code to a model or send it directly to the user via email.
-    # For this example, we're directly sending it via email.
-    send_mail(
-        'Password Reset Code',
-        f'Your reset code is {reset_code}.',
-        'noreply@example.com',
-        [email],
-    )
-    
-    return Response({'message': 'Reset code sent successfully!'}, status=status.HTTP_200_OK)
 
 

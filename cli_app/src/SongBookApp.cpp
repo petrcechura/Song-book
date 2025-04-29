@@ -40,6 +40,12 @@ SongBookApp::SongBookApp()
   BackupTask* backup = new BackupTask("backup", this);
   backup->setDescr("TODO");
 
+  FetchTask* fetch = new FetchTask("fetch", this);
+  fetch->setDescr("TODO");
+
+  PushTask* push = new PushTask("push", this);
+  push->setDescr("TODO");
+
   this->addTask(add);
   this->addTask(remove);
   this->addTask(modify);
@@ -50,6 +56,8 @@ SongBookApp::SongBookApp()
   this->addTask(latex);
   this->addTask(exit);
   this->addTask(backup);
+  this->addTask(fetch);
+  this->addTask(push);
 }
 
 

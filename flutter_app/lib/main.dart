@@ -171,11 +171,17 @@ class _MyHomePageState extends State<MyHomePage> {
   Client client = http.Client();
   List<Song> songs = [];
   SortBy sortBy = SortBy.nameAsc; // <-- Add sorting state
+  String? currentUserEmail;
 
   @override
   void initState() {
     super.initState();
-    _fetchSongs();
+    _loadUserInfo().then((_) => _fetchSongs());
+  }
+
+  Future<void> _loadUserInfo() async {
+    final prefs = await SharedPreferences.getInstance();
+    currentUserEmail = prefs.getString('user_email');
   }
 
   Future<Map<String, String>> _getAuthHeaders() async {
