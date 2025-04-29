@@ -33,10 +33,10 @@ The application usage:
 Please note that this repository was initially used for CLI application written in C++, providing similar functionality, but locally, without server. The CLI application is still part of this repository and it is planned to synchronize its functionality with Django-backend. However right now, its database is rather simple (JSON file only), thus this task remains for the future.
 ### GOALS FOR CLI APP
 
-  [x] CRUD operations over song database
-  [x] Features to sort/backup database
-  [x] LaTeX conversion feature
-  []  Implement SQL table instead of raw JSON
-  []  Add tasks for fetching/pushing songs from/to Django-backend
-  []  Implement user auth. system
+- [x] CRUD operations over song database
+- [x] Features to sort/backup database
+- [x] LaTeX conversion feature
+- [ ] Implement SQL table instead of raw JSON
+- [ ] Add tasks for fetching/pushing songs from/to Django-backend
+- [ ] Implement user auth. system
 
