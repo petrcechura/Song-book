@@ -54,6 +54,8 @@ def loginUser(request):
         })
     return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def sendResetCode(request):
@@ -68,10 +70,10 @@ def sendResetCode(request):
         print(code)
         
         send_mail(
-            'Password Reset Code',
-            f'Your password reset code is: {code}',
-            'no-reply@example.com',
-            [email],
+            subject='Password Reset Code',
+            message=f'Your password reset code is: {code}',
+            from_email='no-reply@example.com',
+            recipient_list=[email],
             fail_silently=False,
         )
         return Response({'message': 'Reset code sent to your email.'})
