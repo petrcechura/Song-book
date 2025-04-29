@@ -7,7 +7,8 @@ from rest_framework import serializers
 class SongSerializer(ModelSerializer):
     class Meta:
         model = Song
-        fields = ['id', 'title', 'artist', 'url']
+        fields = ['artist', 'title', 'id']
+        optional_fields = ['url', 'id', 'owner']
 
 
 class UserSerializer(serializers.ModelSerializer):

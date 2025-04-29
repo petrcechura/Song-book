@@ -23,6 +23,8 @@ def getRoutes(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def getSongs(request):
+    print(request)
+
     songs = Song.objects.filter(owner=request.user)
     serializer = SongSerializer(songs, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
@@ -31,13 +33,25 @@ def getSongs(request):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def createSong(request):
-    data = request.data.copy()
-    serializer = SongSerializer(data=data)
+    print("create")
+    serializer = SongSerializer(data=request.data)
 
+
+
+    print("create")
     if serializer.is_valid():
-        serializer.save(owner=request.user)  # Assign the song to the logged-in user
+        print("valid!")
+
+        # ID is automatically increment of max
+        if (Song.objects.exists()):
+            id = Song.objects.latest('id').id + 1
+        else:
+            id = 0
+
+        serializer.save(owner=request.user, id=id)
+        print("saved!")
         return Response(serializer.data, status=status.HTTP_201_CREATED)
-    
+    print(serializer.errors)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 # Delete a song belonging to the logged-in user
@@ -47,19 +61,6 @@ def deleteSong(request, id):
     song = get_object_or_404(Song, id=id, owner=request.user)
     song.delete()
     return Response({'message': 'Song deleted successfully.'}, status=status.HTTP_204_NO_CONTENT)
-
-# Alternative delete by ID from request body
-@api_view(['DELETE'])
-@permission_classes([IsAuthenticated])
-def deleteSongById(request):
-    song_id = request.data.get('id')
-
-    if song_id is None:
-        return Response({'error': 'ID not provided.'}, status=status.HTTP_400_BAD_REQUEST)
-
-    song = get_object_or_404(Song, id=song_id, owner=request.user)
-    song.delete()
-    return Response({'message': f'Song with id {song_id} deleted.'}, status=status.HTTP_204_NO_CONTENT)
 
 # Edit a song belonging to the logged-in user
 @api_view(['PUT'])

@@ -16,6 +16,7 @@ class _CreatePageState extends State<CreatePage> {
   final TextEditingController authorController = TextEditingController();
   bool isLoading = false;
   String error = '';
+  String? currentUserEmail;
 
   Future<Map<String, String>> _getAuthHeaders() async {
     final prefs = await SharedPreferences.getInstance();
@@ -32,14 +33,17 @@ class _CreatePageState extends State<CreatePage> {
       error = '';
     });
 
+    final prefs = await SharedPreferences.getInstance();
+    currentUserEmail = prefs.getString('user_email');
+
     final headers = await _getAuthHeaders();
 
     final response = await http.post(
       createLsUrl,
       headers: headers,
       body: jsonEncode({
-        'name': nameController.text,
-        'author': authorController.text,
+        'title': nameController.text,
+        'artist': authorController.text,
       }),
     );
 

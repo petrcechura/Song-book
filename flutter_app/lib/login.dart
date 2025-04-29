@@ -18,12 +18,15 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController passwordController = TextEditingController();
   bool isLoading = false;
   String error = '';
+  String email = '';
 
   Future<void> login() async {
     setState(() {
       isLoading = true;
       error = '';
     });
+
+    email = passwordController.text;
 
     try {
       final response = await http.post(

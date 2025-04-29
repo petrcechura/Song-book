@@ -200,14 +200,24 @@ class _MyHomePageState extends State<MyHomePage> {
     try {
       final response = await client.get(fetchUrl, headers: headers);
 
+      print(response.statusCode);
+
       if (response.statusCode == 200) {
+        print('1');
         final decoded = utf8.decode(response.bodyBytes);
+        print('2');
         List jsonResponse = json.decode(decoded);
+        print('3');
         for (var element in jsonResponse) {
+          print(element);
           songs.add(Song.fromMap(element));
+          print('4');
         }
+        print('5');
         _sortSongs(); // Apply sorting after fetching
+        print('6');
         setState(() {});
+        print('7');
       } else if (response.statusCode == 401) {
         _logoutAndRedirect(); // Token expired / invalid
       } else {
@@ -216,6 +226,8 @@ class _MyHomePageState extends State<MyHomePage> {
         );
       }
     } catch (e) {
+      print('e');
+      print(e);
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('Failed to load songs')));
