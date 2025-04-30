@@ -30,6 +30,7 @@ class Song
         void setAuthor(std::string author);
         void setFlag(std::string flag);
         void setFlags(json_t flags);
+        void setUrl(std::string url)
         int deleteFlag(std::string flag);
 
 		void loadJson(json_t j);
