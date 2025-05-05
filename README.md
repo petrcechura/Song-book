@@ -19,9 +19,25 @@ Github URL: https://github.com/petrcechura/Song-book
   * make 4.3 (or newer)
   * curl 8.5.0 (or newer) (TODO not necessary now)
   * python3.12 (or newer)
-### RUN A BACKEND (linux)
+  
   ```
   # activate virtual environment
+  source env/bin/activate
+  # install django framework
+  pip install django
+  # install rest api
+  pip install djangorestframework
+  # install other libs
+  pip install simplejwt
+  pip install --upgrade djangorestframework-simplejwt
+  pip install django-cors-headers
+  pip install googlesearch-python
+  python3 manage.py migrate
+  
+  ```
+### RUN A BACKEND (linux)
+  ```
+  # activate virtual environment (if not already activated)
   source env/bin/activate
   # run a server
   cd django-server && python3 manage.py runserver
