@@ -8,24 +8,25 @@
 
 int ListTask::Start()
 { 
-  using json_t = nlohmann::json;
-
-	json_t data = parent->getDatabase()->getJson();
-	
+	nlohmann::json data = parent->getDatabase()->getJson();
 
 	std::cout << std::string(4 + NAME_WIDTH + AUTHOR_WIDTH, '+')
-			  << std::endl;
+			  << std::endl;	
 	std::cout << std::setw(4) << std::left << "ID"
-			  << std::setw(NAME_WIDTH) << "Name "
-			  << std::setw(AUTHOR_WIDTH) << "Author "
+			  << std::setw(NAME_WIDTH) << "Title "
+			  << std::setw(AUTHOR_WIDTH) << "Artist "
 			  << std::endl;
 	std::cout << std::string(4 + NAME_WIDTH + AUTHOR_WIDTH, '+')
 			  << std::endl;
+
+	std::cout << data.dump() << std::endl;
 	
 	for(const auto& [key, item] : data.items())  {
-    printSong(key.c_str(), item.at("name"), item.at("author"));
+		std::string title = item.count("TITLE") ? item.at("TITLE") : "NULL";
+		std::string artist = item.count("ARTIST") ? item.at("ARTIST") : "NULL";
+		std::string id = item.count("ID") ? item.at("ID") : "NULL";
+    	printSong(id, title, artist);
 	}
-
 
 	std::cout << std::string(4 + NAME_WIDTH + AUTHOR_WIDTH, '+')
 			  << std::endl;
@@ -38,7 +39,7 @@ void ListTask::printSong(const std::string& id, const std::string& name, const s
 {
   
 	std::cout << std::setw(4) << std::left << id
-				    << std::left << alignString(name, ' ', NAME_WIDTH)
+				    << std::left << alignString(name, 	' ', NAME_WIDTH)
 				    << std::left << alignString(author, ' ', AUTHOR_WIDTH)
 				    << std::endl;
 }

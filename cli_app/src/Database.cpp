@@ -6,18 +6,74 @@
 #include <iostream>
 #include <fstream>
 #include <ctime>
+#include <sqlite3.h>
 #include <filesystem>
 #include "Database.h"
 
+static std::vector<std::map<std::string, std::string>> sql_contents;
+
+/** Aux. SQL callback function that returns all contents from sql table as vector */
+static int sql_cb(void* data, int argc, char** argv, char** azColName)
+{
+    std::map<std::string, std::string> m = std::map<std::string, std::string>();
+
+    for (int i = 0; i < argc; i++) {
+        m[azColName[i]] =  argv[i] ? argv[i] : "NULL";
+        std::cout << azColName[i] << ": " << (argv[i] ? argv[i] : "NULL") << std::endl;
+    }
+
+    sql_contents.push_back(m);
+
+    return 0;
+}
+
+int Database::SendQuery(std::string query)  {
+    char* messageError;
+    int exit = sqlite3_exec(DB, query.c_str(), sql_cb, 0, &messageError);
+
+    std::cout << "exit code: " << exit << std::endl;
+    return 0;
+}
+
 Database::Database(std::string fname, std::string backupDir)  {
-    this->song_container = std::vector<Song*>();
-	  this->fname = fname;
     this->backupDir = backupDir;
+
+    int exit = sqlite3_open(DB_file, &DB);
+
+    if (exit) {
+        std::cout << "Couldn't open SQL database `" << DB_file << "`!" << std::endl;
+
+
+
+    }
+    else {
+      std::cout << "database opened Successfully" << std::endl;
+
+      std::string sql = "CREATE TABLE SONGS("
+                          "ID INT PRIMARY KEY     NOT NULL ";
+
+      for (const auto& c : properties)  {
+          sql += ",\n" + c + "     TEXT     NOT NULL";
+      }
+
+      sql += " );";
+      
+      char* messaggeError;
+      exit = sqlite3_exec(DB, sql.c_str(), NULL, 0, &messaggeError);
+      
+      if (exit != SQLITE_OK) {
+          std::cout << "Error Create Table" << std::endl;
+          sqlite3_free(messaggeError);
+      }
+      else
+          std::cout << "Table created Successfully" << std::endl;
+    }
 }
 
 Database::~Database()  {
-    if (!this)
-        delete this;
+    if (!this) {
+      delete this;
+    }
 }
 
 inline std::string convert_to_ascii(std::string str)  {
@@ -90,196 +146,135 @@ int Database::compare(std::string firstString, std::string secondString)  {
 }
 
 
-int Database::addSong(Song* song)  {
+int Database::addSong(std::string json_string)  {
 
-    if (song->getName() == "")  {
-        // TODO
-    }
-    if (song->getAuthor() == "")  {
-        // TODO
-    }
+    nlohmann::json sql_json = getSqlJson();
 
-    song->setId(song_container.size());
-    this->song_container.push_back(song);
+    int id = sql_json.size() + 1;
+
+    nlohmann::json j = nlohmann::json::parse(json_string);  
+    
+    std::string sql = "INSERT INTO SONGS VALUES(" + std::to_string(id);
+    for (const auto& p : properties) {
+      sql += ", " + j[p].dump() + "";
+    }
+    sql += ");";
+
+    int exit = sqlite3_exec(DB, sql.c_str(), nullptr, nullptr, nullptr);
 
     return 0;
 }
 
-int Database::addSong(std::string json_string)  {
-    return 1;
-}
 
-Database::json_t Database::getJson()  {
+/** Get json representation of sql contents */
+nlohmann::json Database::getSqlJson(std::string query)  {
 
-    Database::json_t j = json_t();
+    if (query == "") {
+        query = "SELECT * FROM SONGS";
+    }
 
-    
+    int exit = sqlite3_exec(DB, query.c_str(), sql_cb, nullptr, nullptr);
+
+    nlohmann::json data = nlohmann::json();
+
+    if (exit)  {
+        std::cout << "Error getting sql json! TODO" << std::endl;
+        return data;
+    }
+
     int i = 0;
-    for (const auto& song : song_container)  {
+    for (const auto& content : sql_contents)  {
+        nlohmann::json item  = nlohmann::json();
 
-        Database::json_t _j  = song->getJson();
-            // TODO throw an error, if smth went wrong
-        j[i++] = _j;
-    }
+        item["ID"] = content.at("ID");
 
-    return j;
-}
-
-Song* Database::getSong(int id)
-{
-  if (id >= song_container.size())  {
-    return nullptr;
-  }
-  else  {
-    return song_container[id];
-  }
-}
-
-Song* Database::getSong(std::string name)
-{
-    for (auto &s : this->song_container)  {
-        if (s->getName() == name)  {
-            return s;
-        }
-    }
-    return nullptr;
-}
-
-
-// bubble sort impl.
-int Database::sort(std::string criteria)  
-{
-  
-  if (criteria == "name")  {
-
-    // sort by name
-    for (int i = 0; i < song_container.size()-1; i++)  {
-      for (int j = 0; j < song_container.size()-1; j++)  {
-        int comp = compare(song_container[j]->getName(), song_container[j+1]->getName());
-        if (comp > 0)  {
-          auto _song = song_container[j];
-          song_container[j] = song_container[j+1];
-          song_container[j+1] = _song;
-        }
-        // if name matches, sort by author
-        if (!comp)  {
-
-          int comp2 = compare(song_container[j]->getAuthor(), song_container[j+1]->getAuthor());
-          if (comp2 > 0)  {
-            auto _song = song_container[j];
-            song_container[j] = song_container[j+1];
-            song_container[j+1] = _song;
+        for (const auto& p : properties)  {
+          if (content.count(p))
+              item[p] = content.at(p);
+          else {
+              std::cout << p << std::endl;
           }
         }
-      }
-    } 
+
+        data[i++] = item;
+    }
+
+    sql_contents.clear();
+
+    return data;
+}
+
+nlohmann::json Database::getJson()
+{
+    return getSqlJson();
+}
+
+nlohmann::json Database::getSong(int id)
+{   
+    std::string query = "SELECT * FROM SONGS WHERE ID=" + std::to_string(id) + ";";
+    nlohmann::json sql_json = getSqlJson(query);
+
+    if (sql_json.size() != 1)  {
+      // TODO fatal error! There cannot be two items with same ID!
+    }
+
+    return sql_json;
+}
+
+nlohmann::json Database::getSong(std::string name)
+{   
+    std::string query = "SELECT * FROM SONGS WHERE TITLE = " + name + ";";
+    std::cout << query << std::endl;
+    nlohmann::json sql_json = getSqlJson(query);
+
+    std::cout << sql_json << std::endl;
+
+    return sql_json;
+}
+
+int Database::sort(std::string criteria)
+{
+  bool isProp = false;
+  for (const auto& prop : properties)  {
+    if (criteria == prop)  {
+      isProp = true;
+    }
   }
 
-  else if (criteria == "author")  {
-    // sort by author
-    for (int i = 0; i < song_container.size()-1; i++)  {
-      for (int j = 0; j < song_container.size()-1; j++)  {
-        int comp = compare(song_container[j]->getAuthor(), song_container[j+1]->getAuthor());
-        if (comp > 0)  {
-          auto _song = song_container[j];
-          song_container[j] = song_container[j+1];
-          song_container[j+1] = _song;
-        }
-        // if name matches, sort by name
-        if (!comp)  {
-
-          int comp2 = compare(song_container[j]->getName(), song_container[j+1]->getName());
-          if (comp2 > 0)  {
-            auto _song = song_container[j];
-            song_container[j] = song_container[j+1];
-            song_container[j+1] = _song;
-          }
-        }
-      }
-    } 
-  }
-  else {
+  if (!isProp)  {
     return 1;
   }
 
-  return 0;
+  std::string query = "SELECT * FROM SONGS ORDER BY " + criteria + ";";
+
+  return getSqlJson(query);
 }
 
-int Database::saveJsonFile()
+nlohmann::json Database::findSong(std::string pattern)
 {
-	std::ofstream file(this->fname);
-	
-	file << getJsonString();
+  std::string query = "SELECT * FROM SONGS WHERE TITLE LIKE '%" + pattern + "%';";
 
-	file.close();
-
-	return 0;
-
+  return getSqlJson(query);
 }
 
-Database::json_t Database::findSong(std::string pattern)
-{
-  pattern = convert_to_ascii(pattern);
-
-  json_t json;
-  for (const auto& song : this->song_container)  {
-    std::string txt = convert_to_ascii(song->getName());
-
-    if (txt.find(pattern) != std::string::npos)  {
-      json[std::to_string(song->getId())] = song->getName();
-
-    }
-  }
-
-  return json;
-
-}
-
-int Database::loadJsonFile(std::string fname)
-{	
-	std::ifstream file(fname);
-
-	if (file.fail())  {
-		return 1;
-	}
-	
-	json_t data = json_t::parse(file);
-
-	// TODO check proper format
-
-	if (data.is_discarded())  {
-		return 2;
-	}
-
-	for (auto &el : data.items())  {
-		Song* song = new Song();
-		song->loadJson(el.value());
-		addSong(song);
-	}
-	
-	return 0;
-
-}
-
-
-// TODO
-int Database::removeSong(Song* song)
-{
-	//TODO
-	return 1;
-}
-
-
-// TODO
 int Database::removeSong(int id)
 {
-  if (id < song_container.size() && id >= 0)  {
-	  song_container.erase(song_container.begin()+id);
-    return 0;
+
+  std::string query  = "SELECT * FROM SONGS WHERE ID=" + std::to_string(id) + ";";
+  nlohmann::json sql_json = getSqlJson(query);
+
+  if (sql_json == nullptr)  {
+    return 1;
   }
 
-  else  {
-    return 1;
+  if (sql_json != nullptr; sql_json.size() == 1)  {
+      query  = "DELETE FROM SONGS WHERE ID=" + std::to_string(id) + ";";
+      sqlite3_exec(DB, query.c_str(), nullptr, nullptr, nullptr);
+      return 0;
+  }
+  else {
+    // TODO fatal error! There cannot be two items with same ID!
+    return 2;
   }
 }
 
@@ -293,7 +288,7 @@ int Database::makeBackup()
   std::string backup_name = this->backupDir + "/" + "backup-" + ctime(&timestamp);
   
   // if the `database file` does not exist, return 1
-  if (!std::filesystem::exists(fname))  {
+  if (!std::filesystem::exists(DB_file))  {
     return 1;
   }
   
@@ -303,7 +298,7 @@ int Database::makeBackup()
     std::filesystem::create_directories(backupDir);
   }
 
-  std::filesystem::copy_file(fname, backup_name);
+  std::filesystem::copy_file(DB_file, backup_name);
 
   return 0;
 

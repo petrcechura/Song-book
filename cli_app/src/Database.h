@@ -6,15 +6,14 @@
 #include <map>
 #include "../lib/json/json.hpp"
 #include <string>
+#include <sqlite3.h>
 
 class Database
 {
-    using json_t = nlohmann::json;
 
     private:
-        std::vector<Song*> song_container;
-		    /** File name for a `database` json */
-        std::string fname;
+        sqlite3 *DB;
+        const char* DB_file = "db.sql";
         /** Folder name for backup json files */
         std::string backupDir;
         
@@ -22,16 +21,19 @@ class Database
          *
          *  Returns 1 when order is right (first -> second), -1 otherwise, or 0 when strings match */
         int compare(std::string firstString, std::string secondString);
+        nlohmann::json getSqlJson(std::string query = "");
+
+        std::string properties[2] = {
+                    "TITLE",
+                    "ARTIST",
+        };
 
     public:
 
         Database(std::string fname = "database.json", std::string backupDir = "backups");
         ~Database();
 
-        int addSong(Song *song);
         int addSong(std::string json_string);
-        int addSong(json_t json_string);
-        int removeSong(std::string name);
         int removeSong(int id);
         /** Creates a backup file of a json `database` into `backupDir`
          *
@@ -40,22 +42,24 @@ class Database
         int makeBackup();
         /** Takes a `regex` as a argument, 
          * returns json representation of songs that match this regex */
-        json_t findSong(std::string pattern);
-		    int removeSong(Song* song);
+        nlohmann::json findSong(std::string pattern);
+
+        nlohmann::json getSong(int id);
+        nlohmann::json getSong(std::string name);
+
+        int SendQuery(std::string query);
         
-
-        Song* getSong(int id);
-        Song* getSong(std::string name);
-
-        int getSongCount() { return song_container.size(); };
+        // TODO
+        int getSongCount() { return getJson().size(); };
 
         int sort(std::string criteria);
 
         int loadJsonFile(std::string fname);
-		    int saveJsonFile();
+		int saveJsonFile();
 
-        json_t getJson();
+        nlohmann::json getJson();
         std::string getJsonString() {return this->getJson().dump(); };
+        
 
 };
 

@@ -72,13 +72,8 @@ debug: compile-with-debug link
 run:
 	@./$(OUTPUT_FILE)
 
-# TODO remove
-.PHONY: compile-with-debug
-compile-with-debug:
-	@g++ -g -c $(H_FILES) $(SOURCES) -B $(H_DIRS)
-
 compile:
-	@g++ $(foreach hdir,$(H_DIRS),-I $(hdir)) -c $(SOURCES) -lcurl
+	@g++ $(foreach hdir,$(H_DIRS),-I $(hdir)) -c $(SOURCES) -lcurl -l sqlite3
 
 .PHONY: clean
 clean:
@@ -95,5 +90,5 @@ docs:
 	@$(BROWSER) docs/html/index.html
 
 link:
-	@g++ $(foreach file, $(SOURCES), $(notdir $(basename $(file)).o)) -o $(OUTPUT_FILE) -lcurl
+	@g++ $(foreach file, $(SOURCES), $(notdir $(basename $(file)).o)) -o $(OUTPUT_FILE) -lcurl -l sqlite3
 	rm *.o

@@ -3,6 +3,7 @@
 #include <iostream>
 #include "Database.h"
 #include "cmdapputils.h"
+#include "json.hpp"
 
 #ifndef SONGBOOKAPP_H
 #define SONGBOOKAPP_H

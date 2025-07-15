@@ -25,18 +25,18 @@ int AddTask::Start()
 	else if (name == std::string(1,parent->getExitChar()) )  {
 		return 0;
 	}
-  else if (const Song* s = parent->getDatabase()->getSong(name); s != nullptr)  {
-    std::cout << "Song with this name already exists!\n" << 
-    s->getId() << " : " << s->getName() << " : " << s->getAuthor() << 
-    "\n... you sure you want to proceed? (y/n)" << std::endl;
+  	else if (nlohmann::json song = parent->getDatabase()->getSong(name); song != nullptr)  {
+    	std::cout << "Song with this name already exists!\n" << 
+    	song["ID"] << " : " << song["TITLE"] << " : " << song["ARTIST"] << 
+    	"\n... you sure you want to proceed? (y/n)" << std::endl;
     
-    std::string response;
-	  std::getline(std::cin, response);
+    	std::string response;
+	  	std::getline(std::cin, response);
     
-    if (response != "y")  {
-        return 2;
-    }
-  }
+    	if (response != "y")  {
+        	return 2;
+    	}
+  	}
 
 	std::cout << "Type an author's name\n\t>>";
 	std::getline(std::cin, author);
@@ -51,8 +51,10 @@ int AddTask::Start()
 		return 0;
 	}
 
-	Song* song = new Song(name, author);
-	parent->getDatabase()->addSong(song);
+	nlohmann::json song = nlohmann::json();
+	song["TITLE"] = name;
+	song["ARTIST"] = author;
+	parent->getDatabase()->addSong(song.dump());
 
 	std::cout << "Song '" << name << "' added..." << std::endl;
 

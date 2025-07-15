@@ -2,6 +2,7 @@
 #include <iostream>
 #include <iomanip>
 #include "RemoveTask.h"
+#include "json.hpp"
 #include "SongBookApp.h"
 
 
@@ -13,9 +14,9 @@ int RemoveTask::Start()
 
 	int id;
 
-  if (str_id == std::string(1,parent->getExitChar()))  {
-    return 0;
-  }
+  	if (str_id == std::string(1,parent->getExitChar()))  {
+    	return 0;
+  	}
 
 	try {
 		id = std::stoi(str_id);
@@ -25,35 +26,18 @@ int RemoveTask::Start()
 		return 1;
 	}
 
+	nlohmann::json song = parent->getDatabase()->getSong(id);
+	int exit = parent->getDatabase()->removeSong(id);
 	
-	Song* song = parent->getDatabase()->getSong(id);
-	
-	if (song)  {
-		std::cout << "++++ MODIFY ++++" << std::endl;
-		std::cout << "NAME: " << song->getName() << std::endl;
-		std::cout << "AUTHOR: " << song->getAuthor() << '\n' << std::endl;
-		
-		std::string name = "";
-		std::string author = "";
-		std::cout << "\tType new song name (leave blank for no modification)\n\t>>";
-		std::getline(std::cin, name);
-		std::cout << "\tType new author name (leave blank for no modification)\n\t>>";
-		std::getline(std::cin, author);
-
-		if (name != "")  {
-			song->setName(name);
-		}
-		if (author != "")  {
-			song->setAuthor(author);
-		}
-
-		std::cout << "Song " << song->getName() << " has been modified succesfully..."  << std::endl;
-		
-		return 0;
-
+	if (exit == 0)  { 	
+		std::cout << "Song " << (song.count("TITLE") ? song.at("TITLE") : "NULL") << " removed..." << std::endl;
 	}
-	else  {
+	else if (exit == 1)  {
 		std::cout << "Song with ID " << id << " does not exist!" << std::endl;
-		return 1;
 	}
+	else if (exit == 2)  {
+		std::cout << "FATAL ERROR: There are two songs with same ID!" << std::endl;
+	}
+
+	return exit;
 }

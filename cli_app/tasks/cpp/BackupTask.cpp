@@ -6,7 +6,6 @@
 
 int BackupTask::Start()
 {
-  parent->getDatabase()->saveJsonFile();
 
   int i = parent->getDatabase()->makeBackup();
   if (!i)  {
