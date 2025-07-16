@@ -42,7 +42,7 @@ class Database
         Database(std::string fname = "database.json", std::string backupDir = "backups");
         ~Database();
 
-        int addSong(std::string json_string);
+        int addSong(std::string json_string, bool override=false);
         int removeSong(int id);
         /** Creates a backup file of a json `database` into `backupDir`
          *

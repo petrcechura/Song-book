@@ -71,15 +71,20 @@ int LatexTask::Start()
   file << table_begin;
 
 	nlohmann::json data = parent->getDatabase()->getJson();
-  for (int i = 0; i < parent->getDatabase()->getSongCount(); i++)  {
 
-    const auto& song = parent->getDatabase()->getSong(i);
-    file << i << " & " << song["TITLE"] << " & " << song["ARTIST"] << R"( \\)";
+  int i = 0;
+  for (const auto& song : data)  {
+    file  << i 
+          << " & " << (song.count("TITLE") ? song.at("TITLE") : "NULL")
+          << " & " << (song.count("ARTIST") ? song.at("ARTIST") : "NULL") 
+          << R"( \\)";
 
     if (i % SONGS_PER_PAGE == 0 && i > 0 && i < parent->getDatabase()->getSongCount()-1)  {
       file << table_end;
       file << table_begin;
     }
+
+    i++;
   }
   file << table_end;
   file << ending;

@@ -47,9 +47,16 @@ int ModifyTask::Start()
 			song["ARTIST"] = author;
 		}
 
-		std::cout << "Song " << song["TITLE"] << " has been modified succesfully..."  << std::endl;
+		int exit = parent->getDatabase()->addSong(song.dump(),true);
 		
-		return 0;
+		if (!exit)  {
+			std::cout << "Song " << song["TITLE"] << " has been modified succesfully..."  << std::endl;
+		}
+		else {
+			std::cout << "Failed to modify " << song["TITLE"] << "..." << std::endl;
+		}
+		
+		return exit;
 
 	}
 	else  {

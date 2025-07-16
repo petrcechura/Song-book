@@ -89,6 +89,10 @@ doxygen:
 docs:
 	@$(BROWSER) docs/html/index.html
 
+.PHONY: bin
+bin:
+	@cp $(OUTPUT_FILE) /usr/local/bin/songbook
+
 link:
 	@g++ $(foreach file, $(SOURCES), $(notdir $(basename $(file)).o)) -o $(OUTPUT_FILE) -lcurl -l sqlite3
 	rm *.o

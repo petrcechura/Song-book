@@ -10,8 +10,6 @@ int ListTask::Start()
 { 
 	nlohmann::json data = parent->getDatabase()->getJson();
 
-	std::cout << data.dump();
-
 	std::cout << std::string(4 + TITLE_WIDTH + ARTIST_WIDTH, '+')
 			  << std::endl;	
 	std::cout << std::setw(4) << std::left << "ID"

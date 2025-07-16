@@ -19,7 +19,6 @@ static int sql_cb(void* data, int argc, char** argv, char** azColName)
 
     for (int i = 0; i < argc; i++) {
         m[azColName[i]] =  argv[i] ? argv[i] : "NULL";
-        std::cout << azColName[i] << ": " << (argv[i] ? argv[i] : "NULL") << std::endl;
     }
 
     sql_contents.push_back(m);
@@ -165,33 +164,47 @@ int Database::compare(std::string firstString, std::string secondString)  {
 }
 
 
-int Database::addSong(std::string json_string)  {
+int Database::addSong(std::string json_string, bool override)  {
 
     nlohmann::json sql_json = getSqlJson("SELECT * FROM SONGS ORDER BY ID DESC LIMIT 1;");
 
-    int id;
-    if (sql_json.dump() == "null")  {
-        id = 0;
-    }
-    else {
-        id = std::stoi(sql_json[0]["ID"].get<std::string>()) + 1;
-    }
-
     nlohmann::json j = nlohmann::json::parse(json_string);
-    
-    std::string sql = "INSERT INTO SONGS VALUES(" + std::to_string(id);
-    for (const auto& p : properties) {
-      sql += ", " + j[p].dump() + "";
+
+    std::string query;
+
+    // if input json contains ID that already exists inside database and override is on, don't add, just modify
+    if (j.count("ID") && (getSqlJson("SELECT * FROM SONGS WHERE ID = " + j.at("ID").dump()) != "null") && override)  {
+        query = "UPDATE SONGS SET ";
+        int i = 0;
+        for (const auto& p : properties) {
+            if (j.count(p))  {
+                query += (i++ ? ",\n" : "\n") + p + " = " + j[p].dump();
+            }
+        }
+        query += "\n WHERE ID=" + j["ID"].dump() + ";";
+      
     }
-    sql += ");";
+    // else generate incremental ID and assign new song to database
+    else {
+        int id;
+        if (sql_json.dump() == "null")  {
+            id = 0;
+        }
+        else {
+            id = std::stoi(sql_json[0]["ID"].get<std::string>()) + 1;
+        }
+        
+        query = "INSERT INTO SONGS VALUES(" + std::to_string(id);
+        for (const auto& p : properties) {
+            query += ", " + j[p].dump() + "";
+        }
+        query += ");";
+    }
 
-    std::cout << sql << std::endl;
-
-    int exit = sqlite3_exec(DB, sql.c_str(), sql_cb, nullptr, nullptr);
+    int exit = sqlite3_exec(DB, query.c_str(), sql_cb, nullptr, nullptr);
 
     return exit;
 }
-
 
 /** Get json representation of sql contents */
 nlohmann::json Database::getSqlJson(std::string query)  {
@@ -217,10 +230,8 @@ nlohmann::json Database::getSqlJson(std::string query)  {
         item["ID"] = content.at("ID");
 
         for (const auto& p : properties)  {
-          if (content.count(p))
-              item[p] = content.at(p);
-          else {
-              std::cout << p << std::endl;
+          if (content.count(p))  {
+            item[p] = content.at(p);
           }
         }
 
@@ -254,8 +265,6 @@ nlohmann::json Database::getSong(std::string name)
     std::string query = "SELECT * FROM SONGS WHERE TITLE = " + name + ";";
     std::cout << query << std::endl;
     nlohmann::json sql_json = getSqlJson(query);
-
-    std::cout << sql_json << std::endl;
 
     return sql_json[0];
 }
