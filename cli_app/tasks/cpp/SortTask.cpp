@@ -12,7 +12,7 @@ int SortTask::Start()
   std::cout << "Type a sorting criteria\n\t>>";
   std::getline(std::cin, criteria);
 
-  int i = parent->getDatabase()->sort(criteria);
+  int i = parent->getDatabase()->changeOrder(criteria);
 
   if (!i)  {
     std::cout << "Sort made succesfully..." << std::endl;

@@ -12,9 +12,9 @@ int AddTask::Start()
 	
 	std::cout << "Type a song name\n\t>>";
 	std::getline(std::cin, name);
-	if (name.size() > NAME_WIDTH)  {
+	if (name.size() > TITLE_WIDTH)  {
 		std::cout << "name '" << name << "' is too long! Max width is " 
-				  << NAME_WIDTH << " chars, your's " << name.size() << std::endl;
+				  << TITLE_WIDTH << " chars, your's " << name.size() << std::endl;
 
 		return 1;
 	}
@@ -41,9 +41,9 @@ int AddTask::Start()
 	std::cout << "Type an author's name\n\t>>";
 	std::getline(std::cin, author);
 
-	if (author.size() > AUTHOR_WIDTH)  {
+	if (author.size() > ARTIST_WIDTH)  {
 		std::cout << "author's name '" << author << "' is too long! Max width is " 
-				  << AUTHOR_WIDTH << " chars, your's " << author.size() << std::endl;
+				  << ARTIST_WIDTH << " chars, your's " << author.size() << std::endl;
 
 		return 1;
 	}
@@ -54,9 +54,15 @@ int AddTask::Start()
 	nlohmann::json song = nlohmann::json();
 	song["TITLE"] = name;
 	song["ARTIST"] = author;
-	parent->getDatabase()->addSong(song.dump());
+	
+	int exit = parent->getDatabase()->addSong(song.dump());
 
-	std::cout << "Song '" << name << "' added..." << std::endl;
+	if (!exit)  {
+		std::cout << "Song '" << name << "' added..." << std::endl;
+	}
+	else {
+		std::cout << "Song '" << name << "' could not be added" << std::endl;
+	}
 
 	return 0;
 }

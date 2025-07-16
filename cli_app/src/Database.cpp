@@ -35,6 +35,29 @@ int Database::SendQuery(std::string query)  {
     return 0;
 }
 
+int Database::changeOrder(std::string order)  {
+    // Convert to uppercase
+    for (int i = 0; i < order.size(); i++)  {
+      order[i] = std::toupper(order[i]);
+    }
+
+    // Check if property is present...
+    bool isProp = false;
+    for (const auto& prop : properties)  {
+      if (order == prop)  {
+        isProp = true;
+      }
+    }
+
+    // If property is not present, return...
+    if (!isProp)  {
+      return 1;
+    }
+
+    this->order = order;
+    return 0;
+}
+
 Database::Database(std::string fname, std::string backupDir)  {
     this->backupDir = backupDir;
 
@@ -42,18 +65,14 @@ Database::Database(std::string fname, std::string backupDir)  {
 
     if (exit) {
         std::cout << "Couldn't open SQL database `" << DB_file << "`!" << std::endl;
-
-
-
     }
     else {
       std::cout << "database opened Successfully" << std::endl;
 
-      std::string sql = "CREATE TABLE SONGS("
-                          "ID INT PRIMARY KEY     NOT NULL ";
+      std::string sql = "CREATE TABLE SONGS(ID INT PRIMARY KEY NOT NULL";
 
       for (const auto& c : properties)  {
-          sql += ",\n" + c + "     TEXT     NOT NULL";
+          sql += ",\n" + c + "TEXT NOT NULL";
       }
 
       sql += " );";
@@ -148,11 +167,17 @@ int Database::compare(std::string firstString, std::string secondString)  {
 
 int Database::addSong(std::string json_string)  {
 
-    nlohmann::json sql_json = getSqlJson();
+    nlohmann::json sql_json = getSqlJson("SELECT * FROM SONGS ORDER BY ID DESC LIMIT 1;");
 
-    int id = sql_json.size() + 1;
+    int id;
+    if (sql_json.dump() == "null")  {
+        id = 0;
+    }
+    else {
+        id = std::stoi(sql_json[0]["ID"].get<std::string>()) + 1;
+    }
 
-    nlohmann::json j = nlohmann::json::parse(json_string);  
+    nlohmann::json j = nlohmann::json::parse(json_string);
     
     std::string sql = "INSERT INTO SONGS VALUES(" + std::to_string(id);
     for (const auto& p : properties) {
@@ -160,9 +185,11 @@ int Database::addSong(std::string json_string)  {
     }
     sql += ");";
 
-    int exit = sqlite3_exec(DB, sql.c_str(), nullptr, nullptr, nullptr);
+    std::cout << sql << std::endl;
 
-    return 0;
+    int exit = sqlite3_exec(DB, sql.c_str(), sql_cb, nullptr, nullptr);
+
+    return exit;
 }
 
 
@@ -170,7 +197,7 @@ int Database::addSong(std::string json_string)  {
 nlohmann::json Database::getSqlJson(std::string query)  {
 
     if (query == "") {
-        query = "SELECT * FROM SONGS";
+        query = "SELECT * FROM SONGS ORDER BY " + order;
     }
 
     int exit = sqlite3_exec(DB, query.c_str(), sql_cb, nullptr, nullptr);
@@ -178,7 +205,8 @@ nlohmann::json Database::getSqlJson(std::string query)  {
     nlohmann::json data = nlohmann::json();
 
     if (exit)  {
-        std::cout << "Error getting sql json! TODO" << std::endl;
+        std::cout << "Error getting sql json!" << std::endl;
+        std::cout << data.dump() << std::endl;
         return data;
     }
 
@@ -218,7 +246,7 @@ nlohmann::json Database::getSong(int id)
       // TODO fatal error! There cannot be two items with same ID!
     }
 
-    return sql_json;
+    return sql_json[0];
 }
 
 nlohmann::json Database::getSong(std::string name)
@@ -229,25 +257,7 @@ nlohmann::json Database::getSong(std::string name)
 
     std::cout << sql_json << std::endl;
 
-    return sql_json;
-}
-
-int Database::sort(std::string criteria)
-{
-  bool isProp = false;
-  for (const auto& prop : properties)  {
-    if (criteria == prop)  {
-      isProp = true;
-    }
-  }
-
-  if (!isProp)  {
-    return 1;
-  }
-
-  std::string query = "SELECT * FROM SONGS ORDER BY " + criteria + ";";
-
-  return getSqlJson(query);
+    return sql_json[0];
 }
 
 nlohmann::json Database::findSong(std::string pattern)

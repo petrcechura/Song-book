@@ -79,7 +79,7 @@ std::string SongBookApp::alignString(const std::string& _str, char fill, int max
   std::string str = "CANT DISPLAY (too long)" + std::string(maxWidth-23, fill);
 
   if (_str.size() < maxWidth)  {
-    str = _str + std::string(NAME_WIDTH - countStringChars(_str), fill);
+    str = _str + std::string(TITLE_WIDTH - SongBookApp::countStringChars(_str), fill);
   }
 
   return str;
@@ -97,9 +97,11 @@ void SongBookApp::stopHook()
 }
 
 
-
-
-
-
-
-
+void SongBookApp::printSong(const std::string& id, const std::string& name, const std::string& author)
+{
+  
+	std::cout << std::setw(4) << std::left << id
+				    << std::left << SongBookApp::alignString(name, 	' ', TITLE_WIDTH)
+				    << std::left << SongBookApp::alignString(author, ' ', ARTIST_WIDTH)
+				    << std::endl;
+}

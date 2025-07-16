@@ -25,7 +25,16 @@ class Database
 
         std::string properties[2] = {
                     "TITLE",
-                    "ARTIST",
+                    "ARTIST"
+        };
+
+        std::string order = "ID";
+
+        enum ERROR_CODE 
+        {
+            SUCCESS,
+            SQL_INSERT_ERROR,
+            SQL_SELECT_ERROR
         };
 
     public:
@@ -52,13 +61,13 @@ class Database
         // TODO
         int getSongCount() { return getJson().size(); };
 
-        int sort(std::string criteria);
-
         int loadJsonFile(std::string fname);
 		int saveJsonFile();
 
         nlohmann::json getJson();
         std::string getJsonString() {return this->getJson().dump(); };
+
+        int changeOrder(std::string order);
         
 
 };

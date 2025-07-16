@@ -8,6 +8,9 @@
 #ifndef SONGBOOKAPP_H
 #define SONGBOOKAPP_H
 
+#define TITLE_WIDTH 30
+#define ARTIST_WIDTH 30
+
 /** A specific implementation of `CmdApp` class, `SongBookApp` the main class that provides
  *  API to start/stop Command-line application where tasks can be called, thus
  *  allowing to indirectly work with a *songbook* database.
@@ -32,17 +35,15 @@ class SongBookApp : public Cmd
      *        (and maybe only a certain ones)*/
     Database* getDatabase() { return database; };
 
-
-
-  protected:
-    const int NAME_WIDTH = 30;
+    static void printSong(const std::string& id, const std::string& name, const std::string& author);
 
     /** This function returns number of characters inside string variable, regardless of character format (UNICODE/ASCII) */
-    inline int countStringChars(const std::string& _str);
+    static inline int countStringChars(const std::string& _str);
 
     /** This function returns an aligned string with set width, regardless of characters format (UNICODE/ASCII) */
-    inline std::string alignString(const std::string& _str, char fill = ' ', int maxWidth = 30);
-    
+    static inline std::string alignString(const std::string& _str, char fill = ' ', int maxWidth = 30);
+
+  protected:
     /** A `startHook()` implementation */
     void startHook() override;
     /** A `stopHook()` implementation */
@@ -53,6 +54,8 @@ class SongBookApp : public Cmd
     //====================
     /** songbook database instance */ 
     Database* database;
+
+    std::string order = "ID";
 
 };
 
