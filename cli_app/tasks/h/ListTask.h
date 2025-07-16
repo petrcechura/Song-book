@@ -19,6 +19,6 @@ public:
   /** This function returns number of characters inside string variable, regardless of character format (UNICODE/ASCII) */
   inline int countStringChars(const std::string& _str);
 
-  int Start() override;
+  int Start(bool interactive) override;
 
 };

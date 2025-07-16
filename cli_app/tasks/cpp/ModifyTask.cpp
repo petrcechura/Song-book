@@ -5,7 +5,7 @@
 #include "SongBookApp.h"
 
 
-int ModifyTask::Start()
+int ModifyTask::Start(bool interactive)
 {
 	std::string str_id;
 	std::cout << "Type an ID of song you want to modify\n\t>>";

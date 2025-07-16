@@ -13,7 +13,7 @@
  */
 class TaskBase {
   public:
-    virtual int Start() = 0;
+    virtual int Start(bool interactive = true) = 0;
     virtual ~TaskBase() = default;
     virtual std::string getCmd() = 0;
     virtual std::string getDescr() = 0;

@@ -43,6 +43,9 @@ class SongBookApp : public Cmd
     /** This function returns an aligned string with set width, regardless of characters format (UNICODE/ASCII) */
     static inline std::string alignString(const std::string& _str, char fill = ' ', int maxWidth = 30);
 
+    /** This function executes serie of commands separated by ';' character. */
+    void execCmd(std::string cmd, bool exitWhenDone=false);
+
   protected:
     /** A `startHook()` implementation */
     void startHook() override;

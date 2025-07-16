@@ -12,6 +12,9 @@ SongBookApp::SongBookApp()
 
   AddTask* add = new AddTask("add", this);
   add->setDescr("Adds a new song to database");
+  add->addArg("title");
+  add->addArg("artist");
+  add->addArg("force");
 
   RemoveTask* remove = new RemoveTask("remove", this);
   remove->setDescr("Removes a song from database");
@@ -50,6 +53,7 @@ SongBookApp::SongBookApp()
   push->setDescr("TODO");
 
   this->addTask(add);
+  
   this->addTask(remove);
   this->addTask(modify);
   this->addTask(help);
@@ -94,6 +98,11 @@ void SongBookApp::stopHook()
 {
 	std::cout << "exiting program..." << std::endl;
 	exit(0);
+}
+
+void SongBookApp::execCmd(std::string cmd, bool exitWhenDone)
+{
+  // TODO this funtion shall parse cmd into chain of tasks with their arguments and then run them.
 }
 
 

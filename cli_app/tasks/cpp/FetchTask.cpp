@@ -33,7 +33,7 @@ size_t curl_writedata_callback(
 
 
 // BIG TODO
-int FetchTask::Start()
+int FetchTask::Start(bool interactive)
 {
 
   CURL* handle = curl_easy_init();

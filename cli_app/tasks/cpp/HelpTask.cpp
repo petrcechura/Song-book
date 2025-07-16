@@ -4,7 +4,7 @@
 #include "HelpTask.h"
 #include "SongBookApp.h"
 
-int HelpTask::Start()
+int HelpTask::Start(bool interactive)
 {
   std::cout << "This is a simple Command-line application SongBookApp that allows you"
                "to communicate with a database of a songs (add new, delete old...).\n"

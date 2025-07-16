@@ -5,7 +5,7 @@
 #include "SongBookApp.h"
 
 
-int SortTask::Start()
+int SortTask::Start(bool interactive)
 {
   std::string criteria;
 

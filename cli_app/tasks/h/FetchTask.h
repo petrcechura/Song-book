@@ -9,6 +9,6 @@ public:
   FetchTask(std::string cmd, SongBookApp* parent) 
     : Task<SongBookApp>(cmd, parent) {};
 
-int Start() override;
+int Start(bool interactive) override;
 
 };

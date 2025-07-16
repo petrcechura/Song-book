@@ -6,7 +6,7 @@
 #include "SongBookApp.h"
 #include "json.hpp"
 
-int LatexTask::Start()
+int LatexTask::Start(bool interactive)
 {
 
   const int SONGS_PER_PAGE = 25;
@@ -73,10 +73,15 @@ int LatexTask::Start()
 	nlohmann::json data = parent->getDatabase()->getJson();
 
   int i = 0;
+  std::string title;
+	std::string artist;
+	std::string id;
   for (const auto& song : data)  {
+    title = song.count("TITLE") ? song.at("TITLE") : "NULL";
+    artist = song.count("ARTIST") ? song.at("ARTIST") : "NULL";
     file  << i 
-          << " & " << (song.count("TITLE") ? song.at("TITLE") : "NULL")
-          << " & " << (song.count("ARTIST") ? song.at("ARTIST") : "NULL") 
+          << " & " << title
+          << " & " << artist 
           << R"( \\)";
 
     if (i % SONGS_PER_PAGE == 0 && i > 0 && i < parent->getDatabase()->getSongCount()-1)  {

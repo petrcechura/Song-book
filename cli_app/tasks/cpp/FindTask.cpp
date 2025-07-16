@@ -5,7 +5,7 @@
 #include "SongBookApp.h"
 #include "json.hpp"
 
-int FindTask::Start()
+int FindTask::Start(bool interactive)
 {
   using json_t = nlohmann::json;
   

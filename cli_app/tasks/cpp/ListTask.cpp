@@ -6,7 +6,7 @@
 #include "SongBookApp.h"
 #include "json.hpp"
 
-int ListTask::Start()
+int ListTask::Start(bool interactive)
 { 
 	nlohmann::json data = parent->getDatabase()->getJson();
 
