@@ -44,7 +44,7 @@ class SongBookApp : public Cmd
     static inline std::string alignString(const std::string& _str, char fill = ' ', int maxWidth = 30);
 
     /** This function executes serie of commands separated by ';' character. */
-    void execCmd(std::string cmd, bool exitWhenDone=false);
+    void executeCommands(std::string cmd_line, bool exitWhenDone=false);
 
   protected:
     /** A `startHook()` implementation */

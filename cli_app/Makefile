@@ -1,4 +1,4 @@
-SOURCES=src/Song.cpp src/Database.cpp lib/cmd-app-utils/cpp/TaskBase.cpp \
+SOURCES=src/Database.cpp lib/cmd-app-utils/cpp/TaskBase.cpp \
 			  lib/cmd-app-utils/cpp/Task.cpp lib/cmd-app-utils/cpp/Cmd.cpp \
 			  $(foreach TASK,$(wildcard tasks/cpp/*.cpp), $(TASK)) \
 			  src/SongBookApp.cpp src/main.cpp

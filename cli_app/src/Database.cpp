@@ -1,7 +1,6 @@
 #include "../lib/json/json.hpp"
 #include <map>
 #include <vector>
-#include "Song.h"
 #include <string>
 #include <iostream>
 #include <fstream>
@@ -66,7 +65,6 @@ Database::Database(std::string fname, std::string backupDir)  {
         std::cout << "Couldn't open SQL database `" << DB_file << "`!" << std::endl;
     }
     else {
-      std::cout << "database opened Successfully" << std::endl;
 
       std::string sql = "CREATE TABLE SONGS(ID INT PRIMARY KEY NOT NULL";
 
@@ -79,12 +77,10 @@ Database::Database(std::string fname, std::string backupDir)  {
       char* messaggeError;
       exit = sqlite3_exec(DB, sql.c_str(), NULL, 0, &messaggeError);
       
-      if (exit != SQLITE_OK) {
-          std::cout << "Error Create Table" << std::endl;
+      if (exit == SQLITE_OK) {
+          std::cout << "Could not find SQL database file, created empty one ..." << std::endl;
           sqlite3_free(messaggeError);
       }
-      else
-          std::cout << "Table created Successfully" << std::endl;
     }
 }
 

@@ -4,6 +4,7 @@
 #include <filesystem>
 #include "SongBookApp.h"
 #include "tasks.h"
+#include <vector>
 #include "cmdapputils.h"
 
 SongBookApp::SongBookApp()
@@ -100,9 +101,29 @@ void SongBookApp::stopHook()
 	exit(0);
 }
 
-void SongBookApp::execCmd(std::string cmd, bool exitWhenDone)
+void SongBookApp::execCommands(std::string cmd_line, bool exitWhenDone)
 {
   // TODO this funtion shall parse cmd into chain of tasks with their arguments and then run them.
+    std::vector<std::string> cmd_chain;
+    int pos = 0;
+    while(pos < cmd_line.size()){
+      pos = cmd_line.find(";");
+      cmd_chain.push_back(cmd_line.substr(0,pos));
+      cmd_line.erase(0,pos+1);
+    }
+    
+    for (const auto& c : cmd_chain)  {
+      std::string cmd = c.substr(0, c.find(" "));
+      if (this->tasks.count(cmd))  {
+        tasks.at(cmd)->execCmd(c);
+      }
+      else {
+        std::cout << "Unknown command '" << cmd << "'!" << std::endl;
+      }
+    }
+
+  if (exitWhenDone)  {
+  }
 }
 
 

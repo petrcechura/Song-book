@@ -1,5 +1,6 @@
 #include <string>
 #include <iostream>
+#include <sstream>
 #include "../h/Cmd.h"
 #include "../h/TaskBase.h"
 
@@ -49,7 +50,9 @@ int Cmd::loop()
     }
     else  {
       if (auto it = tasks.find(user_input); it != tasks.end())  {
-        it->second->Start();
+        it->second->startInteractive();
+        it->second->executeCommand();
+        it->second->
       }
       else  {
         unknownInput();
@@ -76,4 +79,26 @@ int Cmd::stopLoop()
   stopHook();
 
   return 0;
+}
+
+
+int Cmd::execCmd(std::string cmd)
+{
+
+  std::istringstream iss(cmd);
+  std::string word;
+  while (iss >> word)  {
+    
+    const auto it = tasks.find(word);
+    if (it != tasks.end())  {
+      it->second->execCmd(cmd);
+      return 0;
+    }
+    else {
+      return 1;
+    }
+  }
+
+  return 1;
+
 }

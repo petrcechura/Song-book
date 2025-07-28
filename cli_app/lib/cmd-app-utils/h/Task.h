@@ -25,10 +25,10 @@ class Task : public TaskBase
         /** A description to be printed when calling `help` */
         std::string descr="no description provided");
     
-    /** This method shall be overriden and contains an implementation of a specific `Task`,
-     *  thus shall "do everything a task is supposed to do"
+    /** 
+     *  Starts the interactive (CLI) approach to obtain all required arguments for task execution.
      */
-    int Start(bool interactive) override;
+    int startInteractive() override;
     
     /** An aux. setter for a description */
     void setDescr(std::string d) { this->descr = d; };
@@ -44,11 +44,22 @@ class Task : public TaskBase
     */
     int addArg(std::string arg);
     
-    /** Executes a command string.
-     * 
-     *  Possible format may look like this: `<cmd> -<arg> <int> <int> --<another_arg> <string>` ...
+    /** 
+     *  Executes this task. For execution, arguments obtained via `Start` (interactive) or `parseCommand` (non-interactive) are used.
      */
-    int execCmd(std::string cmd);
+    int executeCommand();
+    
+    /** Attempts to parse a command line string (arguments separation) and stores its contents into this class.
+     * 
+     *  Returns 0 when cmd string has successfully been parsed, otherwise returns 1.
+     * 
+     *  @param
+     *  A command line string with this syntax: <cmd_name> -<arg1> <arg_values1> -<arg2> <arg_values2> ...
+     * */
+    int parseCommand(std::string cmd_line);
+
+    /** Clears all available arguments into their default state. */
+    void clearArgs();
 
   protected:
     t_cmd* parent;
@@ -67,10 +78,6 @@ class Task : public TaskBase
      *  too, they're returned via `values`.
      */
     bool getArg(const char* arg, char** values = nullptr);
-
-    void clearArgs();
-
-
 };
 
 template<class t_cmd>
@@ -82,7 +89,7 @@ Task<t_cmd>::Task(std::string cmd, t_cmd* parent, std::string descr)
 }
 
 template<class t_cmd>
-int Task<t_cmd>::Start(bool interactive)
+int Task<t_cmd>::startInteractive()
 {
     return 0; // Default does nothing
 }
@@ -96,7 +103,7 @@ int Task<t_cmd>::addArg(std::string arg)
 }
 
 template<class t_cmd>
-int Task<t_cmd>::execCmd(std::string cmd)
+int Task<t_cmd>::parseCommand(std::string cmd_line)
 {
     std::istringstream iss(cmd);
     std::string word;
@@ -107,7 +114,6 @@ int Task<t_cmd>::execCmd(std::string cmd)
     while (iss >> word)  {
       if (first)  {
         if (this->cmd != word)  {
-          std::cout << "ERROR: Bad command " << cmd << std::endl;
           return 1;
         }
 
@@ -120,7 +126,7 @@ int Task<t_cmd>::execCmd(std::string cmd)
           }
           curr_arg = word;
           if (this->args.count(word))  {
-            this->args.at(curr_arg)[0] = true;
+            this->args.at(curr_arg).isTrue = true;
             
           }
           i = 0;
@@ -128,14 +134,14 @@ int Task<t_cmd>::execCmd(std::string cmd)
 
       else  {
           if (this->args.count(word))  {
-            this->args.at(curr_arg)[1][i++] = word;
+            this->args.at(curr_arg).values[i++] = word.data();
           }
       }
     }
 
-    Start(false);
-
     clearArgs();
+
+    return 0;
 
     
 }
@@ -160,9 +166,10 @@ bool Task<t_cmd>::getArg(const char* arg, char** values)
 template<class t_cmd>
 void Task<t_cmd>::clearArgs()
 {
-    for (const auto& arg : this->args)  {
-        arg[0] = false;
-        arg[1] = nullptr;
+    for (auto it = args.begin(); it != args.end(); it++)
+    {
+        it->second.isTrue = false;
+        it->second.values = nullptr;
     }
 }
 

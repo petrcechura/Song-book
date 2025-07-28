@@ -54,7 +54,7 @@ class Cmd
     char getExitChar() { return EXIT_CHAR; };
 
     /**  Executes a command string, followed by additional arguments */
-    void execCmd(std::string cmd);
+    int execCmd(std::string cmd);
 
   // Private properties
   protected:

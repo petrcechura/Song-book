@@ -1,7 +1,6 @@
 #ifndef DATABASE_H
 #define DATABASE_H
 
-#include "Song.h"
 #include <vector>
 #include <map>
 #include "../lib/json/json.hpp"
