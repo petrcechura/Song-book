@@ -12,5 +12,7 @@ class SortTask : public Task<SongBookApp>
     SortTask(std::string cmd, SongBookApp* parent) 
       : Task<SongBookApp>(cmd, parent) {};
 
-    int Start() override;
+    int startInteractive() override;
+    int executeCommand() override;
+    void endInteractive(int error_code) override;
 };

@@ -19,9 +19,6 @@ public:
   /** This function returns number of characters inside string variable, regardless of character format (UNICODE/ASCII) */
   inline int countStringChars(const std::string& _str);
 
-  const int NAME_WIDTH = 30;
-  const int AUTHOR_WIDTH = 30;
-
-  int Start() override;
+  int executeCommand() override;
 
 };

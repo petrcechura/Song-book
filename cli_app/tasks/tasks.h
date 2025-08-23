@@ -12,3 +12,4 @@
 #include "h/PushTask.h"
 #include "h/RemoveTask.h"
 #include "h/SortTask.h"
+#include "h/TestTask.h"

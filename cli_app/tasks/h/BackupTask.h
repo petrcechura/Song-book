@@ -9,6 +9,6 @@ public:
   BackupTask(std::string cmd, SongBookApp* parent) 
     : Task<SongBookApp>(cmd, parent) {};
 
-int Start() override;
+  int executeCommand() override;
 
 };

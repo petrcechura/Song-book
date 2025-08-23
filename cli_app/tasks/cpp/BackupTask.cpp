@@ -4,16 +4,15 @@
 #include "BackupTask.h"
 #include "SongBookApp.h"
 
-int BackupTask::Start()
+int BackupTask::executeCommand()
 {
-  parent->getDatabase()->saveJsonFile();
 
   int i = parent->getDatabase()->makeBackup();
   if (!i)  {
-    std::cout << "backup file has been created..." << std::endl;
+    parent->printInteractive("Backup file has been created...", 2);
   }
   else  {
-    std::cout << "error while creating backup file..." << std::endl;
+    parent->printInteractive("Error while creating backup file ...", 2);
   }
 
   return 0;

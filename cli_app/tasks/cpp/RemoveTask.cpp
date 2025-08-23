@@ -1,59 +1,72 @@
 #include <string>
 #include <iostream>
 #include <iomanip>
+#include <format>
 #include "RemoveTask.h"
+#include "json.hpp"
 #include "SongBookApp.h"
 
+int RemoveTask::executeCommand()
+{
+	if (argumentExists("-id", true))  {
+		std::string str_id = getArgument("-id").values[0];
+		int id;
+		
+		try {
+			id = std::stoi(str_id);
+		}
+		catch (const std::invalid_argument& e)  {
+			return 1;
+		}
+		if (parent->getDatabase()->songExists(id))  {
+ 			return parent->getDatabase()->removeSong(id);
+		}
+		else {
+			return 2;
+		}
 
-int RemoveTask::Start()
+	}
+	else {
+		return 3;
+	}
+
+	return 1;
+}
+
+int RemoveTask::startInteractive()
 {
 	std::string str_id;
-	std::cout << "Type an ID of song you want to modify\n\t>>";
-	std::getline(std::cin, str_id);
-
 	int id;
+	parent->printInteractive("Type an ID of song you wish to remove");
+	str_id = parent->getInput(1);
 
-  if (str_id == std::string(1,parent->getExitChar()))  {
-    return 0;
-  }
-
-	try {
-		id = std::stoi(str_id);
-	}
-	catch (const std::invalid_argument& e)  {
-		std::cout << "'" << str_id << "' does not contain valid ID to parse!" << std::endl;
-		return 1;
-	}
-
-	
-	Song* song = parent->getDatabase()->getSong(id);
-	
-	if (song)  {
-		std::cout << "++++ MODIFY ++++" << std::endl;
-		std::cout << "NAME: " << song->getName() << std::endl;
-		std::cout << "AUTHOR: " << song->getAuthor() << '\n' << std::endl;
-		
-		std::string name = "";
-		std::string author = "";
-		std::cout << "\tType new song name (leave blank for no modification)\n\t>>";
-		std::getline(std::cin, name);
-		std::cout << "\tType new author name (leave blank for no modification)\n\t>>";
-		std::getline(std::cin, author);
-
-		if (name != "")  {
-			song->setName(name);
+  	if (str_id == std::string(1,parent->getExitChar()))  {
+    	return 0;
+  	}
+	else {
+		try {
+			id = std::stoi(str_id);
 		}
-		if (author != "")  {
-			song->setAuthor(author);
+		catch (const std::invalid_argument& e)  {
+			parent->printInteractive(std::format("'{}' does not contain valid ID to parse!", str_id), 1);
+			return 1;
 		}
-
-		std::cout << "Song " << song->getName() << " has been modified succesfully..."  << std::endl;
-		
-		return 0;
-
+		std::vector<std::string> s = {str_id.data()};
+		updateArgument("-id", {false, s});
 	}
-	else  {
-		std::cout << "Song with ID " << id << " does not exist!" << std::endl;
-		return 1;
+
+	return 1;
+}
+
+void RemoveTask::endInteractive(int error_code)
+{
+	if (!error_code)  {
+		parent->printInteractive("Song has been succesfully removed...", 1);
+	}
+	else if (error_code==2)  {
+		parent->printInteractive("Song with this ID does not exist!", 1);
+	}
+	else if (error_code==1)  {
+		parent->printInteractive("Error processing -id as argument...", 1);
 	}
 }

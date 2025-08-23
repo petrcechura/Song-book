@@ -4,7 +4,7 @@
 #include "HelpTask.h"
 #include "SongBookApp.h"
 
-int HelpTask::Start()
+int HelpTask::executeCommand()
 {
   std::cout << "This is a simple Command-line application SongBookApp that allows you"
                "to communicate with a database of a songs (add new, delete old...).\n"
@@ -12,7 +12,7 @@ int HelpTask::Start()
                "extendable for your own implementations." << std::endl;
   std::cout << "\nList of currently available `tasks`:" << std::endl;
   for( const auto& c : parent->tasks)  {
-    std::cout << " > " << c.second->getCmd() << ": " << c.second->getDescr() << std::endl;
+    std::cout << " > " << c.second->getCommandString() << ": " << c.second->getDescription() << std::endl;
   }
 
   std::cout << "Simply type a `task` and follow its instructions :)\n" << std::endl;
@@ -22,5 +22,8 @@ int HelpTask::Start()
   return 1;
 }
 
-
+int HelpTask::startInteractive()
+{
+  return 1;
+}
 

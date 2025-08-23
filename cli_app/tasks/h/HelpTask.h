@@ -7,5 +7,6 @@ public:
   HelpTask(std::string cmd, SongBookApp* parent) 
     : Task<SongBookApp>(cmd, parent) {};
 
-int Start() override;
+  int startInteractive() override;
+  int executeCommand() override;
 };

@@ -5,21 +5,43 @@
 #include "SongBookApp.h"
 
 
-int SortTask::Start()
+int SortTask::executeCommand()
+{
+  if (argumentExists("-criteria", true))  {
+    std::string criteria = getArgument("-criteria").values[0];
+
+    return parent->getDatabase()->changeOrder(criteria);
+  }
+  else  {
+    return 2;
+  }
+  return 0;
+}
+
+int SortTask::startInteractive()
 {
   std::string criteria;
 
-  std::cout << "Type a sorting criteria\n\t>>";
-  std::getline(std::cin, criteria);
+  parent->printInteractive("Type a sorting criteria");
+  criteria = parent->getInput(1);
 
-  int i = parent->getDatabase()->sort(criteria);
-
-  if (!i)  {
-    std::cout << "Sort made succesfully..." << std::endl;
-  }  
-  else  {
-    std::cout << "Unavailable sort criteria..." << std::endl;
+  if (criteria != "")  {
+    std::vector<std::string> s = {criteria};
+    updateArgument("-criteria", {false, s});
   }
 
   return 0;
+}
+
+void SortTask::endInteractive(int error_code)
+{
+  if (!error_code)  {
+    parent->printInteractive("Sort has been made succesfully!", 1);
+  }
+  else if (error_code == 1)  {
+    parent->printInteractive("This sorting criteria does not exist!", 1);
+  }
+  else if (error_code == 2)  {
+    parent->printInteractive("Argument -criteria is empty!", 1);
+  }
 }

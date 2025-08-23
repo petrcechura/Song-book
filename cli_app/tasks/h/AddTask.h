@@ -16,5 +16,7 @@ class AddTask : public Task<SongBookApp>
     const int NAME_WIDTH = 30;
     const int AUTHOR_WIDTH = 30;
 
-    int Start() override;
+    int startInteractive() override;
+    int executeCommand() override;
+    void endInteractive(int error_code) override;
 };

@@ -4,10 +4,10 @@
 #include <iomanip>
 #include "LatexTask.h"
 #include "SongBookApp.h"
+#include "json.hpp"
 
-int LatexTask::Start()
+int LatexTask::executeCommand()
 {
-  using json_t = nlohmann::json;
 
   const int SONGS_PER_PAGE = 25;
 
@@ -70,16 +70,26 @@ int LatexTask::Start()
   file << title_page;
   file << table_begin;
 
-	json_t data = parent->getDatabase()->getJson();
-  for (int i = 0; i < parent->getDatabase()->getSongCount(); i++)  {
+	nlohmann::json data = parent->getDatabase()->getJson();
 
-    const auto& song = parent->getDatabase()->getSong(i);
-    file << i << " & " << song->getName(true) << " & " << song->getAuthor(true) << R"( \\)";
+  int i = 0;
+  std::string title;
+	std::string artist;
+	std::string id;
+  for (const auto& song : data)  {
+    title = song.count("TITLE") ? song.at("TITLE") : "NULL";
+    artist = song.count("ARTIST") ? song.at("ARTIST") : "NULL";
+    file  << i 
+          << " & " << title
+          << " & " << artist 
+          << R"( \\)";
 
     if (i % SONGS_PER_PAGE == 0 && i > 0 && i < parent->getDatabase()->getSongCount()-1)  {
       file << table_end;
       file << table_begin;
     }
+
+    i++;
   }
   file << table_end;
   file << ending;
