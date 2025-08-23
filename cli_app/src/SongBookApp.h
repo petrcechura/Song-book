@@ -1,7 +1,7 @@
 #include <string>
 #include <filesystem>
 #include <iostream>
-#include "Database.h"
+#include "SongDatabase.h"
 #include "cmdapputils.h"
 #include "json.hpp"
 
@@ -11,15 +11,15 @@
 #define TITLE_WIDTH 30
 #define ARTIST_WIDTH 30
 
-/** A specific implementation of `CmdApp` class, `SongBookApp` the main class that provides
+/** A specific implementation of `CommandServer` class, `SongBookApp` the main class that provides
  *  API to start/stop Command-line application where tasks can be called, thus
  *  allowing to indirectly work with a *songbook* database.
  *
  *  New tasks (`Task`) can be simply added via specific methods and their behaviour is encapsulated
  *  so they can be managed/deleted/added independetly. */
-class SongBookApp : public Cmd
+class SongBookApp : public CommandServer
 {
-  using Cmd::Cmd;
+  using CommandServer::CommandServer;
 
   friend class HelpTask;
 
@@ -33,9 +33,13 @@ class SongBookApp : public Cmd
      *  TODO: This is wrong, database shall **NOT** be accessable via API.
      *        Contemplate a way how to allow only tasks to operate with database
      *        (and maybe only a certain ones)*/
-    Database* getDatabase() { return database; };
+    SongDatabase* getDatabase() { return database; };
 
     static void printSong(const std::string& id, const std::string& name, const std::string& author);
+    static void printSongListHeader();
+    static void printSongListBottom();
+
+    static void printInteractive(const std::string& text, unsigned int indentation=0, bool newline=true);
 
     /** This function returns number of characters inside string variable, regardless of character format (UNICODE/ASCII) */
     static inline int countStringChars(const std::string& _str);
@@ -56,7 +60,7 @@ class SongBookApp : public Cmd
     // DATABASE MANAGEMENT
     //====================
     /** songbook database instance */ 
-    Database* database;
+    SongDatabase* database;
 
     std::string order = "ID";
 

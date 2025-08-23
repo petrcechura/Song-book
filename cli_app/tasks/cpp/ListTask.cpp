@@ -6,18 +6,11 @@
 #include "SongBookApp.h"
 #include "json.hpp"
 
-int ListTask::Start(bool interactive)
+int ListTask::executeCommand()
 { 
 	nlohmann::json data = parent->getDatabase()->getJson();
 
-	std::cout << std::string(4 + TITLE_WIDTH + ARTIST_WIDTH, '+')
-			  << std::endl;	
-	std::cout << std::setw(4) << std::left << "ID"
-			  << std::setw(TITLE_WIDTH) << "Title "
-			  << std::setw(ARTIST_WIDTH) << "Artist "
-			  << std::endl;
-	std::cout << std::string(4 + TITLE_WIDTH + ARTIST_WIDTH, '+')
-			  << std::endl;
+	parent->printSongListHeader();
 	
 	for(const auto& [key, item] : data.items())  {
 		std::string title = item.count("TITLE") ? item.at("TITLE") : "NULL";
@@ -26,8 +19,7 @@ int ListTask::Start(bool interactive)
     	SongBookApp::printSong(id, title, artist);
 	}
 
-	std::cout << std::string(4 + TITLE_WIDTH + ARTIST_WIDTH, '+')
-			  << std::endl;
+	parent->printSongListBottom();
 
 	return 0;
 }

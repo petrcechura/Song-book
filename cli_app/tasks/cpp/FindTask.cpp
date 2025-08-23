@@ -5,36 +5,39 @@
 #include "SongBookApp.h"
 #include "json.hpp"
 
-int FindTask::Start(bool interactive)
+int FindTask::startInteractive()
 {
   using json_t = nlohmann::json;
   
   std::string regex;
   json_t data;
 
-  std::cout << "Type a pattern to find\n\t>>";
+  parent->printInteractive("Type a pattern to find");
   std::getline(std::cin, regex);
-  
-  data = parent->getDatabase()->findSong(regex);
 
-  std::cout << "Matched songs:" << std::endl;
-  std::cout << data.dump() << std::endl;
+  std::vector<std::string> v = {regex};
+  this->updateArgument("-pattern", {false, v});
 
-  std::cout << std::string(4 + TITLE_WIDTH + ARTIST_WIDTH, '+')
-			  << std::endl;	
-	std::cout << std::setw(4) << std::left << "ID"
-			  << std::setw(TITLE_WIDTH) << "Title "
-			  << std::setw(ARTIST_WIDTH) << "Artist "
-			  << std::endl;
-	std::cout << std::string(4 + TITLE_WIDTH + ARTIST_WIDTH, '+')
-			  << std::endl;
+  return 0;
+}
 
-	for(const auto& [key, item] : data.items())  {
-    parent->printSong(item.at("ID"), item.at("TITLE"), item.at("ARTIST"));
-	}
+int FindTask::executeCommand()
+{
+  if (this->argumentExists("-pattern", true))  {
+    arg_store_t a = this->getArgument("-pattern");
+    nlohmann::json data = parent->getDatabase()->findSong(a.values[0]);
 
-  std::cout << std::string(4 + TITLE_WIDTH + ARTIST_WIDTH, '+')
-	  	  << std::endl;
+    parent->printInteractive("Matched songs");
+    parent->printSongListHeader();
+    for(const auto& [key, item] : data.items())  {
+      parent->printSong(item.at("ID"), item.at("TITLE"), item.at("ARTIST"));
+	  }
+    parent->printSongListBottom();
+    return 0;
+  }
+  else {
+    return 1;
+  }
 
   return 0;
 }

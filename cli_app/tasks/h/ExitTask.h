@@ -9,6 +9,6 @@ public:
   ExitTask(std::string cmd, SongBookApp* parent) 
     : Task<SongBookApp>(cmd, parent) {};
 
-int Start(bool interactive) override;
+  int executeCommand() override;
 
 };

@@ -4,7 +4,7 @@
 #include "ExitTask.h"
 #include "SongBookApp.h"
 
-int ExitTask::Start(bool interactive)
+int ExitTask::executeCommand()
 {
   parent->stopLoop();
   return 0;

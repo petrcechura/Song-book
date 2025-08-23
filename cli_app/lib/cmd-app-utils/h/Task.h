@@ -8,6 +8,12 @@
 #ifndef TASK_H
 #define TASK_H
 
+struct arg_store_t
+{
+    bool isTrue;
+    std::vector<std::string> values;
+};
+
 /** Default `TaskBase` implementation and a natural top-class to all `Task` subclasses. This
  *  class provides default method implementations for `TestBase`
  *  and introduces `template` methods, used in top-level class `CmdApp`
@@ -19,35 +25,41 @@ class Task : public TaskBase
   public:
     Task(
         /** A command string for which this task should be called inside main loop */
-        std::string cmd,
+        std::string command_string,
         /** A reference to a parent class */
         t_cmd* parent,
         /** A description to be printed when calling `help` */
-        std::string descr="no description provided");
+        std::string description="no description provided");
     
     /** 
      *  Starts the interactive (CLI) approach to obtain all required arguments for task execution.
      */
     int startInteractive() override;
+
+    void endInteractive(int error_code) override;
     
     /** An aux. setter for a description */
-    void setDescr(std::string d) { this->descr = d; };
+    void setDescription(std::string d) { this->description = d; };
     
     /** A getter for `cmd` string */
-    std::string getCmd() override { return cmd; };
+    std::string getCommandString() override { return command_string; };
     /** A getter for a description */
-    std::string getDescr() override { return descr; };
+    std::string getDescription() override { return description; };
     
-    /** Assigns new argument for a task to be used after the command name to specify additional actions
+    /** Assigns argument for a task to be used after the command name to specify additional actions
      *  @param arg
-     *  Specifies the argument name. Either -<arg> or --<arg> can be later used.
+     *  Specifies the argument name. Use "-<arg>" syntax.
+     *  @param arg_contents
+     *  (optional) Assign values to the argument. If not specified, default {false, null} are used.
+     *  @param forceCreate
+     *  If argument with specified name does now exist, it's created unless this option is false (default true).
     */
-    int addArg(std::string arg);
+    int updateArgument(std::string arg, arg_store_t arg_contents={false, {}}, bool forceCreate=true);
     
     /** 
      *  Executes this task. For execution, arguments obtained via `Start` (interactive) or `parseCommand` (non-interactive) are used.
      */
-    int executeCommand();
+    int executeCommand() override;
     
     /** Attempts to parse a command line string (arguments separation) and stores its contents into this class.
      * 
@@ -56,36 +68,31 @@ class Task : public TaskBase
      *  @param
      *  A command line string with this syntax: <cmd_name> -<arg1> <arg_values1> -<arg2> <arg_values2> ...
      * */
-    int parseCommand(std::string cmd_line);
+    int parseCommand(std::string cmd_line) override;
 
     /** Clears all available arguments into their default state. */
-    void clearArgs();
+    void clearArguments();
+
+    bool argumentExists(const char* arg, bool checkIfValExists=false);
 
   protected:
     t_cmd* parent;
-    std::string cmd;
-    std::string descr;
-
-    struct arg_store_t
-    {
-        bool isTrue;
-        char** values;
-    };
+    std::string command_string;
+    std::string description;
     
-    std::map<std::string, arg_store_t> args;
+    std::map<std::string, arg_store_t> arguments;
 
-    /** This function returns true when `arg` has been specified via `execCmd` function. When argument contains additional values
-     *  too, they're returned via `values`.
+    /** This function returns arg_store_t object of specified argument. If the argument does not exist, null is returned
      */
-    bool getArg(const char* arg, char** values = nullptr);
+    arg_store_t getArgument(const char* arg);
 };
 
 template<class t_cmd>
 Task<t_cmd>::Task(std::string cmd, t_cmd* parent, std::string descr)
 {
-    this->cmd = cmd;
+    this->command_string = cmd;
     this->parent = parent;
-    this->descr = descr;
+    this->description = descr;
 }
 
 template<class t_cmd>
@@ -95,17 +102,34 @@ int Task<t_cmd>::startInteractive()
 }
 
 template<class t_cmd>
-int Task<t_cmd>::addArg(std::string arg)
+void Task<t_cmd>::endInteractive(int error_code)
 {
-    arg_store_t arg_store = {false, nullptr};
-    this->args[arg] = arg_store;
+    // Default does nothing
+}
+
+template<class t_cmd>
+int Task<t_cmd>::updateArgument(std::string arg, arg_store_t arg_contents, bool forceCreate)
+{
+    if (this->arguments.count(arg))  {
+        this->arguments.at(arg) = arg_contents;
+        return 0;
+    } 
+    else if (forceCreate)  {
+        this->arguments.insert({arg, arg_contents});
+        return 0;
+    }
+    else  {
+        return 1;
+    }
     return 0;
 }
+
+
 
 template<class t_cmd>
 int Task<t_cmd>::parseCommand(std::string cmd_line)
 {
-    std::istringstream iss(cmd);
+    std::istringstream iss(command_string);
     std::string word;
     std::string curr_arg;
 
@@ -113,7 +137,7 @@ int Task<t_cmd>::parseCommand(std::string cmd_line)
     int i;
     while (iss >> word)  {
       if (first)  {
-        if (this->cmd != word)  {
+        if (this->command_string != word)  {
           return 1;
         }
 
@@ -125,37 +149,49 @@ int Task<t_cmd>::parseCommand(std::string cmd_line)
               word.erase(0,1);
           }
           curr_arg = word;
-          if (this->args.count(word))  {
-            this->args.at(curr_arg).isTrue = true;
+          if (this->arguments.count(word))  {
+            this->arguments.at(curr_arg).isTrue = true;
             
           }
           i = 0;
       }
 
       else  {
-          if (this->args.count(word))  {
-            this->args.at(curr_arg).values[i++] = word.data();
+          if (this->arguments.count(word))  {
+            this->arguments.at(curr_arg).values[i++] = word.data();
           }
       }
     }
 
-    clearArgs();
-
     return 0;
-
-    
 }
 
 template<class t_cmd>
-bool Task<t_cmd>::getArg(const char* arg, char** values)
+int Task<t_cmd>::executeCommand()
 {
-    if (this->args.count(arg))  {
-        if (this->args.at(arg).values != nullptr)  {
-            values = this->args.at(arg).values;
-            return true;
+    return 0;
+}
+
+template<class t_cmd>
+arg_store_t Task<t_cmd>::getArgument(const char* arg)
+{
+    if (this->arguments.count(arg))  {
+        return this->arguments.at(arg);
+    }
+    else  {
+        return {};
+    }
+}
+
+template<class t_cmd>
+bool Task<t_cmd>::argumentExists(const char* arg, bool checkIfValExists)
+{   
+    if (this->arguments.count(arg))  {
+        if (checkIfValExists)  {
+            return (this->arguments.at(arg).values.size() > 0);
         }
         else  {
-            return this->args.at(arg).isTrue;
+            return true;
         }
     }
     else  {
@@ -164,9 +200,9 @@ bool Task<t_cmd>::getArg(const char* arg, char** values)
 }
 
 template<class t_cmd>
-void Task<t_cmd>::clearArgs()
+void Task<t_cmd>::clearArguments()
 {
-    for (auto it = args.begin(); it != args.end(); it++)
+    for (auto it = arguments.begin(); it != arguments.end(); it++)
     {
         it->second.isTrue = false;
         it->second.values = nullptr;

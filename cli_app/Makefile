@@ -1,11 +1,13 @@
-SOURCES=src/Database.cpp lib/cmd-app-utils/cpp/TaskBase.cpp \
-			  lib/cmd-app-utils/cpp/Task.cpp lib/cmd-app-utils/cpp/Cmd.cpp \
+SOURCES=src/SongDatabase.cpp lib/cmd-app-utils/cpp/TaskBase.cpp \
+			  lib/cmd-app-utils/cpp/Task.cpp lib/cmd-app-utils/cpp/CommandServer.cpp \
 			  $(foreach TASK,$(wildcard tasks/cpp/*.cpp), $(TASK)) \
 			  src/SongBookApp.cpp src/main.cpp
 OUTPUT_FILE=songbook.out
 H_FILES=lib/json/json.hpp lib/argparse/argparse.hpp
 
 H_DIRS=lib/json src lib/cmd-app-utils tasks/h lib/cmdapp tasks
+
+COMPILER=g++ -std=c++20 
 
 # shall be overriden in CLI 
 TASK_NAME?=
@@ -17,7 +19,7 @@ all: gen_tasks compile link run
 
 .PHONY: compile-lib
 compile-lib:
-	@g++ -c $(H_FILES) -B $(H_DIRS)
+	@$(COMPILER) -c $(H_FILES) -B $(H_DIRS)
 
 .PHONY: create_task
 create_task:
@@ -58,7 +60,7 @@ gen_tasks:
 # TODO
 .PHONY: lib
 lib:
-	g++ -shared $(H_FILES) Song.cpp Database.cpp -o Database.so
+	$(COMPILER) -shared $(H_FILES) Song.cpp Database.cpp -o Database.so
 
 .PHONY: build
 build: compile-lib compile link
@@ -70,10 +72,10 @@ debug: compile-with-debug link
 
 .PHONY: run
 run:
-	@./$(OUTPUT_FILE)
+	@./$(OUTPUT_FILE) -loop true
 
 compile:
-	@g++ $(foreach hdir,$(H_DIRS),-I $(hdir)) -c $(SOURCES) -lcurl -l sqlite3
+	@$(COMPILER) $(foreach hdir,$(H_DIRS),-I $(hdir)) -c $(SOURCES) -lcurl -l sqlite3
 
 .PHONY: clean
 clean:
@@ -94,5 +96,5 @@ bin:
 	@cp $(OUTPUT_FILE) /usr/local/bin/songbook
 
 link:
-	@g++ $(foreach file, $(SOURCES), $(notdir $(basename $(file)).o)) -o $(OUTPUT_FILE) -lcurl -l sqlite3
+	@$(COMPILER) $(foreach file, $(SOURCES), $(notdir $(basename $(file)).o)) -o $(OUTPUT_FILE) -lcurl -l sqlite3
 	rm *.o

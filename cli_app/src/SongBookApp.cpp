@@ -9,49 +9,50 @@
 
 SongBookApp::SongBookApp()
 {
-  database = new Database;
+  database = new SongDatabase;
 
   AddTask* add = new AddTask("add", this);
-  add->setDescr("Adds a new song to database");
-  add->addArg("title");
-  add->addArg("artist");
-  add->addArg("force");
+  add->setDescription("Adds a new song to database");
+  add->updateArgument("-title");
+  add->updateArgument("-artist");
+  add->updateArgument("-force");
 
   RemoveTask* remove = new RemoveTask("remove", this);
-  remove->setDescr("Removes a song from database");
+  remove->setDescription("Removes a song from database");
 
   ModifyTask* modify = new ModifyTask("modify", this);
-  modify->setDescr("Modifies song in database");
+  modify->setDescription("Modifies song in database");
 
   HelpTask* help = new HelpTask("help", this);
-  help->setDescr("Shows this message");
+  help->setDescription("Shows this message");
 
   SortTask* sort = new SortTask("sort", this);
-  sort->setDescr("Sorts database by chosen criteria");
+  sort->setDescription("Sorts database by chosen criteria");
 
   FindTask* find = new FindTask("find", this);
-  find->setDescr("Tries to find a song matching given regex");
+  find->setDescription("Tries to find a song matching given regex");
+  find->updateArgument("-pattern");
 
   ListTask* list = new ListTask("list", this);
-  list->setDescr("Shows all songs in a database");
+  list->setDescription("Shows all songs in a database");
 
   LatexTask* latex = new LatexTask("latex", this);
-  latex->setDescr("Exports a database into a LaTeX file");
+  latex->setDescription("Exports a database into a LaTeX file");
 
   ExitTask* exit = new ExitTask("exit", this);
-  exit->setDescr("Exits a program");
+  exit->setDescription("Exits a program");
 
   BackupTask* backup = new BackupTask("backup", this);
-  backup->setDescr("TODO");
+  backup->setDescription("TODO");
 
   FetchTask* fetch = new FetchTask("fetch", this);
-  fetch->setDescr("TODO");
+  fetch->setDescription("TODO");
 
   PushTask* push = new PushTask("push", this);
-  push->setDescr("TODO");
+  push->setDescription("TODO");
 
   TestTask* test = new TestTask("query", this);
-  push->setDescr("TODO");
+  push->setDescription("TODO");
 
   this->addTask(add);
   
@@ -101,7 +102,7 @@ void SongBookApp::stopHook()
 	exit(0);
 }
 
-void SongBookApp::execCommands(std::string cmd_line, bool exitWhenDone)
+void SongBookApp::executeCommands(std::string cmd_line, bool exitWhenDone)
 {
   // TODO this funtion shall parse cmd into chain of tasks with their arguments and then run them.
     std::vector<std::string> cmd_chain;
@@ -115,7 +116,8 @@ void SongBookApp::execCommands(std::string cmd_line, bool exitWhenDone)
     for (const auto& c : cmd_chain)  {
       std::string cmd = c.substr(0, c.find(" "));
       if (this->tasks.count(cmd))  {
-        tasks.at(cmd)->execCmd(c);
+        tasks.at(cmd)->parseCommand(c);
+        tasks.at(cmd)->executeCommand();
       }
       else {
         std::cout << "Unknown command '" << cmd << "'!" << std::endl;
@@ -134,4 +136,31 @@ void SongBookApp::printSong(const std::string& id, const std::string& name, cons
 				    << std::left << SongBookApp::alignString(name, 	' ', TITLE_WIDTH)
 				    << std::left << SongBookApp::alignString(author, ' ', ARTIST_WIDTH)
 				    << std::endl;
+}
+
+void SongBookApp::printSongListHeader()
+{
+  std::cout << std::string(4 + TITLE_WIDTH + ARTIST_WIDTH, '+')
+			  << std::endl;	
+	std::cout << std::setw(4) << std::left << "ID"
+			  << std::setw(TITLE_WIDTH) << "Title "
+			  << std::setw(ARTIST_WIDTH) << "Artist "
+			  << std::endl;
+	std::cout << std::string(4 + TITLE_WIDTH + ARTIST_WIDTH, '+')
+			  << std::endl;
+}
+
+void SongBookApp::printSongListBottom()
+{
+  std::cout << std::string(4 + TITLE_WIDTH + ARTIST_WIDTH, '+') << std::endl;
+}
+
+void SongBookApp::printInteractive(const std::string& text, unsigned int indentation, bool newline)
+{
+  std::string t = "#";
+  t += std::string(indentation, '#');
+  
+  std::cout << t << " " <<  text;
+  if (newline) 
+    std::cout << std::endl;
 }

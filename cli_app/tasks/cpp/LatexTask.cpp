@@ -6,7 +6,7 @@
 #include "SongBookApp.h"
 #include "json.hpp"
 
-int LatexTask::Start(bool interactive)
+int LatexTask::executeCommand()
 {
 
   const int SONGS_PER_PAGE = 25;

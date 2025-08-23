@@ -14,9 +14,10 @@
 class TaskBase {
   public:
     virtual int startInteractive() = 0;
+    virtual void endInteractive(int error_code) = 0;
     virtual ~TaskBase() = default;
-    virtual std::string getCmd() = 0;
-    virtual std::string getDescr() = 0;
+    virtual std::string getCommandString() = 0;
+    virtual std::string getDescription() = 0;
     virtual int parseCommand(std::string cmd_line = "") = 0;
     virtual int executeCommand() = 0;
 };

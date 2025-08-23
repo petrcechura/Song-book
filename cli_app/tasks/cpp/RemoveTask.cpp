@@ -1,43 +1,72 @@
 #include <string>
 #include <iostream>
 #include <iomanip>
+#include <format>
 #include "RemoveTask.h"
 #include "json.hpp"
 #include "SongBookApp.h"
 
+int RemoveTask::executeCommand()
+{
+	if (argumentExists("-id", true))  {
+		std::string str_id = getArgument("-id").values[0];
+		int id;
+		
+		try {
+			id = std::stoi(str_id);
+		}
+		catch (const std::invalid_argument& e)  {
+			return 1;
+		}
+		if (parent->getDatabase()->songExists(id))  {
+ 			return parent->getDatabase()->removeSong(id);
+		}
+		else {
+			return 2;
+		}
 
-int RemoveTask::Start(bool interactive)
+	}
+	else {
+		return 3;
+	}
+
+	return 1;
+}
+
+int RemoveTask::startInteractive()
 {
 	std::string str_id;
-	std::cout << "Type an ID of song you want to modify\n\t>>";
-	std::getline(std::cin, str_id);
-
 	int id;
+	parent->printInteractive("Type an ID of song you wish to remove");
+	str_id = parent->getInput(1);
 
   	if (str_id == std::string(1,parent->getExitChar()))  {
     	return 0;
   	}
-
-	try {
-		id = std::stoi(str_id);
-	}
-	catch (const std::invalid_argument& e)  {
-		std::cout << "'" << str_id << "' does not contain valid ID to parse!" << std::endl;
-		return 1;
-	}
-
-	nlohmann::json song = parent->getDatabase()->getSong(id);
-	int exit = parent->getDatabase()->removeSong(id);
-	
-	if (exit == 0)  { 	
-		std::cout << "Song " << (song.count("TITLE") ? song.at("TITLE") : "NULL") << " removed..." << std::endl;
-	}
-	else if (exit == 1)  {
-		std::cout << "Song with ID " << id << " does not exist!" << std::endl;
-	}
-	else if (exit == 2)  {
-		std::cout << "FATAL ERROR: There are two songs with same ID!" << std::endl;
+	else {
+		try {
+			id = std::stoi(str_id);
+		}
+		catch (const std::invalid_argument& e)  {
+			parent->printInteractive(std::format("'{}' does not contain valid ID to parse!", str_id), 1);
+			return 1;
+		}
+		std::vector<std::string> s = {str_id.data()};
+		updateArgument("-id", {false, s});
 	}
 
-	return exit;
+	return 1;
+}
+
+void RemoveTask::endInteractive(int error_code)
+{
+	if (!error_code)  {
+		parent->printInteractive("Song has been succesfully removed...", 1);
+	}
+	else if (error_code==2)  {
+		parent->printInteractive("Song with this ID does not exist!", 1);
+	}
+	else if (error_code==1)  {
+		parent->printInteractive("Error processing -id as argument...", 1);
+	}
 }
