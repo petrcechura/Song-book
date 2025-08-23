@@ -40,7 +40,7 @@ int main(int argc, char* argsv[])
   // argument -cmd
   // *************
   if (args.count("-cmd"))  {
-    app.execCmd(args.at("-cmd"));
+    app.executeCommands(args.at("-cmd"));
   }
 
 

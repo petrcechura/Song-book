@@ -19,15 +19,18 @@ SongBookApp::SongBookApp()
 
   RemoveTask* remove = new RemoveTask("remove", this);
   remove->setDescription("Removes a song from database");
+  remove->updateArgument("-id");
 
   ModifyTask* modify = new ModifyTask("modify", this);
   modify->setDescription("Modifies song in database");
+  modify->updateArgument("-id");
 
   HelpTask* help = new HelpTask("help", this);
   help->setDescription("Shows this message");
 
   SortTask* sort = new SortTask("sort", this);
   sort->setDescription("Sorts database by chosen criteria");
+  sort->updateArgument("-criteria");
 
   FindTask* find = new FindTask("find", this);
   find->setDescription("Tries to find a song matching given regex");
@@ -55,7 +58,6 @@ SongBookApp::SongBookApp()
   push->setDescription("TODO");
 
   this->addTask(add);
-  
   this->addTask(remove);
   this->addTask(modify);
   this->addTask(help);
@@ -102,30 +104,32 @@ void SongBookApp::stopHook()
 	exit(0);
 }
 
-void SongBookApp::executeCommands(std::string cmd_line, bool exitWhenDone)
+void SongBookApp::executeCommands(std::string commands_string, bool exitWhenDone)
 {
-  // TODO this funtion shall parse cmd into chain of tasks with their arguments and then run them.
-    std::vector<std::string> cmd_chain;
-    int pos = 0;
-    while(pos < cmd_line.size()){
-      pos = cmd_line.find(";");
-      cmd_chain.push_back(cmd_line.substr(0,pos));
-      cmd_line.erase(0,pos+1);
-    }
-    
-    for (const auto& c : cmd_chain)  {
-      std::string cmd = c.substr(0, c.find(" "));
-      if (this->tasks.count(cmd))  {
-        tasks.at(cmd)->parseCommand(c);
-        tasks.at(cmd)->executeCommand();
+    std::vector<std::string> commands_vec;
+    std::string command;
+
+    // gather all commands into vector
+    for (int i = 0; i < commands_string.size(); i++)  {
+      if (commands_string[i] == ';')  {
+        if (!command.empty())  {
+          commands_vec.push_back(command);
+          command.clear();
+        }
       }
       else {
-        std::cout << "Unknown command '" << cmd << "'!" << std::endl;
+        command += commands_string[i];
       }
     }
+    if (!command.empty())  {
+      commands_vec.push_back(command);
+    }
 
-  if (exitWhenDone)  {
-  }
+    for (const auto& c : commands_vec)  {
+      if (executeTaskString(c))  {
+        std::cout << "Could not execute command '" << c << "'" << std::endl;
+      }
+    }
 }
 
 

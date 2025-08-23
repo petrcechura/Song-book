@@ -9,7 +9,7 @@
  *
  *  `TaskBase` is immediately inherited by `Task` class, which is fairly similar class expect
  *  for the fact its a *template class*. The intent of having these two similar classes is to
- *  differ *template* and *non-template* methods, which greetly simplifes further management.
+ *  differ *template* and *non-template* methods, which greatly simplifes further management.
  */
 class TaskBase {
   public:

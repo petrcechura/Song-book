@@ -18,8 +18,8 @@ int ModifyTask::executeCommand()
 		
 		if (parent->getDatabase()->songExists(id))  {
 			nlohmann::json song = parent->getDatabase()->getSong(id);
-			song["TITLE"] = getArgument("-title").values[0];
-			song["ARTIST"] = getArgument("-artist").values[0];
+			song["TITLE"] = values2string(getArgument("-title"));
+			song["ARTIST"] = values2string(getArgument("-artist"));
 			
 			int exit = parent->getDatabase()->addSong(song.dump(),true);
 			return exit;
