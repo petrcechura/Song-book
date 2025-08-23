@@ -25,7 +25,7 @@ class Task : public TaskBase
   public:
     Task(
         /** A command string for which this task should be called inside main loop */
-        std::string command_string,
+        std::string task_name,
         /** A reference to a parent class */
         t_cmd* parent,
         /** A description to be printed when calling `help` */
@@ -36,13 +36,18 @@ class Task : public TaskBase
      */
     int startInteractive() override;
 
+    /** 
+     *  Executes this task. For execution, arguments obtained via `Start` (interactive) or `parseCommand` (non-interactive) are used.
+     */
+    int executeCommand() override;
+
     void endInteractive(int error_code) override;
     
     /** An aux. setter for a description */
     void setDescription(std::string d) { this->description = d; };
     
     /** A getter for `cmd` string */
-    std::string getCommandString() override { return command_string; };
+    std::string getCommandString() override { return task_name; };
     /** A getter for a description */
     std::string getDescription() override { return description; };
     
@@ -56,10 +61,7 @@ class Task : public TaskBase
     */
     int updateArgument(std::string arg, arg_store_t arg_contents={false, {}}, bool forceCreate=true);
     
-    /** 
-     *  Executes this task. For execution, arguments obtained via `Start` (interactive) or `parseCommand` (non-interactive) are used.
-     */
-    int executeCommand() override;
+
     
     /** Attempts to parse a command line string (arguments separation) and stores its contents into this class.
      * 
@@ -75,9 +77,11 @@ class Task : public TaskBase
 
     bool argumentExists(const char* arg, bool checkIfValExists=false);
 
+    static std::string values2string(arg_store_t arg);
+
   protected:
     t_cmd* parent;
-    std::string command_string;
+    std::string task_name;
     std::string description;
     
     std::map<std::string, arg_store_t> arguments;
@@ -90,7 +94,7 @@ class Task : public TaskBase
 template<class t_cmd>
 Task<t_cmd>::Task(std::string cmd, t_cmd* parent, std::string descr)
 {
-    this->command_string = cmd;
+    this->task_name = cmd;
     this->parent = parent;
     this->description = descr;
 }
@@ -106,6 +110,8 @@ void Task<t_cmd>::endInteractive(int error_code)
 {
     // Default does nothing
 }
+
+
 
 template<class t_cmd>
 int Task<t_cmd>::updateArgument(std::string arg, arg_store_t arg_contents, bool forceCreate)
@@ -129,38 +135,53 @@ int Task<t_cmd>::updateArgument(std::string arg, arg_store_t arg_contents, bool 
 template<class t_cmd>
 int Task<t_cmd>::parseCommand(std::string cmd_line)
 {
-    std::istringstream iss(command_string);
+
+    int word_cnt = 0;
     std::string word;
-    std::string curr_arg;
+    std::string prev_arg;
+    for (int i = 0; i < cmd_line.size(); i++)  {
+        if (cmd_line[i] == ' ' || i == cmd_line.size()-1)  {
+            // when on end of the string, process last character too
+            if (i==cmd_line.size()-1 && cmd_line[i] != ' ')
+                word += cmd_line[i];
 
-    bool first = true;
-    int i;
-    while (iss >> word)  {
-      if (first)  {
-        if (this->command_string != word)  {
-          return 1;
+            // check if cmd_line has valid `task_name`
+            if (word_cnt == 0)  {
+                if (word != this->task_name)  {
+                    return 1;
+                }
+            }
+
+            // previous word was `-argument`
+            else if (word[0] == '-')  {
+                for (const auto s : arguments)  {
+                    std::cout << "key: " << s.first << std::endl;
+                }
+                if (this->argumentExists(word.c_str()))  {
+                    arg_store_t a = {true,{}};
+                    this->updateArgument(word, a, false);
+                    prev_arg = word;
+                }
+                else  {
+                    std::cout << "Argument " << word << " does not exist for " << this->task_name << "!" << std::endl;
+                    return 2;
+                }                
+                
+            }
+            // previous word was `value`
+            else {
+                if (!prev_arg.empty() && this->argumentExists(prev_arg.c_str()))  {
+                    arg_store_t a = this->getArgument(prev_arg.c_str());
+                    a.values.push_back(word);
+                    this->updateArgument(prev_arg, a);
+                }
+            }
+            word.clear();
+            word_cnt++;
         }
-
-        first = false;
-      }
-      else if (word.size() > 1 && word[0] == '-') {
-          word.erase(0,1);
-          if (word.size() > 1 && word[0] == '-')  {
-              word.erase(0,1);
-          }
-          curr_arg = word;
-          if (this->arguments.count(word))  {
-            this->arguments.at(curr_arg).isTrue = true;
-            
-          }
-          i = 0;
-      }
-
-      else  {
-          if (this->arguments.count(word))  {
-            this->arguments.at(curr_arg).values[i++] = word.data();
-          }
-      }
+        else {
+            word += cmd_line[i];
+        }
     }
 
     return 0;
@@ -208,5 +229,24 @@ void Task<t_cmd>::clearArguments()
         it->second.values = nullptr;
     }
 }
+
+template<class t_cmd>
+std::string Task<t_cmd>::values2string(arg_store_t o)
+{
+    std::string s = "";
+    bool first = true;
+    for (const auto& c : o.values)  {
+        if (first)  {
+            s = c;
+            first = false;
+        }
+        else  {
+            s += " " + c;
+        }
+    }
+    return s;
+}
+
+
 
 #endif

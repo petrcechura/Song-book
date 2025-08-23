@@ -8,13 +8,16 @@
 int AddTask::executeCommand()
 {	
 	if (argumentExists("-title", true) && argumentExists("-artist", true))  {
-		arg_store_t t = getArgument("-title");
-		arg_store_t a = getArgument("-artist");
 		
 		nlohmann::json song = nlohmann::json();
-		song["TITLE"] = t.values[0];
-		song["ARTIST"] = a.values[0];
-		return parent->getDatabase()->addSong(song.dump());
+		
+		arg_store_t arg = getArgument("-title");
+		song["TITLE"] = values2string(arg);
+		arg = getArgument("-artist");
+		song["ARTIST"] = values2string(arg);
+		arg = getArgument("-force");
+
+		return parent->getDatabase()->addSong(song.dump(), arg.isTrue);
 	}
 	else {
 		return 1;
@@ -55,6 +58,9 @@ int AddTask::startInteractive()
     	if (response != "y")  {
         	return 2;
     	}
+		else {
+			this->updateArgument("-force", {true, {}});
+		}
   	}
 
 	parent->printInteractive("Type an artist's name");
