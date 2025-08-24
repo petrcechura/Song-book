@@ -4,6 +4,7 @@ SOURCES=src/SongDatabase.cpp lib/cmd-app-utils/cpp/TaskBase.cpp \
 			  src/SongBookApp.cpp src/main.cpp
 OUTPUT_FILE=songbook.out
 H_FILES=lib/json/json.hpp lib/argparse/argparse.hpp
+CONFIG_FILE=config.json
 
 H_DIRS=lib/json src lib/cmd-app-utils tasks/h lib/cmdapp tasks
 
@@ -21,6 +22,7 @@ all: gen_tasks compile link run
 compile-lib:
 	@$(COMPILER) -c $(H_FILES) -B $(H_DIRS)
 
+# TODO old code; refactor
 .PHONY: create_task
 create_task:
 	$(if $(TASK_NAME),,$(error TASK_NAME var empty, cannot create task!))
@@ -72,15 +74,19 @@ debug: compile-with-debug link
 
 .PHONY: run
 run:
-	@./$(OUTPUT_FILE) -loop true
+	@./$(OUTPUT_FILE) $(if $(CONFIG_FILE),-config $(CONFIG_FILE),)
 
+.PHONY: compile
 compile:
 	@$(COMPILER) $(foreach hdir,$(H_DIRS),-I $(hdir)) -c $(SOURCES) -lcurl -l sqlite3
 
 .PHONY: clean
 clean:
-	@rm *.o
-	@rm ./$(OUTPUT_FILE)
+	@rm -f *.o
+	@rm -f ./$(OUTPUT_FILE)
+	@rm -f *.aux
+	@rm -f *.tex
+	@rm -f *.log
 
 .PHONY: doxygen
 doxygen:
@@ -92,7 +98,7 @@ docs:
 	@$(BROWSER) docs/html/index.html
 
 .PHONY: bin
-bin:
+bin: all
 	@cp $(OUTPUT_FILE) /usr/local/bin/songbook
 
 link:

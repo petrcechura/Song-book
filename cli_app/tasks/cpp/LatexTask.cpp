@@ -101,11 +101,14 @@ int LatexTask::executeCommand()
 	
 	file.close();
 
+  /*
   system(std::format("pdflatex -output-directory={} {}", 
             (this->out_path.has_parent_path() ?  this->out_path.parent_path().string() : "."),
             tex_path.string()
           ).c_str());
+*/
 
+  system("vim");
 	return 0;
 }
 

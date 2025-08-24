@@ -5,6 +5,7 @@
 #include "h/ExitTask.h"
 #include "h/FetchTask.h"
 #include "h/FindTask.h"
+#include "h/GatherTask.h"
 #include "h/HelpTask.h"
 #include "h/LatexTask.h"
 #include "h/ListTask.h"

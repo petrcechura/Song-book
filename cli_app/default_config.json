@@ -1,0 +1,16 @@
+{
+  "commons" : {
+    "loop" : true,
+    "cmd" : "",
+    "exit_char" : "-"
+  },
+  "paths" : {
+    "db_file_path"  : "db.sql",
+    "output_file_path" : "pisnickovnik.pdf"
+  },
+  "ai"  :  {
+    "tool" : "",
+    "model" : "gpt-4.1-mini",
+    "api_key" : ""
+  }
+}
