@@ -3,13 +3,25 @@
 #include <iomanip>
 #include <filesystem>
 #include "SongBookApp.h"
+#include "json.hpp"
 #include "tasks.h"
 #include <vector>
 #include "cmdapputils.h"
 
-SongBookApp::SongBookApp()
+SongBookApp::SongBookApp(nlohmann::json _config)
 {
-  database = new SongDatabase;
+  this->config = _config.size()>0 ? _config : nlohmann::json();
+  database = new SongDatabase(this->config);
+
+  if (this->config.contains("commons"))  {
+    if (this->config["commons"].contains("exit_char"))  {
+      this->EXIT_CHAR = this->config["commons"].at("exit_char").get<std::string>()[0];
+    }
+  }
+  else  {
+    this->EXIT_CHAR = '-';
+  }
+
 
   AddTask* add = new AddTask("add", this);
   add->setDescription("Adds a new song to database");
@@ -38,8 +50,13 @@ SongBookApp::SongBookApp()
 
   ListTask* list = new ListTask("list", this);
   list->setDescription("Shows all songs in a database");
-
+  
   LatexTask* latex = new LatexTask("latex", this);
+  if (this->config.contains("paths"))  {
+    if  (this->config["paths"].contains("output_file_path"))  {
+      latex->setOutPath(this->config["paths"].at("output_file_path"));
+    }
+  }
   latex->setDescription("Exports a database into a LaTeX file");
 
   ExitTask* exit = new ExitTask("exit", this);

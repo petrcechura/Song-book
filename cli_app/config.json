@@ -1,0 +1,11 @@
+{
+  "commons" : {
+    "loop" : true,
+    "exit_char" : "-"
+  },
+  "paths" : {
+    "backup_dir" : "backups",
+    "output_file_path" : "backups/pisnickovnik.pdf",
+      "db_file_path" : "db.sql"
+  }
+}

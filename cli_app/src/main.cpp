@@ -1,10 +1,11 @@
 #include "SongBookApp.h"
 #include <map>
+#include <fstream>
+#include "json.hpp"
+
 
 int main(int argc, char* argsv[])
 {
-  SongBookApp app = SongBookApp();
-
 
   // Parse command-line arguments
   std::map<std::string, std::string> args;
@@ -36,13 +37,32 @@ int main(int argc, char* argsv[])
     }
   }
 
+  // ****************
+  // argument -config
+  // ****************
+
+  nlohmann::json data;
+  if (args.count("-config"))  {
+    try {
+      std::ifstream f(args.at("-config"));
+      data = nlohmann::json::parse(f);
+    }
+    catch (const std::exception& e)  {
+      std::cout << "Could not read file '" << args.at("-config") << "'" <<std::endl;
+    }
+  }
+  SongBookApp app = SongBookApp(data);
+
+
   // *************
   // argument -cmd
   // *************
   if (args.count("-cmd"))  {
     app.executeCommands(args.at("-cmd"));
   }
-
+  else if (data.contains("commons") && data["commons"].contains("cmd"))  {
+    app.executeCommands(data["commons"].at("cmd"));
+  }
 
   // *******************
   // argument -loop
@@ -51,12 +71,11 @@ int main(int argc, char* argsv[])
     if (args.at("-loop") == "true")  {
       app.startLoop();
     }
-    else if (args.at("-loop") != "false")  {
-      std::cout << "ERROR: Unknown option '" << args.at("-loop") << "' for '-loop'! Select true/false instead..." << std::endl;
-    }
   }
-  else {
-    app.startLoop();
+  else if (data.contains("commons") && data["commons"].contains("loop"))  {
+    if (data["commons"]["loop"] == true)  {
+      app.startLoop();
+    }
   }
 }
  

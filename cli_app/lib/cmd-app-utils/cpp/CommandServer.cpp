@@ -1,5 +1,6 @@
 #include <string>
 #include <iostream>
+#include "json.hpp"
 #include <sstream>
 #include "../h/CommandServer.h"
 #include "../h/TaskBase.h"
@@ -26,9 +27,21 @@ void CommandServer::unknownInput()
   std::cout << "Unknown input '" << user_input << "'!" << std::endl;
 }
 
+CommandServer::CommandServer(nlohmann::json _config)
+{
+  if (_config)  {
+    if (_config.contains("commons") && _config["commons"].contains("exit_char"))  {
+      this->EXIT_CHAR = _config["commons"].at("exit_char").get<std::string>()[0];
+    }
+    else  {
+      this->EXIT_CHAR = '-';
+    }
+  }
+}
+
 CommandServer::CommandServer()
 {
-
+  
 }
 
 CommandServer::~CommandServer()

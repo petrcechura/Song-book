@@ -1,4 +1,4 @@
-#include "../lib/json/json.hpp"
+#include "json.hpp"
 #include <map>
 #include <vector>
 #include <string>
@@ -10,6 +10,47 @@
 #include "SongDatabase.h"
 
 static std::vector<std::map<std::string, std::string>> sql_contents;
+
+SongDatabase::SongDatabase(nlohmann::json _config)  {
+
+    this->config = (_config.size()>0) ? _config : nlohmann::json();
+
+    std::string db_file_path;
+    if (config.contains("paths")) {
+      if (config["paths"].contains("db_file_path"))  {
+        db_file_path = config["paths"].at("db_file_path");
+      }
+    }
+    else  {
+      db_file_path = "db.sql";
+    }
+
+    int exit = sqlite3_open(db_file_path.c_str(), &DB);
+
+    if (exit) {
+        std::cout << "Couldn't open SQL database `" <<  db_file_path << "`!" << std::endl;
+    }
+    else {
+
+      std::string sql = "CREATE TABLE SONGS(ID INT PRIMARY KEY NOT NULL";
+
+      for (const auto& c : properties)  {
+          sql += ",\n" + c + " TEXT NOT NULL";
+      }
+
+      sql += " );";
+      
+      char* messaggeError;
+      exit = sqlite3_exec(DB, sql.c_str(), NULL, 0, &messaggeError);
+      
+      if (exit == SQLITE_OK) {
+          std::cout << "Could not find SQL database file, created empty one ..." << std::endl;
+          sqlite3_free(messaggeError);
+      }
+    }
+}
+
+
 
 /** Aux. SQL callback function that returns all contents from sql table as vector */
 static int sql_cb(void* data, int argc, char** argv, char** azColName)
@@ -60,33 +101,7 @@ int SongDatabase::changeOrder(std::string order)  {
     return 0;
 }
 
-SongDatabase::SongDatabase(std::string fname, std::string backupDir)  {
-    this->backupDir = backupDir;
 
-    int exit = sqlite3_open(DB_file, &DB);
-
-    if (exit) {
-        std::cout << "Couldn't open SQL database `" << DB_file << "`!" << std::endl;
-    }
-    else {
-
-      std::string sql = "CREATE TABLE SONGS(ID INT PRIMARY KEY NOT NULL";
-
-      for (const auto& c : properties)  {
-          sql += ",\n" + c + "TEXT NOT NULL";
-      }
-
-      sql += " );";
-      
-      char* messaggeError;
-      exit = sqlite3_exec(DB, sql.c_str(), NULL, 0, &messaggeError);
-      
-      if (exit == SQLITE_OK) {
-          std::cout << "Could not find SQL database file, created empty one ..." << std::endl;
-          sqlite3_free(messaggeError);
-      }
-    }
-}
 
 SongDatabase::~SongDatabase()  {
     if (!this) {
@@ -186,8 +201,8 @@ int SongDatabase::addSong(std::string json_string, bool override)  {
 
     std::string query;
 
-    if (songExists(j["TITLE"].get<std::string>(), j["ARTIST"].get<std::string>()))  {
-      nlohmann::json song = getSong(j["TITLE"].get<std::string>(), j["ARTIST"].get<std::string>());
+    if (songExists(j["TITLE"].dump(), j["ARTIST"].dump()))  {
+      nlohmann::json song = getSong(j["TITLE"].dump(), j["ARTIST"].dump());
       if (override)  {
         query = "UPDATE SONGS SET ";
         int i = 0;
@@ -206,12 +221,11 @@ int SongDatabase::addSong(std::string json_string, bool override)  {
     else {
       query = "INSERT INTO SONGS VALUES(" + available_id;
       for (const auto& p : properties) {
-          query += ", '" + j[p].get<std::string>() + "'";
+          query += ", " + j[p].dump() + "";
       }
       query += ");";
     }
 
-    std::cout << query << std::endl;
     int exit = sqlite3_exec(DB, query.c_str(), sql_cb, nullptr, nullptr);
 
     return exit;
@@ -321,12 +335,29 @@ int SongDatabase::makeBackup()
 {
   time_t timestamp;
   time(&timestamp);
+
+  std::string backupDir;
+  
+  
+  if (config.contains("paths") && config["paths"].contains("backup_dir"))  {
+      backupDir = config["paths"].at("backup_dir");
+    }
+    else  {
+      backupDir = ".";
+  }
   
   // TODO make it universal for OS
-  std::string backup_name = this->backupDir + "/" + "backup-" + ctime(&timestamp);
+  std::string backup_name = backupDir + "/" + "backup-" + ctime(&timestamp);
   
+  std::string db_file_path;
+  if (config.contains("paths") && config["paths"].contains("db_file_path"))  {
+    db_file_path = config["paths"].at("db_file_path");
+  }
+  else  {
+    db_file_path = "db.sql";
+  }
   // if the `database file` does not exist, return 1
-  if (!std::filesystem::exists(DB_file))  {
+  if (!std::filesystem::exists(db_file_path))  {
     return 1;
   }
   
@@ -336,7 +367,7 @@ int SongDatabase::makeBackup()
     std::filesystem::create_directories(backupDir);
   }
 
-  std::filesystem::copy_file(DB_file, backup_name);
+  std::filesystem::copy_file(db_file_path, backup_name);
 
   return 0;
 

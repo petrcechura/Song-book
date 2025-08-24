@@ -2,8 +2,11 @@
 #include <iostream>
 #include <fstream>
 #include <iomanip>
+#include <filesystem>
+#include <format>
 #include "LatexTask.h"
 #include "SongBookApp.h"
+#include <map>
 #include "json.hpp"
 
 int LatexTask::executeCommand()
@@ -64,7 +67,9 @@ int LatexTask::executeCommand()
   const char* ending = R"(
     \end{document})";
 
-  std::ofstream file("database.tex");
+  std::filesystem::path tex_path = out_path;
+  tex_path.replace_extension("tex").filename();
+  std::ofstream file(tex_path);
 
   file << header;
   file << title_page;
@@ -80,8 +85,8 @@ int LatexTask::executeCommand()
     title = song.count("TITLE") ? song.at("TITLE") : "NULL";
     artist = song.count("ARTIST") ? song.at("ARTIST") : "NULL";
     file  << i 
-          << " & " << title
-          << " & " << artist 
+          << " & " << getPrintableString(title)
+          << " & " << getPrintableString(artist) 
           << R"( \\)";
 
     if (i % SONGS_PER_PAGE == 0 && i > 0 && i < parent->getDatabase()->getSongCount()-1)  {
@@ -96,7 +101,42 @@ int LatexTask::executeCommand()
 	
 	file.close();
 
-  system("pdflatex database.tex");
+  system(std::format("pdflatex -output-directory={} {}", 
+            (this->out_path.has_parent_path() ?  this->out_path.parent_path().string() : "."),
+            tex_path.string()
+          ).c_str());
 
 	return 0;
 }
+
+
+std::string LatexTask::getPrintableString(std::string str)
+{
+  std::map<char, std::string> special_chars = 
+    {{'&', "\\&"},
+     {'#', "\\#"},
+     {'\'', "\\'"}
+    };
+
+  std::string t;
+  for (const auto& c : str)  {
+    if (special_chars.count(c))  {
+      t += special_chars.at(c);
+    }
+    else  {
+      t += c;
+    }
+  }
+
+  return t;
+}
+
+void LatexTask::setOutPath(std::string out_path) 
+{
+  try {
+    this->out_path = std::filesystem::path(out_path);
+
+    this->out_path.replace_extension("pdf");
+  }
+  catch(const std::exception& e)  {}
+};

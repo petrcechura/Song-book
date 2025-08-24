@@ -3,7 +3,7 @@
 
 #include <vector>
 #include <map>
-#include "../lib/json/json.hpp"
+#include "json.hpp"
 #include <string>
 #include <sqlite3.h>
 
@@ -12,9 +12,8 @@ class SongDatabase
 
     private:
         sqlite3 *DB;
-        const char* DB_file = "db.sql";
-        /** Folder name for backup json files */
-        std::string backupDir;
+        /** config holding paths and other settings for database */
+        nlohmann::json config;
         
         /** Own private implementation of `compare` function, supporting czech characters
          *
@@ -31,7 +30,7 @@ class SongDatabase
 
     public:
 
-        SongDatabase(std::string fname = "database.json", std::string backupDir = "backups");
+        SongDatabase(nlohmann::json _config);
         ~SongDatabase();
 
         int addSong(std::string json_string, bool override=false);
