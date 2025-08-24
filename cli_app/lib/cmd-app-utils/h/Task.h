@@ -155,7 +155,6 @@ int Task<t_cmd>::parseCommand(std::string cmd_line)
             // previous word was `-argument`
             else if (word[0] == '-')  {
                 for (const auto s : arguments)  {
-                    std::cout << "key: " << s.first << std::endl;
                 }
                 if (this->argumentExists(word.c_str()))  {
                     arg_store_t a = {true,{}};

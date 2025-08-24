@@ -26,7 +26,7 @@ class SongBookApp : public CommandServer
   public:
     /** A default contructor that creates a songbook database instance
      *  and adds certains tasks to a *task container* */
-    SongBookApp();
+    SongBookApp(nlohmann::json _config);
     
     /** Returns an instance of a database, allowing tasks to operate with that.
      *
@@ -61,6 +61,7 @@ class SongBookApp : public CommandServer
     //====================
     /** songbook database instance */ 
     SongDatabase* database;
+    nlohmann::json config;
 
     std::string order = "ID";
 

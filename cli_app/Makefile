@@ -63,7 +63,7 @@ lib:
 	$(COMPILER) -shared $(H_FILES) Song.cpp Database.cpp -o Database.so
 
 .PHONY: build
-build: compile-lib compile link
+build: gen_tasks compile-lib compile link
 
 # TODO remove
 .PHONY: debug
