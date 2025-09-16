@@ -10,6 +10,7 @@ class SongBookApp;
 class GatherTask : public Task<SongBookApp>
 {
   public:
+
     GatherTask(std::string cmd, SongBookApp* parent) 
       : Task<SongBookApp>(cmd, parent) {};
  
@@ -17,13 +18,34 @@ class GatherTask : public Task<SongBookApp>
     int executeCommand() override;
     void endInteractive(int error_code) override;
 
-    void setApiKey(std::string api_key);
+    void setAiApiKey(std::string ai_api_key) { this->ai_api_key = ai_api_key; };
+    void setGoogleApiKey(std::string google_api_key) { this->google_api_key = google_api_key; };
+    void setGoogleSearchEngine(std::string google_search_engine) { this->google_search_engine = google_search_engine; };
     void setSongProps(std::string title, std::string artist);
-    void setModel(std::string model) { this->model = model; };
+    void setAiModel(std::string model) { this->model = model; };
+
+    /** Searches Google with songs properties, returns websites that contain song chords */
+    std::string googleSearch(std::string title, std::string artist, int number_of_websites);
+    
+    /** Parses a websites using pandoc tool, returning chords only in plain text */
+    std::string parseWebsite(std::string website_url);
+
+
 
   private:
+
+
+    // Google search related properties
+    std::string google_api_key = "";
+    std::string google_search_engine = "";
+    std::string allowed_urls[2] = {
+      "https://www.velkyzpevnik.cz",
+      "https://pisnicky-akordy.cz"
+    };
+
+    // Ai parsing related properties
     std::string model = "gpt-4.1-mini";
-    std::string api_key = "";
+    std::string ai_api_key = "";
     std::string temp_fp = "";
     std::string ai_prompt = "\
         I want you to read this URL ({}}), containing a song lyrics. If the url is unaccessable, try again, \

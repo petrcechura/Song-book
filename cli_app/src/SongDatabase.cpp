@@ -71,7 +71,9 @@ int SongDatabase::SendQuery(std::string query)  {
     int exit = sqlite3_exec(DB, query.c_str(), sql_cb, 0, &messageError);
 
     std::cout << "exit code: " << exit << std::endl;
-    std::cout << "Message: " << messageError << std::endl;
+    if (!exit)  {
+      std::cout << "Message: " << messageError << std::endl;
+    }
 
     sql_contents.clear();
 
@@ -181,11 +183,11 @@ int SongDatabase::compare(std::string firstString, std::string secondString)  {
 
 int SongDatabase::addSong(std::string json_string, bool override)  {
 
-
     // obtain unique ID
     nlohmann::json sql_json = getSqlJson("SELECT * FROM SONGS ORDER BY ID DESC LIMIT 1;");
     
     std::string available_id = (sql_json.empty()) ? "0" : sql_json[0]["ID"].get<std::string>();
+
     try
     {
       available_id = std::to_string(std::stoi(available_id) + 1);
@@ -196,13 +198,12 @@ int SongDatabase::addSong(std::string json_string, bool override)  {
       return 2;
     }
     
-
     nlohmann::json j = nlohmann::json::parse(json_string);
 
     std::string query;
 
-    if (songExists(j["TITLE"].dump(), j["ARTIST"].dump()))  {
-      nlohmann::json song = getSong(j["TITLE"].dump(), j["ARTIST"].dump());
+    if (j.contains("ID") && songExists(std::stoi(j["ID"].get<std::string>())))  {
+      nlohmann::json song = getSong(std::stoi(j["ID"].get<std::string>()));
       if (override)  {
         query = "UPDATE SONGS SET ";
         int i = 0;
@@ -211,7 +212,7 @@ int SongDatabase::addSong(std::string json_string, bool override)  {
             query += (i++ ? ",\n" : "\n") + p + " = " + j[p].dump();
           }
         }
-        query += "\n WHERE ID=" + std::to_string(song["ID"].get<int>()) + ";";
+        query += "\n WHERE ID=" + song["ID"].get<std::string>() + ";";
       }
       else  {
       // song is already present and override is false, hence don't do anything...

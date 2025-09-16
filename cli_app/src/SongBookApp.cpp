@@ -37,17 +37,27 @@ SongBookApp::SongBookApp(nlohmann::json _config)
   modify->setDescription("Modifies song in database");
   modify->updateArgument("-id");
 
+  
   GatherTask* gather = new GatherTask("gather", this);
   gather->setDescription("Tries to gather lyrics for a song");
   if (this->config.contains("ai"))  {
     if  (this->config["ai"].contains("api_key"))  {
-      gather->setApiKey(this->config["ai"].at("api_key"));
+      gather->setAiApiKey(this->config["ai"].at("api_key"));
     }
     if  (this->config["ai"].contains("model"))  {
-      gather->setModel(this->config["ai"].at("model"));
+      gather->setAiModel(this->config["ai"].at("model"));
+    }
+  }
+  if (this->config.contains("google"))  {
+    if  (this->config["google"].contains("api_key"))  {
+      gather->setGoogleApiKey(this->config["google"].at("api_key"));
+    }
+    if  (this->config["google"].contains("search_engine"))  {
+      gather->setGoogleSearchEngine(this->config["google"].at("search_engine"));
     }
   }
   gather->updateArgument("-id");
+  
 
   HelpTask* help = new HelpTask("help", this);
   help->setDescription("Shows this message");
@@ -99,7 +109,7 @@ SongBookApp::SongBookApp(nlohmann::json _config)
   this->addTask(fetch);
   this->addTask(push);
   this->addTask(test);
-  this->addTask(gather);
+  //this->addTask(gather);
 }
 
 

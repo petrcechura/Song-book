@@ -21,9 +21,10 @@ class SongDatabase
         int compare(std::string firstString, std::string secondString);
         nlohmann::json getSqlJson(std::string query = "");
 
-        std::string properties[2] = {
+        std::string properties[3] = {
                     "TITLE",
-                    "ARTIST"
+                    "ARTIST",
+                    "LYRICS"
         };
 
         std::string order = "ID";

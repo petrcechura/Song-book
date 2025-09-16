@@ -63,8 +63,9 @@ int CommandServer::loop()
     }
     else  {
       if (auto it = tasks.find(user_input); it != tasks.end())  {
-        it->second->startInteractive();
-        it->second->endInteractive(it->second->executeCommand());
+        if (!it->second->startInteractive())  {
+          it->second->endInteractive(it->second->executeCommand());
+        }
       }
       else  {
         unknownInput();

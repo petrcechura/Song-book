@@ -55,7 +55,7 @@ int RemoveTask::startInteractive()
 		updateArgument("-id", {false, s});
 	}
 
-	return 1;
+	return 0;
 }
 
 void RemoveTask::endInteractive(int error_code)

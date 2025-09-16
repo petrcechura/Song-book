@@ -20,7 +20,7 @@ int LatexTask::executeCommand()
 
   const char* header = R"(
     \documentclass[17pt]{memoir}
-    \usepackage[czech]{babel}
+    % \usepackage[czech]{babel}
     \usepackage{bookman}
     \usepackage[none]{hyphenat}
     \usepackage[T1]{fontenc}
@@ -101,14 +101,12 @@ int LatexTask::executeCommand()
 	
 	file.close();
 
-  /*
-  system(std::format("pdflatex -output-directory={} {}", 
+  
+  system(std::format("pdflatex -output-directory={} {} && clear", 
             (this->out_path.has_parent_path() ?  this->out_path.parent_path().string() : "."),
             tex_path.string()
           ).c_str());
-*/
 
-  system("vim");
 	return 0;
 }
 

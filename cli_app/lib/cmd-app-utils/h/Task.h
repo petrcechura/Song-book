@@ -225,7 +225,7 @@ void Task<t_cmd>::clearArguments()
     for (auto it = arguments.begin(); it != arguments.end(); it++)
     {
         it->second.isTrue = false;
-        it->second.values = nullptr;
+        it->second.values = {};
     }
 }
 

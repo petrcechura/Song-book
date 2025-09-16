@@ -56,7 +56,7 @@ int AddTask::startInteractive()
     	std::string response = parent->getInput(1);
 
     	if (response != "y")  {
-        	return 2;
+        	return 3;
     	}
 		else {
 			this->updateArgument("-force", {true, {}});
