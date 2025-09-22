@@ -1,0 +1,11 @@
+import re
+import sys
+import subprocess
+import os
+
+pattern = r'\*([^;#]+);([^#]+)#'
+
+matches = re.findall(pattern, sys.stdin.read())
+
+for pair in matches:
+    os.system("./songbook.out -loop false -cmd \"add -title " + pair[0] + " -artist " + pair[1] + "\"")

@@ -1,0 +1,23 @@
+{
+  "commons" : {
+    "loop" : true,
+    "cmd" : "",
+    "exit_char" : "-",
+    "google_api" : ""
+  },
+  "paths" : {
+    "db_file_path"  : "db.sql",
+    "output_file_path" : "pisnickovnik.pdf",
+    "songs_dir" : "songs"
+  },
+  "google": {
+    "api_key" : "",
+    "search_engine" : ""
+  },
+  "ai"  :  {
+    "tool" : "",
+    "model" : "gpt-4.1-mini",
+    "api_key" : ""
+  }
+
+}
