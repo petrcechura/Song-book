@@ -21,6 +21,7 @@ size_t write_cb(void* contents, size_t size, size_t nmemb, void* userp) {
     return size * nmemb;
 }
 
+// Aux. command that calls a system command and returns its output as an std::string 
 std::string execSystemCommand(const char* cmd) {
     std::array<char, 1000> buffer;
     std::string result;
@@ -70,17 +71,9 @@ int GatherTask::executeCommand()
 		return NO_ID;
 	}
 
-	std::string lyrics;
-
-	int err = searchForLyrics(lyrics, song["TITLE"], song["ARTIST"]);
-
-	std::cout << lyrics << std::endl;
-	if (err == SUCCESS)  {
-		//std::cout << websites;
-	}
-
-	return SUCCESS;
-	// parent->getDatabase()->addSong(song.dump(), success)
+	int err = searchForLyrics(song["TITLE"], song["ARTIST"]);
+	
+	return err;
 }
 
 int GatherTask::parseByAi(std::string to_parse, std::string& from_ai)
@@ -91,42 +84,28 @@ int GatherTask::parseByAi(std::string to_parse, std::string& from_ai)
 	nlohmann::json song;
 
 	std::ostringstream query;
-	
-	query  << "I want you to take these lyrics with chords "
-	       << "and parse them into a different syntax with the following rules:\n"
-	       << "- Each chord line belongs to the lyric line directly below it.\n"
-	       << "- Move each chord so it appears immediately before the next lyric word.\n"
-	       << "- Wrap each chord in backticks (e.g., `Emi`).\n"
-	       << "- Remove the original chord lines.\n"
-	       << "- Verse begins with number and dot (e.g., '1. ...').\n"
-	       << "- Chorus begins with '>' (e.g., '> ...').\n"
-	       << "- Preserve newlines.\n"
-	       << "- Output only the transformed lyrics, nothing else, inside a code block.\n\n"
-	       << "```input\n"
-	       << to_parse
-	       << "\n```";
 
 	nlohmann::json prompt_json = {
     	{"model", this->model},
     	{"messages", {
         	{{"role", "system"},
          		{"content", 
-					"You are a strict formatter. \
+					"You are a strict formatter for songbook application. Input is lyrics with chords, you parse it into different syntax.\
 						Always preserve newlines. \
+						Syntax rules: \
 						Chords in the input are written on a separate line above the lyrics. \
 						For each pair (chord line + lyric line): \
 						- Read the chord line left to right. \
-						- Insert each chord immediately before the next word in the lyric line. \
+						- Insert each chord on lyrics line, on exactly same position as it is in chord line \
 						- Wrap the chord in backticks. (i.e. `Ami`) \
 						- After inserting all chords, remove the separate chord line. \
 						Rules: \
 						1. Verse begins with number and dot (e.g., '1. ...'). \
 						2. Chorus begins with '>' (e.g., '> ...'). \
 						3. Preserve lyric words and line breaks exactly. \
-						4. Output only the transformed lyrics, no explanations. \
-						5. Return everything inside a single fenced code block."}},
+						4. Output only the transformed lyrics, no explanations"}},
             	{{"role", "user"},
-            	{"content", query.str()}}
+            	{"content", to_parse}}
     		}}
 	};
 	std::string prompt = prompt_json.dump();
@@ -150,7 +129,7 @@ int GatherTask::parseByAi(std::string to_parse, std::string& from_ai)
 		std::cout << "Parsing by AI (" << this->model << ")" << std::endl;
         err_code = curl_easy_perform(curl);
         if(err_code != CURLE_OK)
-            fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(err_code));
+            return CURL_ERROR;
 
         curl_easy_cleanup(curl);
         curl_slist_free_all(headers);
@@ -242,7 +221,7 @@ void GatherTask::endInteractive(int error_code)
 		nlohmann::json song = parent->getDatabase()->getSong(id);
 
 		parent->printInteractive("Found these lyrics...", 1);
-		std::cout << song["LYRICS"] << std::endl;
+		std::cout << this->lyrics_reg << std::endl;
 
 		parent->printInteractive("Do you wish to edit lyrics before saving? (y/n)", 1);
 		std::string response = parent->getInput(1);
@@ -266,8 +245,7 @@ void GatherTask::endInteractive(int error_code)
 
 }
 
-int GatherTask::searchForLyrics(std::string& lyrics, 
-							 	std::string title, 
+int GatherTask::searchForLyrics(std::string title, 
 							 	std::string artist, 
 							 	int number_of_websites)
 {
@@ -314,7 +292,7 @@ int GatherTask::searchForLyrics(std::string& lyrics,
 							return PARSE_WEBSITE_FAILED;;
 						}
 
-						return parseByAi(raw_lyrics, lyrics);
+						return parseByAi(raw_lyrics, this->lyrics_reg);
 					}
 				}
     		}

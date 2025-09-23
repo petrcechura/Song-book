@@ -11,7 +11,7 @@ An SQL-based song database CLI application, able to:
   * curl (8.16)
   * make (4.3)
   * pdflatex
-
+  * pandoc
 ## How to build an app
 ### Linux
 ```
@@ -45,4 +45,10 @@ make run
 To exit this interactive mode, type '-' (or different character specified in `CONFIG_FILE` under `commons/exit_char`).
 
 ## Tasks
-TODO
+*TODO Add proper description of all tasks available (interactive and batch mode)*
+
+# TODO
+  [ ] Refactor code into Cmake project management (instead of Makefile)
+  [ ] Comment out all functions and task
+  [ ] Allow arguments in interactive mode too
+  [ ] Add proper error handling to all tasks

@@ -32,8 +32,7 @@ class GatherTask : public Task<SongBookApp>
     std::string curlQuery(const char* query);
 
     /** Searches Google with songs properties, returns websites that contain song chords */
-    int searchForLyrics(std::string& lyrics,
-                        std::string title, 
+    int searchForLyrics(std::string title, 
                         std::string artist,
                         int number_of_websites=5);
     
@@ -103,4 +102,5 @@ class GatherTask : public Task<SongBookApp>
         SYNTAX EXAMPLE END \
         \
         Return ONLY result, no other talking.";
+    std::string lyrics_reg;
 };
