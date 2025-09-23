@@ -10,6 +10,7 @@
 #include <cstdlib>
 #include <sstream>
 #include <cstdarg>
+#include <thread>
 #include <fstream>
 #include "GatherTask.h"
 #include "SongBookApp.h"
@@ -92,14 +93,14 @@ int GatherTask::parseByAi(std::string to_parse, std::string& from_ai)
          		{"content", 
 					"You are a strict formatter for songbook application. Input is lyrics with chords, you parse it into different syntax.\
 						Always preserve newlines. \
-						Syntax rules: \
-						Chords in the input are written on a separate line above the lyrics. \
-						For each pair (chord line + lyric line): \
-						- Read the chord line left to right. \
-						- Insert each chord on lyrics line, on exactly same position as it is in chord line \
-						- Wrap the chord in backticks. (i.e. `Ami`) \
-						- After inserting all chords, remove the separate chord line. \
-						Rules: \
+						Input syntax: \
+						- there are chord lines and lyrics lines \
+						- Each chord has position ABOVE some word. \
+						Output syntax: \
+						- each chord is put BEFORE its word \
+						- each chord is wrapped in backticks. (i.e. `Ami`) \
+						- There are no chord lines, chords are inserted into lyrics. \
+						Other Rules: \
 						1. Verse begins with number and dot (e.g., '1. ...'). \
 						2. Chorus begins with '>' (e.g., '> ...'). \
 						3. Preserve lyric words and line breaks exactly. \
@@ -126,7 +127,6 @@ int GatherTask::parseByAi(std::string to_parse, std::string& from_ai)
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_cb);
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, &read_buffer);
 
-		std::cout << "Parsing by AI (" << this->model << ")" << std::endl;
         err_code = curl_easy_perform(curl);
         if(err_code != CURLE_OK)
             return CURL_ERROR;
@@ -206,7 +206,7 @@ int GatherTask::startInteractive()
 void GatherTask::endInteractive(int error_code)
 {
 
-	if (!error_code)  {
+	if (error_code == SUCCESS)  {
 		arg_store_t a = getArgument("-id");
 
 		int id;
@@ -227,22 +227,36 @@ void GatherTask::endInteractive(int error_code)
 		std::string response = parent->getInput(1);
 
 		if (response == "y")  {
-			// TODO
+
 		}
 	}
-	else if (error_code==1)  {
-		parent->printInteractive("Invalid ID to parse!", 1);
-	}
-	else if (error_code==5)  {
-		parent->printInteractive("Failed to gather lyrics due to ai returning error...", 2);
-	}
-	else if (error_code==6)  {
-		parent->printInteractive("Failed to gather lyrics due to not returing proper response ...", 2);
-	}
-	else if (error_code==7)  {
-		parent->printInteractive("Failed to update song in database with lyrics ...", 2);
-	}
 
+	switch (error_code)
+	{
+		case SUCCESS:
+			parent->printInteractive("Successfuly added lyrics to database...");
+			break;
+		case INVALID_ID:
+			parent->printInteractive("Invalid ID to parse!", 2);
+			break;
+		case AI_ERROR_RESPONSE: 
+			parent->printInteractive("Failed to gather lyrics due to ai returning error...", 2);
+			break;
+		case AI_EMPTY_RESPONSE: 
+			parent->printInteractive("Failed to gather lyrics due to not returing proper response ...", 2);
+			break;
+		case ADD_SONG_FAILED: 
+			parent->printInteractive("Failed to update song in database with lyrics ...", 2);
+			break;
+		case SEARCH_NO_VALID_WEBSITE: 
+			parent->printInteractive("Cannot find lyrics for this song on valid websites!", 2);
+			break;
+		case PARSE_WEBSITE_FAILED:
+			parent->printInteractive("Error occured when trying to parse a website");
+			break;
+		default:
+			std::cout << "Unspecifed error code occured: " << error_code << std::endl;
+	}
 }
 
 int GatherTask::searchForLyrics(std::string title, 
@@ -276,8 +290,8 @@ int GatherTask::searchForLyrics(std::string title,
 	// if websites found, iterate over them to see if any of them is valid
 	if (!response_json.empty())  {
 		if (response_json.contains("items") && response_json["items"].is_array()) {
-    		for (const auto& item : response_json["items"]) {
-				for (auto& url : this->allowed_urls)  {
+			for (auto& url : this->allowed_urls)  {
+				for (const auto& item : response_json["items"]) {
 					if (item["displayLink"] == url)  {
 						std::string link;
 						try  {
@@ -288,11 +302,12 @@ int GatherTask::searchForLyrics(std::string title,
 						}
 						
 						std::string raw_lyrics = parseWebsite(link, url);
-						if (raw_lyrics == "")  {
-							return PARSE_WEBSITE_FAILED;;
+						if (raw_lyrics != "")  {
+							std::cout << "Parsing by AI (" << this->model << ")" << std::endl;
+							// TODO make this a thread
+							return parseByAi(raw_lyrics, this->lyrics_reg);
 						}
 
-						return parseByAi(raw_lyrics, this->lyrics_reg);
 					}
 				}
     		}
@@ -350,14 +365,31 @@ std::string GatherTask::parseWebsite(std::string website_url, std::string base_u
 	std::string cmd = "curl " + website_url + " | pandoc -f html -t markdown";
 	std::string md_content = execSystemCommand(cmd.c_str());
 
+	std::istringstream iss(md_content);
+	std::cout << "Parsing website " << website_url << std::endl;
 	if (base_url == "www.velkyzpevnik.cz")  {
-		// TODO
-		return "";
-	} else if (base_url == "pisnicky-akordy.cz")  {
-		std::istringstream iss(md_content);
 
 		bool gather_lyrics = false;
 		std::ostringstream _lyrics;
+
+		for (std::string line; std::getline(iss, line); ) {
+			if (gather_lyrics)  {
+				if (line == "```")  {
+					break;
+				} else {
+					_lyrics << line << '\n';
+				}
+			}
+			if (line == "``` {#chordbox .format style=\"width: 59ch\"}")  {
+				gather_lyrics = true;
+			} 
+		}
+		return _lyrics.str();
+	} else if (base_url == "pisnicky-akordy.cz")  {
+
+		bool gather_lyrics = false;
+		std::ostringstream _lyrics;
+
 		for (std::string line; std::getline(iss, line); ) {
 			if (gather_lyrics)  {
 				if (line == ":::")  {

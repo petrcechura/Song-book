@@ -54,3 +54,4 @@ To exit this interactive mode, type '-' (or different character specified in `CO
   - [ ] Add proper error handling to all tasks
   - [ ] Add Bard converter support
   - [ ] Remove unused libraries and for others, make them git submodules to provide reference
+  - [ ] Make `GatherTask` thread-based, so it's killable

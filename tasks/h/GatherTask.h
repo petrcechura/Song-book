@@ -39,7 +39,8 @@ class GatherTask : public Task<SongBookApp>
     /** Parses a websites using pandoc tool, returning chords only in plain text */
     std::string parseWebsite(std::string website_url, std::string base_url);
 
-    /** Check whether this OS has all dependencies for all `Gather Task` functions */
+    /** Check whether this OS has all dependencies for all `Gather Task` functions
+        TODO: Not in use right now! Implement and use... */
     bool checkSanity();
 
   private:
