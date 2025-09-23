@@ -4,7 +4,10 @@ SOURCES=src/SongDatabase.cpp lib/cmd-app-utils/cpp/TaskBase.cpp \
 			  src/SongBookApp.cpp src/main.cpp
 OUTPUT_FILE=songbook.out
 H_FILES=lib/json/json.hpp lib/argparse/argparse.hpp
-CONFIG_FILE=config.json
+
+CONFIG_FILE?=config.json
+COMMANDS?=
+LOOP?=
 
 H_DIRS=lib/json src lib/cmd-app-utils tasks/h lib/cmdapp tasks
 
@@ -74,7 +77,7 @@ debug: compile-with-debug link
 
 .PHONY: run
 run:
-	@./$(OUTPUT_FILE) $(if $(CONFIG_FILE),-config $(CONFIG_FILE),)
+	@./$(OUTPUT_FILE) $(if $(CONFIG_FILE),-config $(CONFIG_FILE),) $(if $(COMMANDS),-cmd $(COMMANDS),) $(if $(LOOP),-loop $(LOOP),)
 
 .PHONY: compile
 compile:
