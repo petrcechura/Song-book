@@ -48,7 +48,9 @@ To exit this interactive mode, type '-' (or different character specified in `CO
 *TODO Add proper description of all tasks available (interactive and batch mode)*
 
 # TODO
-  [ ] Refactor code into Cmake project management (instead of Makefile)
-  [ ] Comment out all functions and task
-  [ ] Allow arguments in interactive mode too
-  [ ] Add proper error handling to all tasks
+  - [ ] Refactor code into Cmake project management (instead of Makefile)
+  - [ ] Comment out all functions and task
+  - [ ] Allow arguments in interactive mode too
+  - [ ] Add proper error handling to all tasks
+  - [ ] Add Bard converter support
+  - [ ] Remove unused libraries and for others, make them git submodules to provide reference
