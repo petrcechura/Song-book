@@ -92,26 +92,43 @@ int GatherTask::parseByAi(std::string to_parse, std::string& from_ai)
 
 	std::ostringstream query;
 	
-	query 	<< "I want you to take these lyrics with chords "
-			<< "and parse them into different syntax with following rules.\n"
-			<< "Verse begins with number and dot (i.e. 1. (verse lyrics)\n"
-			<< "Chorus begins with \'>\' (i.e. (chorus lyrics))\n"
-			<< "Chords above words are moved before the word and encapsulated with ``\n"
-			<< "(Example: `Emi` I walk a `G` lonely road...)\n"
-			<< "Please respect newlines, as they will tell you where the chords are\n"
-			<< "Below is lyrics. Return parsed output only\n\n"
-			<< to_parse;
+	query  << "I want you to take these lyrics with chords "
+	       << "and parse them into a different syntax with the following rules:\n"
+	       << "- Each chord line belongs to the lyric line directly below it.\n"
+	       << "- Move each chord so it appears immediately before the next lyric word.\n"
+	       << "- Wrap each chord in backticks (e.g., `Emi`).\n"
+	       << "- Remove the original chord lines.\n"
+	       << "- Verse begins with number and dot (e.g., '1. ...').\n"
+	       << "- Chorus begins with '>' (e.g., '> ...').\n"
+	       << "- Preserve newlines.\n"
+	       << "- Output only the transformed lyrics, nothing else, inside a code block.\n\n"
+	       << "```input\n"
+	       << to_parse
+	       << "\n```";
 
 	nlohmann::json prompt_json = {
     	{"model", this->model},
     	{"messages", {
-        	{
-            	{"role", "user"},
-            	{"content", query.str()}
-        	}
-    	}}
+        	{{"role", "system"},
+         		{"content", 
+					"You are a strict formatter. \
+						Always preserve newlines. \
+						Chords in the input are written on a separate line above the lyrics. \
+						For each pair (chord line + lyric line): \
+						- Read the chord line left to right. \
+						- Insert each chord immediately before the next word in the lyric line. \
+						- Wrap the chord in backticks. (i.e. `Ami`) \
+						- After inserting all chords, remove the separate chord line. \
+						Rules: \
+						1. Verse begins with number and dot (e.g., '1. ...'). \
+						2. Chorus begins with '>' (e.g., '> ...'). \
+						3. Preserve lyric words and line breaks exactly. \
+						4. Output only the transformed lyrics, no explanations. \
+						5. Return everything inside a single fenced code block."}},
+            	{{"role", "user"},
+            	{"content", query.str()}}
+    		}}
 	};
-
 	std::string prompt = prompt_json.dump();
 	
     curl_global_init(CURL_GLOBAL_DEFAULT);
