@@ -1,61 +1,48 @@
-# SONGBOOK APPLICATION
-This repository contains a multiplatform songbook application, with Django server as a database backend, flutter app (written in Dart) for frontend.
-The application usage:
-  * Store songs into database (title, artist)
-  * Edit/Delete songs in database
-  * Sort individual songs based on given criteria
-  * Manage multiple users via email auth.
-    * Each user has its own database field
-    * password reset via mail
-  * Automatically find chords on the verified websites and provide a proxy to it
+# Command-line Songbook Application
+An SQL-based song database CLI application, able to:
+  * CRUD operations over songs in database (title, artist)
+  * Generate a LaTeX Songbook from database
+  * Find chords and lyrics on Web automatically
+  * Run app either in interactive or batch mode
 
-Github URL: https://github.com/petrcechura/Song-book
+# Installation setup
+## Dependencies
+  * g++ (20+)
+  * curl (8.16)
+  * make (4.3)
+  * pdflatex
 
-## HOW TO INSTALL
-### DEPENDENCIES
-  * Django 5.2 (or newer)
-  * Flutter 3.29 (or newer)
-  * g++
-  * make 4.3 (or newer)
-  * curl 8.5.0 (or newer) (TODO not necessary now)
-  * python3.12 (or newer)
-  
-  ```
-  # activate virtual environment
-  source env/bin/activate
-  # install django framework
-  pip install django
-  # install rest api
-  pip install djangorestframework
-  # install other libs
-  pip install simplejwt
-  pip install --upgrade djangorestframework-simplejwt
-  pip install django-cors-headers
-  pip install googlesearch-python
-  python3 manage.py migrate
-  
-  ```
-### RUN A BACKEND (linux)
-  ```
-  # activate virtual environment (if not already activated)
-  source env/bin/activate
-  # run a server
-  cd django-server && python3 manage.py runserver
-  ```
-### RUN A FLUTTER APP
- 
-  * Open VS Code
-  * install `Flutter` extension
-  * run `flutter/lib/main.dart`
-## DEVELOPMENT NOTES
-Please note that this repository was initially used for CLI application written in C++, providing similar functionality, but locally, without server. It's purpose was rather for C++ language training, hence many features are handwritten instead of using available libraries (that's the main reason for using raw C++ database + json instead of SQL-based database).
-The CLI application is still part of this repository and it is planned to synchronize its functionality with Django-backend. However right now, its database is rather simple (JSON file only), thus this task remains for the future development.
-### GOALS FOR CLI APP
+## How to build an app
+### Linux
+```
+git clone git@github.com:petrcechura/Song-book.git
+make build
+```
+### Windows
+**Currently unavailable**
 
-- [x] CRUD operations over song database
-- [x] Features to sort/backup database
-- [x] LaTeX conversion feature
-- [ ] Implement SQL table instead of raw JSON
-- [ ] Add tasks for fetching/pushing songs from/to Django-backend
-- [ ] Implement user auth. system
+# How to use an app
+## Configuration file
+Many of the app properties are managed via `CONFIG_FILE`, which is structure `.json` file. See `default_config.json` file to see available properties.
 
+## Batch mode
+By default, application is run in *batch mode*, hence reads command from `-cmd` argument and exits. Commands are separated with ';' character. Alternatively, these commands may be specified in `CONFIG_FILE` under `commons/cmd` property.
+See section `Tasks` for available commands.
+Usage:
+```
+CONFIG_FILE=<path-to-json-file> \
+COMMANDS=<<cmd1>;<cmd2>;<cmd3>...> \
+make run
+```
+## Interactive mode
+When `-loop` argument is used, app is executed in an interactive CLI mode.
+```
+CONFIG_FILE=<path-to-json-file> \
+COMMANDS=<<cmd1>;<cmd2>;<cmd3>...> \
+LOOP=true \
+make run
+```
+To exit this interactive mode, type '-' (or different character specified in `CONFIG_FILE` under `commons/exit_char`).
+
+## Tasks
+TODO
