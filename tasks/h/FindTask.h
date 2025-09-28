@@ -10,6 +10,11 @@ public:
     : Task<SongBookApp>(cmd, parent) {};
 
   int startInteractive() override;
-  int executeCommand() override;
+  int executeCommand(int error_code) override;
+
+  enum {
+    SUCCESS,
+    SONG_NOT_FOUND
+  } ErrorCode;
 
 };

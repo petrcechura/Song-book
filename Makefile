@@ -105,5 +105,5 @@ bin: all
 	@cp $(OUTPUT_FILE) /usr/local/bin/songbook
 
 link:
-	@$(COMPILER) $(foreach file, $(SOURCES), $(notdir $(basename $(file)).o)) -o $(OUTPUT_FILE) -lcurl -l sqlite3 -lgumbo
+	@$(COMPILER) $(foreach file, $(SOURCES), $(notdir $(basename $(file)).o)) -o $(OUTPUT_FILE) -lcurl -l sqlite3
 	rm *.o

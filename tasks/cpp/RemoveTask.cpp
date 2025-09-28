@@ -6,7 +6,7 @@
 #include "json.hpp"
 #include "SongBookApp.h"
 
-int RemoveTask::executeCommand()
+int RemoveTask::executeCommand(int error_code)
 {
 	if (argumentExists("-id", true))  {
 		std::string str_id = getArgument("-id").values[0];

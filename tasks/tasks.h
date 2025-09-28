@@ -3,7 +3,6 @@
 #include "h/AddTask.h"
 #include "h/BackupTask.h"
 #include "h/ExitTask.h"
-#include "h/FetchTask.h"
 #include "h/FindTask.h"
 #include "h/GatherTask.h"
 #include "h/HelpTask.h"

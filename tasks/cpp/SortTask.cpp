@@ -5,7 +5,7 @@
 #include "SongBookApp.h"
 
 
-int SortTask::executeCommand()
+int SortTask::executeCommand(int error_code)
 {
   if (argumentExists("-criteria", true))  {
     std::string criteria = getArgument("-criteria").values[0];

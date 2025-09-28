@@ -4,7 +4,7 @@
 #include "BackupTask.h"
 #include "SongBookApp.h"
 
-int BackupTask::executeCommand()
+int BackupTask::executeCommand(int error_code)
 {
 
   int i = parent->getDatabase()->makeBackup();

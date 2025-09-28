@@ -39,7 +39,7 @@ class Task : public TaskBase
     /** 
      *  Executes this task. For execution, arguments obtained via `Start` (interactive) or `parseCommand` (non-interactive) are used.
      */
-    int executeCommand() override;
+    int executeCommand(int error_code) override;
 
     void endInteractive(int error_code) override;
     
@@ -187,7 +187,7 @@ int Task<t_cmd>::parseCommand(std::string cmd_line)
 }
 
 template<class t_cmd>
-int Task<t_cmd>::executeCommand()
+int Task<t_cmd>::executeCommand(int error_code)
 {
     return 0;
 }

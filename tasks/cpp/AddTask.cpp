@@ -5,8 +5,12 @@
 #include "AddTask.h"
 #include "SongBookApp.h"
 
-int AddTask::executeCommand()
+int AddTask::executeCommand(int error_code)
 {	
+	if (error_code)  {
+		return error_code;
+	}
+
 	if (argumentExists("-title", true) && argumentExists("-artist", true))  {
 		
 		nlohmann::json song = nlohmann::json();
@@ -16,6 +20,7 @@ int AddTask::executeCommand()
 		arg = getArgument("-artist");
 		song["ARTIST"] = values2string(arg);
 		arg = getArgument("-force");
+		song["LYRICS"] = "";
 
 		int err = parent->getDatabase()->addSong(song.dump(), arg.isTrue);
 
@@ -23,11 +28,11 @@ int AddTask::executeCommand()
 			return SUCCESS;
 		}
 		else  {
-			return ERR_SONG_NOT_ADDED;
+			return ERR_ADD_SONG_FAILED;
 		}
 	}
 	else {
-		return ERR_SONG_NOT_ADDED;
+		return ERR_MISSING_ARGS;
 	}
 }
 
@@ -93,11 +98,27 @@ int AddTask::startInteractive()
 }
 
 void AddTask::endInteractive(int error_code)  {
-	if (error_code == SUCCESS)  {
-		parent->printInteractive("Song added succesfully...", 1);
-	}
-	else  {
-		parent->printInteractive("Could not save song to database!", 1);
+
+	switch(error_code)
+	{
+		case SUCCESS:
+			parent->printInteractive("Song added sucessfully...", 1); break;
+		case ERR_TITLE_TOO_LONG:
+			parent->printInteractive("Title field too long! Can't add this song...", 1); break;
+		case ERR_TITLE_FIELD_EMPTY:
+			parent->printInteractive("Title field cannot be empty...", 1); break;
+		case OK_EXIT_CHAR:
+			break;
+		case ERR_SONG_EXISTS:
+			parent->printInteractive("Song with these properties already exists...", 1); break;
+		case ERR_ARTIST_TOO_LONG:
+			parent->printInteractive("Artist field too long! Can't add this song...", 1); break;
+		case ERR_ADD_SONG_FAILED:
+			parent->printInteractive("Failed to add a song due to internal error...", 1); break;
+		case ERR_MISSING_ARGS:
+			parent->printInteractive("Arguments -title, -artist are missing, can't add this song...", 1); break;
+		default:
+			parent->printInteractive("Failed to add a song due to unknown error code...", 1); break;
 	}
 }
 

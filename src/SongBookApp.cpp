@@ -87,9 +87,6 @@ SongBookApp::SongBookApp(nlohmann::json _config)
   BackupTask* backup = new BackupTask("backup", this);
   backup->setDescription("TODO");
 
-  FetchTask* fetch = new FetchTask("fetch", this);
-  fetch->setDescription("TODO");
-
   PushTask* push = new PushTask("push", this);
   push->setDescription("TODO");
 
@@ -106,7 +103,6 @@ SongBookApp::SongBookApp(nlohmann::json _config)
   this->addTask(latex);
   this->addTask(exit);
   this->addTask(backup);
-  this->addTask(fetch);
   this->addTask(push);
   this->addTask(test);
   this->addTask(gather);

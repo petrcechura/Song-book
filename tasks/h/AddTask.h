@@ -17,7 +17,7 @@ class AddTask : public Task<SongBookApp>
     const int AUTHOR_WIDTH = 30;
 
     int startInteractive() override;
-    int executeCommand() override;
+    int executeCommand(int error_code) override;
     void endInteractive(int error_code) override;
 
   private:
@@ -28,7 +28,9 @@ class AddTask : public Task<SongBookApp>
       ERR_TITLE_FIELD_EMPTY,
       ERR_SONG_EXISTS,
       ERR_ARTIST_TOO_LONG,
-      ERR_SONG_NOT_ADDED
+      ERR_SONG_NOT_ADDED,
+      ERR_ADD_SONG_FAILED,
+      ERR_MISSING_ARGS
 
     } ErrorCode;
 };

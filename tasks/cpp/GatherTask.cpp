@@ -37,7 +37,7 @@ std::string execSystemCommand(const char* cmd) {
 }
 
 
-int GatherTask::executeCommand()
+int GatherTask::executeCommand(int error_code)
 {	
 	CURL* curl;
     CURLcode err_code;

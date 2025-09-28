@@ -5,7 +5,7 @@
 #include "ModifyTask.h"
 #include "SongBookApp.h"
 
-int ModifyTask::executeCommand()
+int ModifyTask::executeCommand(int error_code)
 {	
 	int id;
 	if (argumentExists("-id", true) && argumentExists("-title", true) && argumentExists("-artist", true))  {

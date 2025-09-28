@@ -11,7 +11,7 @@ public:
   LatexTask(std::string cmd, SongBookApp* parent) 
     : Task<SongBookApp>(cmd, parent) {};
 
-  int executeCommand() override;
+    int executeCommand(int error_code) override;
 
   /** Replaces special charactes in string to printable alternatives. */
   std::string getPrintableString(std::string str);

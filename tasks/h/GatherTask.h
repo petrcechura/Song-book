@@ -16,7 +16,7 @@ class GatherTask : public Task<SongBookApp>
 
     // virtual functions override
     int startInteractive() override;
-    int executeCommand() override;
+    int executeCommand(int error_code) override;
     void endInteractive(int error_code) override;
 
     // SETTERS
@@ -68,8 +68,8 @@ class GatherTask : public Task<SongBookApp>
     std::string google_api_key = "";
     std::string google_search_engine = "";
     std::string allowed_urls[2] = {
-      "www.velkyzpevnik.cz",
-      "pisnicky-akordy.cz"
+      "pisnicky-akordy.cz",
+      "www.velkyzpevnik.cz"
     };
 
     // Ai parsing related properties

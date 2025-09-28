@@ -19,7 +19,7 @@ class TaskBase {
     virtual std::string getCommandString() = 0;
     virtual std::string getDescription() = 0;
     virtual int parseCommand(std::string cmd_line = "") = 0;
-    virtual int executeCommand() = 0;
+    virtual int executeCommand(int error_code) = 0;
 };
 
 #endif 

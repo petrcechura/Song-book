@@ -63,9 +63,11 @@ int CommandServer::loop()
     }
     else  {
       if (auto it = tasks.find(user_input); it != tasks.end())  {
-        if (!it->second->startInteractive())  {
-          it->second->endInteractive(it->second->executeCommand());
-        }
+        it->second->endInteractive(
+          it->second->executeCommand(
+            it->second->startInteractive()
+          )
+        );
       }
       else  {
         unknownInput();
@@ -103,8 +105,7 @@ int CommandServer::executeTaskString(std::string task_string)
   const auto it = tasks.find(task_name);
   if (it != tasks.end())  {
     if (!it->second->parseCommand(task_string))  {
-      int err = it->second->executeCommand();
-      return err;
+      return it->second->executeCommand(0);
     }
     else  {
       std::cout << "Could not parse task_string '" << task_string << "'" << std::endl;

@@ -18,10 +18,10 @@ int FindTask::startInteractive()
   std::vector<std::string> v = {regex};
   this->updateArgument("-pattern", {false, v});
 
-  return 0;
+  return SUCCESS;
 }
 
-int FindTask::executeCommand()
+int FindTask::executeCommand(int error_code)
 {
   if (this->argumentExists("-pattern", true))  {
     arg_store_t a = this->getArgument("-pattern");
@@ -33,11 +33,20 @@ int FindTask::executeCommand()
       parent->printSong(item.at("ID"), item.at("TITLE"), item.at("ARTIST"));
 	  }
     parent->printSongListBottom();
-    return 0;
+    return SUCCESS;
   }
   else {
-    return 1;
+    return SONG_NOT_FOUND;
   }
+}
 
-  return 0;
+void FindTask::endInteractive(int error_code)
+{
+  switch(error_code)
+  {
+    case SUCCESS:
+      break;
+    case SONG_NOT_FOUND:
+      printInteractive("Could not find a song under this pattern..."); break;
+  }
 }

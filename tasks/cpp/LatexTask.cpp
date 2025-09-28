@@ -9,7 +9,7 @@
 #include <map>
 #include "json.hpp"
 
-int LatexTask::executeCommand()
+int LatexTask::executeCommand(int error_code)
 {
 
   const int SONGS_PER_PAGE = 25;
