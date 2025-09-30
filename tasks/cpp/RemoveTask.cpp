@@ -8,29 +8,39 @@
 
 int RemoveTask::executeCommand(int error_code)
 {
-	if (argumentExists("-id", true))  {
-		std::string str_id = getArgument("-id").values[0];
-		int id;
-		
-		try {
-			id = std::stoi(str_id);
-		}
-		catch (const std::invalid_argument& e)  {
-			return 1;
-		}
-		if (parent->getDatabase()->songExists(id))  {
- 			return parent->getDatabase()->removeSong(id);
-		}
-		else {
-			return 2;
-		}
-
+	if (error_code != SUCCESS)
+	{
+		return error_code;
 	}
 	else {
-		return 3;
-	}
+		if (argumentExists("-id", true))  {
+			std::string str_id = getArgument("-id").values[0];
+			int id;
 
-	return 1;
+			try {
+				id = std::stoi(str_id);
+			}
+			catch (const std::invalid_argument& e)  {
+				return INVALID_ID;
+			}
+			if (parent->getDatabase()->songExists(id))  {
+				int error = parent->getDatabase()->removeSong(id);
+				if (!error)  {
+					return SUCCESS;
+				}
+				else {
+					return DB_ERROR;
+				}
+			}
+			else {
+				return SONG_NOT_FOUND;
+			}
+
+		}
+		else {
+			return NO_ID;
+		}
+	}
 }
 
 int RemoveTask::startInteractive()
@@ -41,7 +51,7 @@ int RemoveTask::startInteractive()
 	str_id = parent->getInput(1);
 
   	if (str_id == std::string(1,parent->getExitChar()))  {
-    	return 0;
+    	return OK_EXIT_CHAR;
   	}
 	else {
 		try {
@@ -49,24 +59,32 @@ int RemoveTask::startInteractive()
 		}
 		catch (const std::invalid_argument& e)  {
 			parent->printInteractive(std::format("'{}' does not contain valid ID to parse!", str_id), 1);
-			return 1;
+			return INVALID_ID;
 		}
 		std::vector<std::string> s = {str_id.data()};
 		updateArgument("-id", {false, s});
 	}
 
-	return 0;
+	return SUCCESS;
 }
 
 void RemoveTask::endInteractive(int error_code)
 {
-	if (!error_code)  {
-		parent->printInteractive("Song has been succesfully removed...", 1);
-	}
-	else if (error_code==2)  {
-		parent->printInteractive("Song with this ID does not exist!", 1);
-	}
-	else if (error_code==1)  {
-		parent->printInteractive("Error processing -id as argument...", 1);
+	switch(error_code)
+	{
+		case SUCCESS:
+			parent->printInteractive("Song removed succesfully.", 1); break;
+      	case OK_EXIT_CHAR:
+			break;
+      	case INVALID_ID:
+			parent->printInteractive("Invalid -id passed as an argument...", 1); break;
+      	case NO_ID:
+			parent->printInteractive("No -id passed as an argument...", 1); break;
+      	case DB_ERROR:
+			parent->printInteractive("Could not remove a song due to internal database error.", 1); break;
+      	case SONG_NOT_FOUND:
+			parent->printInteractive("Could not find this song in database, hence can't remove...", 1); break;
+		default:
+			parent->printInteractive("Could not remove a song due to unknown error...", 1); break;
 	}
 }

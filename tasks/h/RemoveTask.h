@@ -15,4 +15,15 @@ class RemoveTask : public Task<SongBookApp>
     int startInteractive() override;
     int executeCommand(int error_code) override;
     void endInteractive(int error_code) override;
+
+  private:
+
+    enum {
+      SUCCESS,
+      OK_EXIT_CHAR,
+      INVALID_ID,
+      NO_ID,
+      DB_ERROR,
+      SONG_NOT_FOUND
+    } ErrorCode;
 };

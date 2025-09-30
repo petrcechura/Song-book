@@ -11,6 +11,7 @@ public:
 
   int startInteractive() override;
   int executeCommand(int error_code) override;
+  void endInteractive(int error_code) override;
 
   enum {
     SUCCESS,

@@ -47,6 +47,6 @@ void FindTask::endInteractive(int error_code)
     case SUCCESS:
       break;
     case SONG_NOT_FOUND:
-      printInteractive("Could not find a song under this pattern..."); break;
+      parent->printInteractive("Could not find a song under this pattern..."); break;
   }
 }

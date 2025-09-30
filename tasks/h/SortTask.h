@@ -15,4 +15,12 @@ class SortTask : public Task<SongBookApp>
     int startInteractive() override;
     int executeCommand(int error_code) override;
     void endInteractive(int error_code) override;
+
+  private:
+    enum {
+      SUCCESS,
+      OK_EXIT_CHAR,
+      CRITERIA_NOT_FOUND,
+      ARG_EMPTY
+    };
 };

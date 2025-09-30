@@ -8,28 +8,40 @@
 int ModifyTask::executeCommand(int error_code)
 {	
 	int id;
-	if (argumentExists("-id", true) && argumentExists("-title", true) && argumentExists("-artist", true))  {
-		try {
-			id = std::stoi(getArgument("-id").values[0]);
+
+	if (error_code == SUCCESS)  {
+		if (argumentExists("-id", true) && argumentExists("-title", true) && argumentExists("-artist", true))  {
+			try {
+				id = std::stoi(getArgument("-id").values[0]);
+			}
+			catch (const std::invalid_argument& e)  {
+				return NO_ID;
+			}
+
+			if (parent->getDatabase()->songExists(id))  {
+				nlohmann::json song = parent->getDatabase()->getSong(id);
+				song["TITLE"] = values2string(getArgument("-title"));
+				song["ARTIST"] = values2string(getArgument("-artist"));
+
+				int exit = parent->getDatabase()->addSong(song.dump(),true);
+				if (!exit) {
+					return SUCCESS;
+				}
+				else {
+					return DB_ERROR;
+				}
+			}
+			else {
+				return SONG_NOT_FOUND;
+			}
 		}
-		catch (const std::invalid_argument& e)  {
-			return 2;
-		}
-		
-		if (parent->getDatabase()->songExists(id))  {
-			nlohmann::json song = parent->getDatabase()->getSong(id);
-			song["TITLE"] = values2string(getArgument("-title"));
-			song["ARTIST"] = values2string(getArgument("-artist"));
-			
-			int exit = parent->getDatabase()->addSong(song.dump(),true);
-			return exit;
+		else {
+			return MISSING_ARGS;
 		}
 	}
 	else {
-		return 1;
+		return error_code;
 	}
-
-	return 1;
 }
 
 int ModifyTask::startInteractive()
@@ -41,7 +53,7 @@ int ModifyTask::startInteractive()
 	int id;
 
   	if (str_id == std::string(1,parent->getExitChar()))  {
-    	return 0;
+    	return OK_EXIT_CHAR;
   	}
 	else  {
 		try {
@@ -49,7 +61,7 @@ int ModifyTask::startInteractive()
 		}
 		catch (const std::invalid_argument& e)  {
 			parent->printInteractive(std::format("'{}' does not contain valid ID to parse!", str_id), 1);
-			return 1;
+			return INVALID_ID;
 		}
 		std::vector<std::string> s = {str_id.data()};
 		updateArgument("-id", {false, s});
@@ -80,21 +92,33 @@ int ModifyTask::startInteractive()
 		v = {author};
 		updateArgument("-artist", {false, v});
 
-		return 0;
+		return SUCCESS;
 
 	}
 	else  {
 		parent->printInteractive(std::format("Song with ID {} does not exist!", id), 1);
-		return 1;
+		return SONG_NOT_FOUND;
 	}
 }
 
 void ModifyTask::endInteractive(int error_code)
 {
-	if (!error_code)  {
-		parent->printInteractive("Song has been modified succesfully...", 1);
-	}
-	else {
-		parent->printInteractive("Failed to modify  ...", 1);
+	switch(error_code)
+	{
+	  	case SUCCESS:
+			parent->printInteractive("Song has been modified succesfully...", 1); break;
+      	case OK_EXIT_CHAR: break;
+      	case INVALID_ID:
+			parent->printInteractive("Invalid ID passed as an argument", 1); break;
+      	case SONG_NOT_FOUND:
+			parent->printInteractive("Could not find a song with this title and name in database!", 1); break;
+      	case NO_ID:
+			parent->printInteractive("Missing -id as an argument...", 1); break;
+      	case MISSING_ARGS:
+			parent->printInteractive("Missing arguments (required -id, -title, -artist)", 1); break;
+      	case DB_ERROR:
+			parent->printInteractive("Could not modify a song due to internal error in database...", 1); break;
+		default:
+			parent->printInteractive("Could not modify a song due to unknown error...", 1); break;
 	}
 }
