@@ -56,6 +56,11 @@ SongBookApp::SongBookApp(nlohmann::json _config)
       gather->setGoogleSearchEngine(this->config["google"].at("search_engine"));
     }
   }
+  if (this->config.contains("paths"))  {
+    if  (this->config["paths"].contains("songs_dir"))  {
+      gather->setSongsDir(this->config["paths"].at("songs_dir"));
+    }
+  }
   gather->updateArgument("-id");
   
 
@@ -74,11 +79,6 @@ SongBookApp::SongBookApp(nlohmann::json _config)
   list->setDescription("Shows all songs in a database");
   
   LatexTask* latex = new LatexTask("latex", this);
-  if (this->config.contains("paths"))  {
-    if  (this->config["paths"].contains("output_file_path"))  {
-      latex->setOutPath(this->config["paths"].at("output_file_path"));
-    }
-  }
   latex->setDescription("Exports a database into a LaTeX file");
 
   ExitTask* exit = new ExitTask("exit", this);
@@ -88,7 +88,7 @@ SongBookApp::SongBookApp(nlohmann::json _config)
   backup->setDescription("TODO");
 
   TestTask* test = new TestTask("query", this);
-  push->setDescription("TODO");
+  test->setDescription("TODO");
 
   this->addTask(add);
   this->addTask(remove);
@@ -101,7 +101,10 @@ SongBookApp::SongBookApp(nlohmann::json _config)
   this->addTask(exit);
   this->addTask(backup);
   this->addTask(test);
-  this->addTask(gather);
+
+  if (gather->checkSanity()) {
+    this->addTask(gather);
+  }
 }
 
 
@@ -165,12 +168,13 @@ void SongBookApp::executeCommands(std::string commands_string, bool exitWhenDone
 }
 
 
-void SongBookApp::printSong(const std::string& id, const std::string& name, const std::string& author)
+void SongBookApp::printSong(const std::string& id, const std::string& name, const std::string& author, bool has_lyrics)
 {
   
 	std::cout << std::setw(4) << std::left << id
 				    << std::left << SongBookApp::alignString(name, 	' ', TITLE_WIDTH)
 				    << std::left << SongBookApp::alignString(author, ' ', ARTIST_WIDTH)
+            << (has_lyrics ? "X" : " ")
 				    << std::endl;
 }
 
@@ -181,6 +185,7 @@ void SongBookApp::printSongListHeader()
 	std::cout << std::setw(4) << std::left << "ID"
 			  << std::setw(TITLE_WIDTH) << "Title "
 			  << std::setw(ARTIST_WIDTH) << "Artist "
+        << "Has lyrics?"
 			  << std::endl;
 	std::cout << std::string(4 + TITLE_WIDTH + ARTIST_WIDTH, '+')
 			  << std::endl;

@@ -9,7 +9,6 @@
 #include "h/LatexTask.h"
 #include "h/ListTask.h"
 #include "h/ModifyTask.h"
-#include "h/PushTask.h"
 #include "h/RemoveTask.h"
 #include "h/SortTask.h"
 #include "h/TestTask.h"

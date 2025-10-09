@@ -16,7 +16,8 @@ int ListTask::executeCommand(int error_code)
 		std::string title = item.count("TITLE") ? item.at("TITLE") : "NULL";
 		std::string artist = item.count("ARTIST") ? item.at("ARTIST") : "NULL";
 		std::string id = item.count("ID") ? item.at("ID") : "NULL";
-    	SongBookApp::printSong(id, title, artist);
+		bool has_lyrics = item.count("LYRICS") ? !(item["LYRICS"] == "NULL") : false;
+    	SongBookApp::printSong(id, title, artist, has_lyrics);
 	}
 
 	parent->printSongListBottom();

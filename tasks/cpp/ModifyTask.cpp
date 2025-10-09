@@ -23,7 +23,7 @@ int ModifyTask::executeCommand(int error_code)
 				song["TITLE"] = values2string(getArgument("-title"));
 				song["ARTIST"] = values2string(getArgument("-artist"));
 
-				int exit = parent->getDatabase()->addSong(song.dump(),true);
+				int exit = parent->getDatabase()->addSong(song, true);
 				if (!exit) {
 					return SUCCESS;
 				}
@@ -73,7 +73,7 @@ int ModifyTask::startInteractive()
 		nlohmann::json song = parent->getDatabase()->getSong(id);
 		
 		parent->printSongListHeader();
-		parent->printSong(song["ID"], song["TITLE"], song["ARTIST"]);
+		parent->printSong(song["ID"], song["TITLE"], song["ARTIST"], song.count("LYRICS"));
 		
 		parent->printInteractive("Type new song name (leave blank for no modification)", 2);
 		std::string name = parent->getInput(1);

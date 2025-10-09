@@ -35,7 +35,7 @@ SongDatabase::SongDatabase(nlohmann::json _config)  {
       std::string sql = "CREATE TABLE SONGS(ID INT PRIMARY KEY NOT NULL";
 
       for (const auto& c : properties)  {
-          sql += ",\n" + c + " TEXT NOT NULL";
+          sql += ",\n" + c.name + " " + c.type;
       }
 
       sql += " );";
@@ -89,7 +89,7 @@ int SongDatabase::changeOrder(std::string order)  {
     // Check if property is present...
     bool isProp = false;
     for (const auto& prop : properties)  {
-      if (order == prop)  {
+      if (order == prop.name)  {
         isProp = true;
       }
     }
@@ -182,7 +182,7 @@ int SongDatabase::compare(std::string firstString, std::string secondString)  {
 }
 
 
-int SongDatabase::addSong(std::string json_string, bool override)  {
+int SongDatabase::addSong(nlohmann::json json_string, bool override)  {
 
     // obtain unique ID
     nlohmann::json sql_json = getSqlJson("SELECT * FROM SONGS ORDER BY ID DESC LIMIT 1;");
@@ -199,7 +199,7 @@ int SongDatabase::addSong(std::string json_string, bool override)  {
       return 2;
     }
     
-    nlohmann::json j = nlohmann::json::parse(json_string);
+    nlohmann::json j = json_string;
 
     std::string query;
 
@@ -209,8 +209,8 @@ int SongDatabase::addSong(std::string json_string, bool override)  {
         query = "UPDATE SONGS SET ";
         int i = 0;
         for (const auto& p : properties) {
-          if (j.count(p))  {
-            query += (i++ ? ",\n" : "\n") + p + " = " + j[p].dump();
+          if (j.count(p.name))  {
+            query += (i++ ? ",\n" : "\n") + p.name + " = " + j[p.name].dump();
           }
         }
         query += "\n WHERE ID=" + song["ID"].get<std::string>() + ";";
@@ -223,7 +223,7 @@ int SongDatabase::addSong(std::string json_string, bool override)  {
     else {
       query = "INSERT INTO SONGS VALUES(" + available_id;
       for (const auto& p : properties) {
-          query += ", " + j[p].dump() + "";
+          query += ", " + j[p.name].dump() + "";
       }
       query += ");";
     }
@@ -257,8 +257,8 @@ nlohmann::json SongDatabase::getSqlJson(std::string query)  {
         item["ID"] = content.at("ID");
 
         for (const auto& p : properties)  {
-          if (content.count(p))  {
-            item[p] = content.at(p);
+          if (content.count(p.name))  {
+            item[p.name] = content.at(p.name);
           }
         }
 

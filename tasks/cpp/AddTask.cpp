@@ -20,9 +20,8 @@ int AddTask::executeCommand(int error_code)
 		arg = getArgument("-artist");
 		song["ARTIST"] = values2string(arg);
 		arg = getArgument("-force");
-		song["LYRICS"] = "";
 
-		int err = parent->getDatabase()->addSong(song.dump(), arg.isTrue);
+		int err = parent->getDatabase()->addSong(song, arg.isTrue);
 
 		if (err == 0)  {
 			return SUCCESS;
@@ -61,7 +60,7 @@ int AddTask::startInteractive()
 		nlohmann::json song = parent->getDatabase()->getSong(name);
 		parent->printInteractive("Song with this name already exists!", 1);
 		parent->printSongListHeader();
-		parent->printSong(song["ID"], song["TITLE"], song["ARTIST"]);
+		parent->printSong(song["ID"], song["TITLE"], song["ARTIST"], song.count("LYRICS"));
 		parent->printSongListBottom();
 
 		parent->printInteractive("... Do you really with to proceed? (y/n)", 1);

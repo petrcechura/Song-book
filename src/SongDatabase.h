@@ -21,10 +21,15 @@ class SongDatabase
         int compare(std::string firstString, std::string secondString);
         nlohmann::json getSqlJson(std::string query = "");
 
-        std::string properties[3] = {
-                    "TITLE",
-                    "ARTIST",
-                    "LYRICS"
+        typedef struct {
+            std::string name;
+            std::string type;
+        } t_property;
+
+        t_property properties[3] = {
+                {"TITLE",  "TEXT NOT NULL"},
+                {"ARTIST", "TEXT NOT NULL"},
+                {"LYRICS", "TEXT"}
         };
 
         std::string order = "ID";
@@ -34,7 +39,7 @@ class SongDatabase
         SongDatabase(nlohmann::json _config);
         ~SongDatabase();
 
-        int addSong(std::string json_string, bool override=false);
+        int addSong(nlohmann::json json_string, bool override=false);
         int removeSong(int id);
         /** Creates a backup file of a json `database` into `backupDir`
          *

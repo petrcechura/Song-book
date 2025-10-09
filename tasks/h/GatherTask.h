@@ -2,6 +2,7 @@
 #include <filesystem>
 #include <iostream>
 #include "cmdapputils.h"
+#include "SongBookFormatter.h"
 
 class SongBookApp;
 
@@ -12,7 +13,9 @@ class GatherTask : public Task<SongBookApp>
   public:
 
     GatherTask(std::string cmd, SongBookApp* parent) 
-      : Task<SongBookApp>(cmd, parent) {};
+      : Task<SongBookApp>(cmd, parent) {
+        this->formatter = new BardFormatter();
+      };
 
     // virtual functions override
     int startInteractive() override;
@@ -24,10 +27,9 @@ class GatherTask : public Task<SongBookApp>
     void setGoogleApiKey(std::string google_api_key) { this->google_api_key = google_api_key; };
     void setGoogleSearchEngine(std::string google_search_engine) { this->google_search_engine = google_search_engine; };
     // - Ai parse
-    void setAiApiKey(std::string ai_api_key) { this->ai_api_key = ai_api_key; };
-    void setAiModel(std::string model) { this->model = model; };
-
-    int parseByAi(std::string to_parse, std::string& from_ai);
+    void setAiApiKey(std::string ai_api_key) { this->ai_api_key = ai_api_key; formatter->setAiApiKey(ai_api_key);};
+    void setAiModel(std::string model) { this->model = model; formatter->setAiModel(model);};
+    void setSongsDir(std::string song_dir) { this->songs_dir = song_dir; };
 
     std::string curlQuery(const char* query);
 
@@ -58,11 +60,15 @@ class GatherTask : public Task<SongBookApp>
       AI_EMPTY_RESPONSE,
       CURL_EMPTY_RESPONSE,
       SEARCH_EMPTY_RESPONSE,
-      SEARCH_ERROR_RESPONSE,
       SEARCH_NO_VALID_WEBSITE,
       LINK_GET_FAILED,
-      PARSE_WEBSITE_FAILED
+      PARSE_WEBSITE_FAILED,
+      INVALID_GOOGLE_RESPONSE,
+      SONG_DIR_NOT_DEFINED
     } ErrorCode;
+
+    // TODO 
+    SongBookFormatter* formatter;
 
     // Google search related properties
     std::string google_api_key = "";
@@ -76,32 +82,6 @@ class GatherTask : public Task<SongBookApp>
     std::string model = "gpt-4.1-mini";
     std::string ai_api_key = "";
     std::string temp_fp = "";
-    std::string ai_prompt = "\
-        I want you to read this URL ({}}), containing a song lyrics. If the url is unaccessable, try again, \
-        it should work. Now, extract lyrics, song title and song artist and convert it \
-        to following format. Ignore the chords. See that every verse begin with (number). \
-        and chorus with > \
-        \
-        SYNTAX EXAMPLE BEGIN  \
-        # (Song title)  \
-        ## (Song artist)  \
-        \
-        1. O the summer time has come \
-        And the trees are sweetly bloomin  \
-        And the wild mountain thyme \
-        Grows around the bloomin heather \
-        Will ye go lassie go? \
-        \
-        > And we'll all go together to pull wild mountain thyme \
-        All around the bloomin heather, will ye go lassie go? \
-        \
-        2. I will build my love a bower \
-        By yon cool crystal fountain \
-        And round it I will pile \
-        All the wild flowers o the mountain. \
-        Will ye go lassie go? \
-        SYNTAX EXAMPLE END \
-        \
-        Return ONLY result, no other talking.";
+    std::string songs_dir = "";
     std::string lyrics_reg;
 };

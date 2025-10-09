@@ -74,96 +74,45 @@ int GatherTask::executeCommand(int error_code)
 
 	int err = searchForLyrics(song["TITLE"], song["ARTIST"]);
 	
-	return err;
-}
+	if (err != SUCCESS) {
+		return err;
+	}
 
-int GatherTask::parseByAi(std::string to_parse, std::string& from_ai)
-{
-	CURL* curl;
-    CURLcode err_code;
-    std::string read_buffer;
-	nlohmann::json song;
-
-	std::ostringstream query;
-
-	nlohmann::json prompt_json = {
-    	{"model", this->model},
-    	{"messages", {
-        	{{"role", "system"},
-         		{"content", 
-					"You are a strict formatter for songbook application. Input is lyrics with chords, you parse it into different syntax.\
-						Always preserve newlines. \
-						Input syntax: \
-						- there are chord lines and lyrics lines \
-						- Each chord has position ABOVE some word. \
-						Output syntax: \
-						- each chord is put BEFORE its word \
-						- each chord is wrapped in backticks. (i.e. `Ami`) \
-						- There are no chord lines, chords are inserted into lyrics. \
-						Other Rules: \
-						1. Verse begins with number and dot (e.g., '1. ...'). \
-						2. Chorus begins with '>' (e.g., '> ...'). \
-						3. Preserve lyric words and line breaks exactly. \
-						4. Output only the transformed lyrics, no explanations"}},
-            	{{"role", "user"},
-            	{"content", to_parse}}
-    		}}
-	};
-	std::string prompt = prompt_json.dump();
-	
-    curl_global_init(CURL_GLOBAL_DEFAULT);
-    curl = curl_easy_init();
-
-    if(curl) {
-        struct curl_slist* headers = NULL;
-        headers = curl_slist_append(headers, "Content-Type: application/json");
-        std::string auth_header = "Authorization: Bearer " + this->ai_api_key;
-        headers = curl_slist_append(headers, auth_header.c_str());
-
-        curl_easy_setopt(curl, CURLOPT_URL, "https://api.openai.com/v1/chat/completions");
-        curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
-        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, prompt.c_str());
-		curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, prompt.size()); 
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_cb);
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &read_buffer);
-
-        err_code = curl_easy_perform(curl);
-        if(err_code != CURLE_OK)
-            return CURL_ERROR;
-
-        curl_easy_cleanup(curl);
-        curl_slist_free_all(headers);
-    }
-    curl_global_cleanup();
-
-	nlohmann::json read_json = nlohmann::json::parse(read_buffer);
-
-	if (!read_json.empty())  {
-		if (read_json.contains("error"))  {
-			if (read_json["error"].contains("message"))  {
-				std::cout << "** " << read_json["error"].at("message") << " **" << std::endl;
-			}
-			// ai response is error
-			return AI_ERROR_RESPONSE;
+	// TODO
+	if (false)  {
+		if (this->songs_dir.empty())  {
+			return SONG_DIR_NOT_DEFINED;
 		}
-		else if (read_json.contains("choices")) {
-		    if (!read_json["choices"].empty() && read_json["choices"][0].contains("message")) {
-		        if (read_json["choices"][0]["message"].contains("content")) {
-		            std::string s = read_json["choices"][0]["message"]["content"].get<std::string>();
-		            if (!s.empty()) {
-		                from_ai = s;
-						return SUCCESS;
-		            }
-					
-		        }
-		    } 
-		}
-		return AI_EMPTY_RESPONSE;
 		
+		// convert title to file name friendly format
+		std::string title = song["TITLE"];
+		std::replace(title.begin(), title.end(), ' ', '_');
+		title = parent->getDatabase()->convert_to_ascii(title);
+
+		// convert artist to file name friendly format
+		std::string artist = song["ARTIST"];
+		std::replace(artist.begin(), artist.end(), ' ', '_');
+		artist = parent->getDatabase()->convert_to_ascii(artist);
+		
+		// TODO make it OS independent
+		std::string fname = this->songs_dir + "/" + artist + "-" + title + ".txt";
+
+		// save lyrics to file
+  		std::ofstream songFile(fname);
+  		songFile << this->lyrics_reg;
+  		songFile.close();
 	}
 	else {
-		return CURL_EMPTY_RESPONSE;
+		song["LYRICS"] = this->lyrics_reg;
+
+		if (parent->getDatabase()->addSong(song, true)) {
+			return ADD_SONG_FAILED;
+		}
 	}
+
+
+	return SUCCESS;
+	
 }
 
 int GatherTask::startInteractive()
@@ -234,28 +183,34 @@ void GatherTask::endInteractive(int error_code)
 	switch (error_code)
 	{
 		case SUCCESS:
-			parent->printInteractive("Successfuly added lyrics to database...");
-			break;
+			parent->printInteractive("Successfuly added lyrics to database..."); break;
 		case INVALID_ID:
-			parent->printInteractive("Invalid ID to parse!", 2);
-			break;
+			parent->printInteractive("Invalid ID to parse!", 2); break;
 		case AI_ERROR_RESPONSE: 
-			parent->printInteractive("Failed to gather lyrics due to ai returning error...", 2);
-			break;
+			parent->printInteractive("Failed to gather lyrics due to ai returning error...", 2); break;
 		case AI_EMPTY_RESPONSE: 
-			parent->printInteractive("Failed to gather lyrics due to not returing proper response ...", 2);
-			break;
+			parent->printInteractive("Failed to gather lyrics due to not returing proper response ...", 2); break;
 		case ADD_SONG_FAILED: 
-			parent->printInteractive("Failed to update song in database with lyrics ...", 2);
-			break;
+			parent->printInteractive("Failed to update song in database with lyrics ...", 2); break;
 		case SEARCH_NO_VALID_WEBSITE: 
-			parent->printInteractive("Cannot find lyrics for this song on valid websites!", 2);
-			break;
+			parent->printInteractive("Cannot find lyrics for this song on valid websites!", 2); break;
 		case PARSE_WEBSITE_FAILED:
-			parent->printInteractive("Error occured when trying to parse a website");
-			break;
+			parent->printInteractive("Error occured when trying to parse a website"); break;
+		case INVALID_GOOGLE_RESPONSE:
+			parent->printInteractive("Google search contains unexpected items!"); break;
+		case CURL_ERROR:
+			parent->printInteractive("Internal curl error"); break;
+		case OK_EXIT_CHAR: break;
+		case SONG_NOT_FOUND:
+			parent->printInteractive("Song with such ID not found in database"); break;
+		case SEARCH_EMPTY_RESPONSE:
+			parent->printInteractive("Google search returned an empty response..."); break;
+		case LINK_GET_FAILED:
+			parent->printInteractive("Failed to get a link from Google search json!"); break;
+		case NO_ID:
+			parent->printInteractive("No ID passed as an argument..."); break;
 		default:
-			std::cout << "Unspecifed error code occured: " << error_code << std::endl;
+			std::cout << "Unspecified error code occured: " << error_code << std::endl;
 	}
 }
 
@@ -285,6 +240,8 @@ int GatherTask::searchForLyrics(std::string title,
 	// search for valid websites
 	std::string response = curlQuery(query.str().c_str());
 
+	//std::cout << response << std::endl;
+
 	nlohmann::json response_json = nlohmann::json::parse(response);
 
 	// if websites found, iterate over them to see if any of them is valid
@@ -305,7 +262,10 @@ int GatherTask::searchForLyrics(std::string title,
 						if (raw_lyrics != "")  {
 							std::cout << "Parsing by AI (" << this->model << ")" << std::endl;
 							// TODO make this a thread
-							return parseByAi(raw_lyrics, this->lyrics_reg);
+							this->lyrics_reg = formatter->parseMarkdown(raw_lyrics);
+							if (!this->lyrics_reg.empty()) {
+								return SUCCESS;
+							}
 						}
 
 					}
@@ -313,10 +273,12 @@ int GatherTask::searchForLyrics(std::string title,
     		}
 			return SEARCH_NO_VALID_WEBSITE;
 		}
+		else {
+			return INVALID_GOOGLE_RESPONSE;
+		}
 	}
-	else {
-		return CURL_EMPTY_RESPONSE;
-	}
+	
+	return CURL_EMPTY_RESPONSE;
 }
 
 std::string GatherTask::curlQuery(const char* query)
@@ -407,4 +369,25 @@ std::string GatherTask::parseWebsite(std::string website_url, std::string base_u
 	} else {
 		return "";
 	}
+}
+
+bool GatherTask::checkSanity()
+{
+	bool success = true;
+
+	std::string cmds[] = {	"pandoc",
+					   		"pdflatex",
+					   		"curl" };
+
+	for (int i = 0; i < 3; i++)  {
+		std::string w = "which " + cmds[i] + " > /tmp/nul";
+		if (system(w.c_str()))  {
+			std::cout << "**Cannot use 'GatherTask', missing " << cmds[i] << " command!" << std::endl;
+			success = false;
+		}
+	}
+
+	// TODO check APIs and other properties for sanity
+	
+	return success;
 }

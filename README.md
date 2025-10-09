@@ -12,6 +12,7 @@ An SQL-based song database CLI application, able to:
   * make (4.3)
   * pdflatex
   * pandoc
+  * rust
 ## How to build an app
 ### Linux
 ```
@@ -55,3 +56,4 @@ To exit this interactive mode, type '-' (or different character specified in `CO
   - [ ] Add Bard converter support
   - [ ] Remove unused libraries and for others, make them git submodules to provide reference
   - [ ] Make `GatherTask` thread-based, so it's killable
+  - [ ] Assign std::err to a file, so debug is possible the easy way
