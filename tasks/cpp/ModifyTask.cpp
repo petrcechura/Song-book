@@ -73,12 +73,18 @@ int ModifyTask::startInteractive()
 		nlohmann::json song = parent->getDatabase()->getSong(id);
 		
 		parent->printSongListHeader();
-		parent->printSong(song["ID"], song["TITLE"], song["ARTIST"], song.count("LYRICS"));
+		parent->printSong(song["ID"], song["TITLE"], song["ARTIST"], song["LYRICS"] != "NULL");
 		
 		parent->printInteractive("Type new song name (leave blank for no modification)", 2);
 		std::string name = parent->getInput(1);
 		parent->printInteractive("Type new artist name (leave blank for no modification)", 2);
 		std::string author = parent->getInput(1);
+		parent->printInteractive("Do you want to modify lyrics as well? (y/n)");
+		std::response = parent->getInput(1);
+
+		if (response == "y")  {
+			// TODO open vim (or other selected text editor) and allows user to modify lyrics content
+		}
 
 		if (name == "")  {
 			name = song["TITLE"];

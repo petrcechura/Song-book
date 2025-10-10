@@ -166,7 +166,7 @@ int BardFormatter::addSongPage(std::string title, std::string artist, std::strin
 
 void BardFormatter::clearPages()
 {   
-    // TODO
+    this->songs.clear();
     return;
 }
 

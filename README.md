@@ -57,3 +57,5 @@ To exit this interactive mode, type '-' (or different character specified in `CO
   - [ ] Remove unused libraries and for others, make them git submodules to provide reference
   - [ ] Make `GatherTask` thread-based, so it's killable
   - [ ] Assign std::err to a file, so debug is possible the easy way
+  - [ ] Untie `bard` tool location from the app properly
+  - [ ] Make a translator layer in SongDatabase between ID and no of song in `ListTask`
