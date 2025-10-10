@@ -2,6 +2,7 @@
 #include <map>
 #include <fstream>
 #include "json.hpp"
+#include "SongBookUtils.h"
 
 
 int main(int argc, char* argsv[])
@@ -52,6 +53,7 @@ int main(int argc, char* argsv[])
     }
   }
   SongBookApp app = SongBookApp(data);
+  SongBookUtils::getInstance()->setJson(data);
 
 
   // *************

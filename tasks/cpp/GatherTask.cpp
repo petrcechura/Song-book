@@ -14,26 +14,13 @@
 #include <fstream>
 #include "GatherTask.h"
 #include "SongBookApp.h"
+#include "SongBookUtils.h"
 
 
 // Callback to collect the response into a string
 size_t write_cb(void* contents, size_t size, size_t nmemb, void* userp) {
     ((std::string*)userp)->append((char*)contents, size * nmemb);
     return size * nmemb;
-}
-
-// Aux. command that calls a system command and returns its output as an std::string 
-std::string execSystemCommand(const char* cmd) {
-    std::array<char, 1000> buffer;
-    std::string result;
-    std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(cmd, "r"), pclose);
-    if (!pipe) {
-        throw std::runtime_error("popen() failed!");
-    }
-    while (fgets(buffer.data(), static_cast<int>(buffer.size()), pipe.get()) != nullptr) {
-        result += buffer.data();
-    }
-    return result;
 }
 
 
@@ -80,7 +67,7 @@ int GatherTask::executeCommand(int error_code)
 
 	// TODO
 	if (false)  {
-		if (this->songs_dir.empty())  {
+		if (SongBookUtils::getInstance()->getConfigItem("paths/songs_dir") == "")  {
 			return SONG_DIR_NOT_DEFINED;
 		}
 		
@@ -95,7 +82,7 @@ int GatherTask::executeCommand(int error_code)
 		artist = parent->getDatabase()->convert_to_ascii(artist);
 		
 		// TODO make it OS independent
-		std::string fname = this->songs_dir + "/" + artist + "-" + title + ".txt";
+		std::string fname = SongBookUtils::getInstance()->getConfigItem("paths/songs_dir") + "/" + artist + "-" + title + ".txt";
 
 		// save lyrics to file
   		std::ofstream songFile(fname);
@@ -169,15 +156,8 @@ void GatherTask::endInteractive(int error_code)
 		}
 		nlohmann::json song = parent->getDatabase()->getSong(id);
 
-		parent->printInteractive("Found these lyrics...", 1);
+		parent->printInteractive("Successfully saved these lyrics to database!", 1);
 		std::cout << this->lyrics_reg << std::endl;
-
-		parent->printInteractive("Do you wish to edit lyrics before saving? (y/n)", 1);
-		std::string response = parent->getInput(1);
-
-		if (response == "y")  {
-
-		}
 	}
 
 	switch (error_code)
@@ -227,9 +207,9 @@ int GatherTask::searchForLyrics(std::string title,
 
 	query << "https://www.googleapis.com/customsearch/v1"
 	      << "?key="
-		  << this->google_api_key
+		  << SongBookUtils::getInstance()->getConfigItem("google/api_key")
 		  << "&cx="
-		  << this->google_search_engine
+		  << SongBookUtils::getInstance()->getConfigItem("google/search_engine")
 		  << "&q="
 		  << parent->getDatabase()->convert_to_ascii(title) << "+"
 		  << parent->getDatabase()->convert_to_ascii(artist) <<  "+"
@@ -260,7 +240,7 @@ int GatherTask::searchForLyrics(std::string title,
 						
 						std::string raw_lyrics = parseWebsite(link, url);
 						if (raw_lyrics != "")  {
-							std::cout << "Parsing by AI (" << this->model << ")" << std::endl;
+							std::cout << "Parsing by AI (" << SongBookUtils::getInstance()->getConfigItem("ai/model") << ")" << std::endl;
 							// TODO make this a thread
 							this->lyrics_reg = formatter->parseMarkdown(raw_lyrics);
 							if (!this->lyrics_reg.empty()) {
@@ -325,7 +305,7 @@ std::string GatherTask::parseWebsite(std::string website_url, std::string base_u
 	// This is just wrong, but none of other options I found did not work better than this.
     // Pandoc is best tool for parsing html to markdown and it cannot be used as a lib.	
 	std::string cmd = "curl " + website_url + " | pandoc -f html -t markdown";
-	std::string md_content = execSystemCommand(cmd.c_str());
+	std::string md_content = SongBookUtils::getInstance()->execSystemCommand(cmd.c_str());
 
 	std::istringstream iss(md_content);
 	std::cout << "Parsing website " << website_url << std::endl;
@@ -380,14 +360,12 @@ bool GatherTask::checkSanity()
 					   		"curl" };
 
 	for (int i = 0; i < 3; i++)  {
-		std::string w = "which " + cmds[i] + " > /tmp/nul";
-		if (system(w.c_str()))  {
+		if (!SongBookUtils::getInstance()->systemCommandExists(cmds[i].c_str()))  {
 			std::cout << "**Cannot use 'GatherTask', missing " << cmds[i] << " command!" << std::endl;
 			success = false;
 		}
 	}
 
 	// TODO check APIs and other properties for sanity
-	
 	return success;
 }

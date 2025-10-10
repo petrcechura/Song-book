@@ -22,15 +22,6 @@ class GatherTask : public Task<SongBookApp>
     int executeCommand(int error_code) override;
     void endInteractive(int error_code) override;
 
-    // SETTERS
-    // - Google search
-    void setGoogleApiKey(std::string google_api_key) { this->google_api_key = google_api_key; };
-    void setGoogleSearchEngine(std::string google_search_engine) { this->google_search_engine = google_search_engine; };
-    // - Ai parse
-    void setAiApiKey(std::string ai_api_key) { this->ai_api_key = ai_api_key; formatter->setAiApiKey(ai_api_key);};
-    void setAiModel(std::string model) { this->model = model; formatter->setAiModel(model);};
-    void setSongsDir(std::string song_dir) { this->songs_dir = song_dir; };
-
     std::string curlQuery(const char* query);
 
     /** Searches Google with songs properties, returns websites that contain song chords */
@@ -79,9 +70,6 @@ class GatherTask : public Task<SongBookApp>
     };
 
     // Ai parsing related properties
-    std::string model = "gpt-4.1-mini";
-    std::string ai_api_key = "";
     std::string temp_fp = "";
-    std::string songs_dir = "";
     std::string lyrics_reg;
 };

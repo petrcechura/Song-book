@@ -3,6 +3,7 @@
 #include <iomanip>
 #include <filesystem>
 #include "SongBookApp.h"
+#include "SongBookUtils.h"
 #include "json.hpp"
 #include "tasks.h"
 #include <vector>
@@ -13,15 +14,13 @@ SongBookApp::SongBookApp(nlohmann::json _config)
   this->config = _config.size()>0 ? _config : nlohmann::json();
   database = new SongDatabase(this->config);
 
-  if (this->config.contains("commons"))  {
-    if (this->config["commons"].contains("exit_char"))  {
-      this->EXIT_CHAR = this->config["commons"].at("exit_char").get<std::string>()[0];
-    }
-  }
-  else  {
+  std::string exit_char = SongBookUtils::getInstance()->getConfigItem("commons/exit_char");
+  if (exit_char.empty())  {
     this->EXIT_CHAR = '-';
+  } 
+  else {
+    this->EXIT_CHAR = exit_char[0];
   }
-
 
   AddTask* add = new AddTask("add", this);
   add->setDescription("Adds a new song to database");
@@ -40,27 +39,6 @@ SongBookApp::SongBookApp(nlohmann::json _config)
   
   GatherTask* gather = new GatherTask("gather", this);
   gather->setDescription("Tries to gather lyrics for a song");
-  if (this->config.contains("ai"))  {
-    if  (this->config["ai"].contains("api_key"))  {
-      gather->setAiApiKey(this->config["ai"].at("api_key"));
-    }
-    if  (this->config["ai"].contains("model"))  {
-      gather->setAiModel(this->config["ai"].at("model"));
-    }
-  }
-  if (this->config.contains("google"))  {
-    if  (this->config["google"].contains("api_key"))  {
-      gather->setGoogleApiKey(this->config["google"].at("api_key"));
-    }
-    if  (this->config["google"].contains("search_engine"))  {
-      gather->setGoogleSearchEngine(this->config["google"].at("search_engine"));
-    }
-  }
-  if (this->config.contains("paths"))  {
-    if  (this->config["paths"].contains("songs_dir"))  {
-      gather->setSongsDir(this->config["paths"].at("songs_dir"));
-    }
-  }
   gather->updateArgument("-id");
   
 

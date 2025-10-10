@@ -1,6 +1,7 @@
 SOURCES=src/SongDatabase.cpp lib/cmd-app-utils/cpp/TaskBase.cpp \
 			  lib/cmd-app-utils/cpp/Task.cpp lib/cmd-app-utils/cpp/CommandServer.cpp \
 			  src/SongBookFormatter.cpp \
+			  src/SongBookUtils.cpp \
 			  $(foreach TASK,$(wildcard tasks/cpp/*.cpp), $(TASK)) \
 			  src/SongBookApp.cpp src/main.cpp
 OUTPUT_FILE=songbook.out

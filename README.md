@@ -52,8 +52,8 @@ To exit this interactive mode, type '-' (or different character specified in `CO
   - [ ] Refactor code into Cmake project management (instead of Makefile)
   - [ ] Comment out all functions and task
   - [ ] Allow arguments in interactive mode too
-  - [ ] Add proper error handling to all tasks
-  - [ ] Add Bard converter support
+  - [x] Add proper error handling to all tasks
+  - [x] Add Bard converter support
   - [ ] Remove unused libraries and for others, make them git submodules to provide reference
   - [ ] Make `GatherTask` thread-based, so it's killable
   - [ ] Assign std::err to a file, so debug is possible the easy way

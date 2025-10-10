@@ -6,6 +6,7 @@
 #include <fstream>
 #include "json.hpp"
 #include "SongBookFormatter.h"
+#include "SongBookUtils.h"
 
 int BardFormatter::generateSongBook(const char* output_file)
 {	
@@ -21,18 +22,14 @@ int BardFormatter::generateSongBook(const char* output_file)
 		std::string fpath = "bard/songs/" + fname;
 		// save lyrics to file
 
-		// replace "\\n" with '\n'
-		size_t pos = 0;
-		while ((pos = song.find("\\n", pos)) != std::string::npos) {
-        	song.replace(pos, 2, "\n");
-        	pos += 1;
-    	}
+		song = SongBookUtils::getInstance()->sql2txt(song);
+
 		std::ofstream songFile(fpath);
 		songFile << song;
 		songFile.close();
 		i++;
 
-		toml_oss << "\t\"" << fname << "\",\n";
+		toml_oss << "    \"" << fname << "\",\n";
 	}
 
 	toml_oss << "]\n\n"
@@ -40,16 +37,29 @@ int BardFormatter::generateSongBook(const char* output_file)
 			 << "[[output]]\n"
 			 << "file = \"songbook.pdf\"\n\n"
 			 << "[book]\n"
-			 << "title = \"Zpěvník\"\n"
-			 << "subtitle = \"TODO\"\n"
+			 << "title = \"" << SongBookUtils::getInstance()->getConfigItem("songbook/title") <<"\"\n"
+			 << "subtitle = \"" << SongBookUtils::getInstance()->getConfigItem("songbook/subtitle") << "\"\n"
 			 << "chorus_label = \"Ref\"\n"
-			 << "title_note = \"(tady neco jeste pridej)\"";
+			 << "title_note = \"" << SongBookUtils::getInstance()->getConfigItem("songbook/note") <<"\"";
 
-	std::ofstream tomlFile("bard/bard.toml");
-	tomlFile << toml_oss.str();
-	tomlFile.close();
+	std::string bard_dir = SongBookUtils::getInstance()->getConfigItem("paths/bard_dir");
+	
+	if (bard_dir != "") {
+		if (SongBookUtils::getInstance()->systemCommandExists(std::format("{}/bard", bard_dir).c_str()))  {
+			std::ofstream tomlFile(std::format("{}/bard.toml", bard_dir).c_str());
+			tomlFile << toml_oss.str();
+			tomlFile.close();
+			system(std::format("(cd {} && ./bard make )", bard_dir).c_str());
+		}
+		else {
+			std::cout << "Command `bard` not found in bard dir" << std::endl;
+		}
+		
+	}
+	else {
+		std::cout << "bard dir not found under `paths/bard_dir`" << std::endl;
+	}
 
-	system("(cd bard/ && ./bard make)");
     return 0;
 }
 
@@ -63,7 +73,7 @@ std::string BardFormatter::parseMarkdown(std::string markdown_lyrics)
 	std::ostringstream query;
 
 	nlohmann::json prompt_json = {
-    	{"model", this->ai_model},
+    	{"model", SongBookUtils::getInstance()->getConfigItem("ai/model")},
     	{"messages", {
         	{{"role", "system"},
          		{"content", 
@@ -91,7 +101,7 @@ std::string BardFormatter::parseMarkdown(std::string markdown_lyrics)
     if(curl) {
         struct curl_slist* headers = NULL;
         headers = curl_slist_append(headers, "Content-Type: application/json");
-        std::string auth_header = "Authorization: Bearer " + this->ai_api_key;
+        std::string auth_header = "Authorization: Bearer " + SongBookUtils::getInstance()->getConfigItem("ai/api_key");
         headers = curl_slist_append(headers, auth_header.c_str());
 
         curl_easy_setopt(curl, CURLOPT_URL, "https://api.openai.com/v1/chat/completions");

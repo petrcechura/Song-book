@@ -210,7 +210,7 @@ int SongDatabase::addSong(nlohmann::json json_string, bool override)  {
         int i = 0;
         for (const auto& p : properties) {
           if (j.count(p.name))  {
-            query += (i++ ? ",\n" : "\n") + p.name + " = " + j[p.name].dump();
+            query += (i++ ? ",\n" : "\n") + p.name + " = \"" + j[p.name].get<std::string>() + "\"";
           }
         }
         query += "\n WHERE ID=" + song["ID"].get<std::string>() + ";";

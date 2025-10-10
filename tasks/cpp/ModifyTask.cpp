@@ -1,9 +1,11 @@
 #include <string>
 #include <iostream>
 #include <format>
+#include <cstdio>
 #include <iomanip>
 #include "ModifyTask.h"
 #include "SongBookApp.h"
+#include "SongBookUtils.h"
 
 int ModifyTask::executeCommand(int error_code)
 {	
@@ -22,6 +24,7 @@ int ModifyTask::executeCommand(int error_code)
 				nlohmann::json song = parent->getDatabase()->getSong(id);
 				song["TITLE"] = values2string(getArgument("-title"));
 				song["ARTIST"] = values2string(getArgument("-artist"));
+				song["LYRICS"] = values2string(getArgument("-lyrics"));
 
 				int exit = parent->getDatabase()->addSong(song, true);
 				if (!exit) {
@@ -80,10 +83,30 @@ int ModifyTask::startInteractive()
 		parent->printInteractive("Type new artist name (leave blank for no modification)", 2);
 		std::string author = parent->getInput(1);
 		parent->printInteractive("Do you want to modify lyrics as well? (y/n)");
-		std::response = parent->getInput(1);
+		std::string response = parent->getInput(1);
+		std::string lyrics = "";
 
 		if (response == "y")  {
-			// TODO open vim (or other selected text editor) and allows user to modify lyrics content
+			std::string editor = SongBookUtils::getInstance()->getConfigItem("commons/text_editor");
+			if (editor == "")  {
+				parent->printInteractive("Unable to edit lyrics, text editor not found under commons/text_editor!", 1);
+			}
+			else if (!SongBookUtils::getInstance()->systemCommandExists(editor.c_str())){
+				parent->printInteractive("Unable to edit lyrics, command `" + editor + "` does not exist!", 1);
+			}
+			else {
+				std::string tmpfile = std::tmpnam(nullptr);
+
+				lyrics = song["LYRICS"].get<std::string>();
+
+				lyrics = SongBookUtils::getInstance()->sql2txt(lyrics);
+				
+				std::string cmd = std::format("echo \"{}\" > {} && {} {}", lyrics, tmpfile, editor, tmpfile);
+
+				system(cmd.c_str());
+				cmd = std::format("cat {}", tmpfile);
+				lyrics = SongBookUtils::getInstance()->execSystemCommand(cmd.c_str());
+			}
 		}
 
 		if (name == "")  {
@@ -92,11 +115,16 @@ int ModifyTask::startInteractive()
 		if (author == "")  {
 			author = song["ARTIST"];
 		}
+		if (lyrics == "")  {
+			lyrics = song["LYRICS"];
+		}
 
 		std::vector<std::string> v = {name};
 		updateArgument("-title", {false, v});
 		v = {author};
 		updateArgument("-artist", {false, v});
+		v = {lyrics};
+		updateArgument("-lyrics", {false, v});
 
 		return SUCCESS;
 

@@ -70,8 +70,6 @@ class SongDatabase
         std::string getJsonString() {return this->getJson().dump(); };
 
         int changeOrder(std::string order);
-        
-
 };
 
 

@@ -63,16 +63,6 @@ public:
      *  Shall be called after songbook generation.
      */
     virtual void clearPages() = 0;
-
-    virtual void setAiApiKey(std::string ai_api_key)
-    {
-        this->ai_api_key = ai_api_key;
-    }
-
-    virtual void setAiModel(std::string ai_model)
-    {
-        this->ai_model = ai_model;
-    }
 };
 
 class BardFormatter : public SongBookFormatter
