@@ -23,6 +23,8 @@ class SongBookUtils
     /** Converts a piece of text from format that is stored inside sql (preserving newlines and other
         special character) into readable syntax */
     static std::string sql2txt(std::string sql);
+    /** Prepares a string for saving into sql database */
+    static std::string txt2sql(std::string txt);
 
   private:
     static nlohmann::json config;

@@ -19,8 +19,6 @@ H_DIRS=lib/json src lib/cmd-app-utils tasks/h tasks
 
 COMPILER=g++ -std=c++20 
 
-# shall be overriden in CLI 
-TASK_NAME?=
 # Default html open
 BROWSER=xdg-open
 

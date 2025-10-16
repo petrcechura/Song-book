@@ -36,7 +36,7 @@ class SongBookApp : public CommandServer
      *        (and maybe only a certain ones)*/
     SongDatabase* getDatabase() { return database; };
 
-    static void printSong(const std::string& id, const std::string& name, const std::string& author, bool has_lyrics);
+    static void printSong(const std::string& no, const std::string& id, const std::string& name, const std::string& author, bool has_lyrics);
     static void printSongListHeader();
     static void printSongListBottom();
 

@@ -91,6 +91,7 @@ int GatherTask::executeCommand(int error_code)
 	}
 	else {
 		song["LYRICS"] = this->lyrics_reg;
+		std::cout << this->lyrics_reg << std::endl;
 
 		if (parent->getDatabase()->addSong(song, true)) {
 			return ADD_SONG_FAILED;
@@ -156,8 +157,19 @@ void GatherTask::endInteractive(int error_code)
 		}
 		nlohmann::json song = parent->getDatabase()->getSong(id);
 
-		parent->printInteractive("Successfully saved these lyrics to database!", 1);
+		parent->printInteractive("Found these lyrics:", 1);
 		std::cout << this->lyrics_reg << std::endl;
+		parent->printInteractive("Do you want to keep them? (y/n)", 1);
+		std::string i = parent->getInput();
+		if (i != "y")  {
+			song.erase("LYRICS");
+			if (parent->getDatabase()->addSong(song, true))  {
+				error_code = ADD_SONG_FAILED;
+			}
+			else {
+				error_code = LYRICS_NOT_SAVED;
+			}
+		}
 	}
 
 	switch (error_code)
@@ -172,6 +184,8 @@ void GatherTask::endInteractive(int error_code)
 			parent->printInteractive("Failed to gather lyrics due to not returing proper response ...", 2); break;
 		case ADD_SONG_FAILED: 
 			parent->printInteractive("Failed to update song in database with lyrics ...", 2); break;
+		case LYRICS_NOT_SAVED:
+			parent->printInteractive("Lyrics not saved...", 2); break; 
 		case SEARCH_NO_VALID_WEBSITE: 
 			parent->printInteractive("Cannot find lyrics for this song on valid websites!", 2); break;
 		case PARSE_WEBSITE_FAILED:
@@ -199,65 +213,67 @@ int GatherTask::searchForLyrics(std::string title,
 							 	int number_of_websites)
 {
 	
-	std::ostringstream query;
-
+	
 	// replace spaces with '+' character, so string becomes query friendly
 	std::replace(title.begin(), title.end(), ' ', '+');
 	std::replace(artist.begin(), artist.end(), ' ', '+'); 
-
-	query << "https://www.googleapis.com/customsearch/v1"
-	      << "?key="
-		  << SongBookUtils::getInstance()->getConfigItem("google/api_key")
-		  << "&cx="
-		  << SongBookUtils::getInstance()->getConfigItem("google/search_engine")
-		  << "&q="
-		  << parent->getDatabase()->convert_to_ascii(title) << "+"
-		  << parent->getDatabase()->convert_to_ascii(artist) <<  "+"
-		  << "akordy"
-		  << "&num="
-		  << "5";
 	
-	// search for valid websites
-	std::string response = curlQuery(query.str().c_str());
 
-	//std::cout << response << std::endl;
-
-	nlohmann::json response_json = nlohmann::json::parse(response);
-
-	// if websites found, iterate over them to see if any of them is valid
-	if (!response_json.empty())  {
+	for (auto& url : this->allowed_urls)  {
+		std::ostringstream query;
+		query << "https://www.googleapis.com/customsearch/v1"
+			  << "?key="
+			  << SongBookUtils::getInstance()->getConfigItem("google/api_key")
+			  << "&cx="
+			  << SongBookUtils::getInstance()->getConfigItem("google/search_engine")
+			  << "&q="
+			  << parent->getDatabase()->convert_to_ascii(title) << "+"
+			  << parent->getDatabase()->convert_to_ascii(artist) <<  "+"
+			  << url
+			  << "&num="
+			  << "5";
+		
+		// search for valid websites
+		std::string response = curlQuery(query.str().c_str());
+	
+		nlohmann::json response_json = nlohmann::json::parse(response);
+	
+		if (response_json.empty())  {
+		  return INVALID_GOOGLE_RESPONSE;
+		}
+	
 		if (response_json.contains("items") && response_json["items"].is_array()) {
 			for (auto& url : this->allowed_urls)  {
-				for (const auto& item : response_json["items"]) {
-					if (item["displayLink"] == url)  {
-						std::string link;
-						try  {
-							link = item["link"].get<std::string>();
-						}
-						catch(const std::exception& e)  {
-							return LINK_GET_FAILED;
-						}
-						
-						std::string raw_lyrics = parseWebsite(link, url);
-						if (raw_lyrics != "")  {
-							std::cout << "Parsing by AI (" << SongBookUtils::getInstance()->getConfigItem("ai/model") << ")" << std::endl;
-							// TODO make this a thread
-							this->lyrics_reg = formatter->parseMarkdown(raw_lyrics);
-							if (!this->lyrics_reg.empty()) {
-								return SUCCESS;
-							}
-						}
-
-					}
-				}
-    		}
+			  for (const auto& item : response_json["items"]) {
+				  if (item["displayLink"] == url)  {
+					  std::string link;
+					  try  {
+						  link = item["link"].get<std::string>();
+					  }
+					  catch(const std::exception& e)  {
+						  return LINK_GET_FAILED;
+					  }
+					  
+					  std::string raw_lyrics = parseWebsite(link, url);
+					  if (raw_lyrics != "")  {
+						  std::cout << "Parsing by AI (" << SongBookUtils::getInstance()->getConfigItem("ai/model") << ")" << std::endl;
+						  // TODO make this a thread
+						  this->lyrics_reg = formatter->parseMarkdown(raw_lyrics);
+						  if (!this->lyrics_reg.empty()) {
+							  return SUCCESS;
+						  }
+					  }
+				  }
+			  }
+			}
 			return SEARCH_NO_VALID_WEBSITE;
-		}
+			  }
 		else {
-			return INVALID_GOOGLE_RESPONSE;
+		  return INVALID_GOOGLE_RESPONSE;
 		}
+
 	}
-	
+
 	return CURL_EMPTY_RESPONSE;
 }
 
@@ -322,7 +338,8 @@ std::string GatherTask::parseWebsite(std::string website_url, std::string base_u
 					_lyrics << line << '\n';
 				}
 			}
-			if (line == "``` {#chordbox .format style=\"width: 59ch\"}")  {
+
+			if (line.substr(0, 14) == "``` {#chordbox")  {
 				gather_lyrics = true;
 			} 
 		}

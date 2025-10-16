@@ -30,7 +30,7 @@ int FindTask::executeCommand(int error_code)
     parent->printInteractive("Matched songs");
     parent->printSongListHeader();
     for(const auto& [key, item] : data.items())  {
-      parent->printSong(item.at("ID"), item.at("TITLE"), item.at("ARTIST"), item.count("LYRICS"));
+      parent->printSong(item.at("NO"), item.at("ID"), item.at("TITLE"), item.at("ARTIST"), item.count("LYRICS"));
 	  }
     parent->printSongListBottom();
     return SUCCESS;

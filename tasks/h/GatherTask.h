@@ -55,6 +55,7 @@ class GatherTask : public Task<SongBookApp>
       LINK_GET_FAILED,
       PARSE_WEBSITE_FAILED,
       INVALID_GOOGLE_RESPONSE,
+      LYRICS_NOT_SAVED,
       SONG_DIR_NOT_DEFINED
     } ErrorCode;
 

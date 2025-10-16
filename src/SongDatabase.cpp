@@ -5,6 +5,7 @@
 #include <iostream>
 #include <fstream>
 #include <ctime>
+#include "SongBookUtils.h"
 #include <sqlite3.h>
 #include <filesystem>
 #include "SongDatabase.h"
@@ -209,11 +210,11 @@ int SongDatabase::addSong(nlohmann::json json_string, bool override)  {
         query = "UPDATE SONGS SET ";
         int i = 0;
         for (const auto& p : properties) {
-          if (j.count(p.name))  {
-            query += (i++ ? ",\n" : "\n") + p.name + " = \"" + j[p.name].get<std::string>() + "\"";
-          }
+          query += (i++ ? ",\n" : "\n") + (j.contains(p.name) ? (p.name + " = \'" + SongBookUtils::txt2sql(j[p.name].get<std::string>()) + "\'") : (p.name + " = NULL"));
+        
         }
         query += "\n WHERE ID=" + song["ID"].get<std::string>() + ";";
+        std::cout << query << std::endl;
       }
       else  {
       // song is already present and override is false, hence don't do anything...
@@ -223,11 +224,10 @@ int SongDatabase::addSong(nlohmann::json json_string, bool override)  {
     else {
       query = "INSERT INTO SONGS VALUES(" + available_id;
       for (const auto& p : properties) {
-          query += ", " + j[p.name].dump() + "";
+        query += (j.contains(p.name)) ? (", '" + SongBookUtils::txt2sql(j[p.name].get<std::string>()) + "'") : (", NULL");
       }
       query += ");";
     }
-
     int exit = sqlite3_exec(DB, query.c_str(), sql_cb, nullptr, nullptr);
 
     return exit;
@@ -255,6 +255,7 @@ nlohmann::json SongDatabase::getSqlJson(std::string query)  {
         nlohmann::json item  = nlohmann::json();
 
         item["ID"] = content.at("ID");
+        item["NO"] = std::to_string(i);
 
         for (const auto& p : properties)  {
           if (content.count(p.name))  {

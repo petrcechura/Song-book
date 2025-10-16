@@ -146,32 +146,38 @@ void SongBookApp::executeCommands(std::string commands_string, bool exitWhenDone
 }
 
 
-void SongBookApp::printSong(const std::string& id, const std::string& name, const std::string& author, bool has_lyrics)
+void SongBookApp::printSong(const std::string& no,
+                            const std::string& id, 
+                            const std::string& name, 
+                            const std::string& author, 
+                            bool has_lyrics)
 {
   
-	std::cout << std::setw(4) << std::left << id
+	std::cout << std::setw(4) << std::left << no
+            << std::setw(4) << std::left << id
 				    << std::left << SongBookApp::alignString(name, 	' ', TITLE_WIDTH)
 				    << std::left << SongBookApp::alignString(author, ' ', ARTIST_WIDTH)
-            << (has_lyrics ? "X" : " ")
+            << "    " << (has_lyrics ? "X" : " ")
 				    << std::endl;
 }
 
 void SongBookApp::printSongListHeader()
 {
-  std::cout << std::string(4 + TITLE_WIDTH + ARTIST_WIDTH, '+')
+  std::cout << std::string(4 + 4 + TITLE_WIDTH + ARTIST_WIDTH + 11, '+')
 			  << std::endl;	
-	std::cout << std::setw(4) << std::left << "ID"
-			  << std::setw(TITLE_WIDTH) << "Title "
-			  << std::setw(ARTIST_WIDTH) << "Artist "
-        << "Has lyrics?"
-			  << std::endl;
-	std::cout << std::string(4 + TITLE_WIDTH + ARTIST_WIDTH, '+')
-			  << std::endl;
+	std::cout << std::setw(4) << std::left << "NO"
+            << std::setw(4) << std::left << "ID"
+			      << std::setw(TITLE_WIDTH) << "Title "
+			      << std::setw(ARTIST_WIDTH) << "Artist "
+            << "Has lyrics?"
+			      << std::endl;
+	std::cout << std::string(4 + 4 + TITLE_WIDTH + ARTIST_WIDTH + 11, '+')
+			      << std::endl;
 }
 
 void SongBookApp::printSongListBottom()
 {
-  std::cout << std::string(4 + TITLE_WIDTH + ARTIST_WIDTH, '+') << std::endl;
+  std::cout << std::string(4 + 4 + TITLE_WIDTH + ARTIST_WIDTH+ 11, '+') << std::endl;
 }
 
 void SongBookApp::printInteractive(const std::string& text, unsigned int indentation, bool newline)

@@ -77,7 +77,7 @@ std::string BardFormatter::parseMarkdown(std::string markdown_lyrics)
     	{"messages", {
         	{{"role", "system"},
          		{"content", 
-					"You are a strict formatter for songbook application. Input is lyrics with chords, you parse it into different syntax.\
+					"You are a strict formatter for songbook application. Input is lyrics with chords, you parse it into different syntax with lyrics only.\
 						Always preserve newlines. \
 						Input syntax: \
 						- there are chord lines and lyrics lines \
@@ -86,9 +86,12 @@ std::string BardFormatter::parseMarkdown(std::string markdown_lyrics)
 						- Ignore the chord lines.\
 						Other Rules: \
 						1. Verse begins with number and dot (e.g., '1. ...'). \
-						2. Chorus begins with '>' (e.g., '> ...'). \
-						3. Preserve lyric words and line breaks exactly. \
-						5. Output only the transformed lyrics, no explanations"}},
+						2. Verses are enumerated (first starts with 1., then 2. ) \
+						3. There cannot be verse without an enumeration number. \
+						4. Chorus begins with '>' (e.g., '> ...'). \
+						5. If the chorus with 'ref', it's replace by '>' \
+						6. Preserve lyric words and line breaks exactly. \
+						7. Output only the transformed lyrics, no explanations"}},
             	{{"role", "user"},
             	{"content", markdown_lyrics}}
     		}}

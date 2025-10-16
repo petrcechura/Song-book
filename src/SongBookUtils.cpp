@@ -93,6 +93,32 @@ std::string SongBookUtils::sql2txt(std::string sql)
         	sql.replace(pos, 2, "\n");
         	pos += 1;
     }
+    // replace "\\'" with '\''
+    pos = 0;
+		while ((pos = sql.find("\\'", pos)) != std::string::npos) {
+        	sql.replace(pos, 2, "\'");
+        	pos += 1;
+    }
 
     return sql;
+}
+
+std::string SongBookUtils::txt2sql(std::string txt)
+{
+
+    // replace `"` with `\"`
+    size_t pos = 0;
+    while ((pos = txt.find("\"", pos)) != std::string::npos) {
+        txt.replace(pos, 1, "\\\"");
+        pos += 2;  // advance past the escaped quote
+    }
+
+    // replace `'` with `\'`
+    pos = 0;
+    while ((pos = txt.find("'", pos)) != std::string::npos) {
+        txt.replace(pos, 1, "''");
+        pos += 2;  // advance past the escaped single quote
+    }
+
+    return txt;
 }

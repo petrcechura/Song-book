@@ -58,4 +58,4 @@ To exit this interactive mode, type '-' (or different character specified in `CO
   - [ ] Make `GatherTask` thread-based, so it's killable
   - [ ] Assign std::err to a file, so debug is possible the easy way
   - [ ] Untie `bard` tool location from the app properly
-  - [ ] Make a translator layer in SongDatabase between ID and no of song in `ListTask`
+  - [x] Make a translator layer in SongDatabase between ID and no of song in `ListTask`

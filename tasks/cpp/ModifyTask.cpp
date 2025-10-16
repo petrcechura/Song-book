@@ -1,5 +1,6 @@
 #include <string>
 #include <iostream>
+#include <sstream>
 #include <format>
 #include <cstdio>
 #include <iomanip>
@@ -25,6 +26,9 @@ int ModifyTask::executeCommand(int error_code)
 				song["TITLE"] = values2string(getArgument("-title"));
 				song["ARTIST"] = values2string(getArgument("-artist"));
 				song["LYRICS"] = values2string(getArgument("-lyrics"));
+				if (song["LYRICS"] == "")  {
+					song.erase("LYRICS");
+				}
 
 				int exit = parent->getDatabase()->addSong(song, true);
 				if (!exit) {
@@ -76,7 +80,7 @@ int ModifyTask::startInteractive()
 		nlohmann::json song = parent->getDatabase()->getSong(id);
 		
 		parent->printSongListHeader();
-		parent->printSong(song["ID"], song["TITLE"], song["ARTIST"], song["LYRICS"] != "NULL");
+		parent->printSong(song["NO"], song["ID"], song["TITLE"], song["ARTIST"], song["LYRICS"] != "NULL");
 		
 		parent->printInteractive("Type new song name (leave blank for no modification)", 2);
 		std::string name = parent->getInput(1);
@@ -97,11 +101,21 @@ int ModifyTask::startInteractive()
 			else {
 				std::string tmpfile = std::tmpnam(nullptr);
 
-				lyrics = song["LYRICS"].get<std::string>();
-
-				lyrics = SongBookUtils::getInstance()->sql2txt(lyrics);
+				lyrics = SongBookUtils::getInstance()->sql2txt(song["LYRICS"].get<std::string>());
 				
-				std::string cmd = std::format("echo \"{}\" > {} && {} {}", lyrics, tmpfile, editor, tmpfile);
+				std::ostringstream cmd_oss;
+				if (lyrics != "NULL")  {
+					cmd_oss << "echo \'" 
+							<< lyrics
+							<< "\' > "
+							<< tmpfile
+							<< " && ";
+				}
+				cmd_oss << editor
+						<< " "
+						<< tmpfile;
+				
+				std::string cmd = cmd_oss.str();
 
 				system(cmd.c_str());
 				cmd = std::format("cat {}", tmpfile);
@@ -114,9 +128,6 @@ int ModifyTask::startInteractive()
 		}
 		if (author == "")  {
 			author = song["ARTIST"];
-		}
-		if (lyrics == "")  {
-			lyrics = song["LYRICS"];
 		}
 
 		std::vector<std::string> v = {name};

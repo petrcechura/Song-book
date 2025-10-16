@@ -60,7 +60,7 @@ int AddTask::startInteractive()
 		nlohmann::json song = parent->getDatabase()->getSong(name);
 		parent->printInteractive("Song with this name already exists!", 1);
 		parent->printSongListHeader();
-		parent->printSong(song["ID"], song["TITLE"], song["ARTIST"], song.count("LYRICS"));
+		parent->printSong(song["NO"], song["ID"], song["TITLE"], song["ARTIST"], song.count("LYRICS"));
 		parent->printSongListBottom();
 
 		parent->printInteractive("... Do you really with to proceed? (y/n)", 1);
