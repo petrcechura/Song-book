@@ -23,7 +23,7 @@ int LatexTask::executeCommand(int error_code)
     artist = song.count("ARTIST") ? song.at("ARTIST") : "NULL";
 
     if (song["LYRICS"] != "NULL") {
-      formatter->addSongPage(title, artist, song.at("LYRICS"));
+      formatter->addSongPage(song);
     }
   }
   formatter->generateSongBook();

@@ -31,6 +31,5 @@ class AddTask : public Task<SongBookApp>
       ERR_SONG_NOT_ADDED,
       ERR_ADD_SONG_FAILED,
       ERR_MISSING_ARGS
-
     } ErrorCode;
 };

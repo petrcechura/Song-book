@@ -93,12 +93,22 @@ std::string SongBookUtils::sql2txt(std::string sql)
         	sql.replace(pos, 2, "\n");
         	pos += 1;
     }
-    // replace "\\'" with '\''
+
     pos = 0;
-		while ((pos = sql.find("\\'", pos)) != std::string::npos) {
-        	sql.replace(pos, 2, "\'");
+		while ((pos = sql.find("\\\"", pos)) != std::string::npos) {
+        	sql.replace(pos, 2, "\"");
         	pos += 1;
     }
+
+    
+    // Replace each single quote ' with the sequence '\'' (used for shell escaping)
+    pos = 0;
+    const std::string from = "'";
+    const std::string to   = "'\\''"; // C++ literal that produces the characters:  '  \  '  '
+    while ((pos = sql.find(from, pos)) != std::string::npos) {
+        sql.replace(pos, from.size(), to);
+        pos += to.size(); // advance past the inserted text to avoid re-checking it
+    } 
 
     return sql;
 }
@@ -122,3 +132,40 @@ std::string SongBookUtils::txt2sql(std::string txt)
 
     return txt;
 }
+
+std::string SongBookUtils::convert_to_ascii(std::string str)  {
+std::map<wchar_t, char> cz_chars = {
+    {L'Á', 'a'}, {L'á', 'a'},
+    {L'Č', 'c'}, {L'č', 'c'},
+    {L'Ď', 'd'}, {L'ď', 'd'},
+    {L'É', 'e'}, {L'é', 'e'},
+    {L'Ě', 'e'}, {L'ě', 'e'},
+    {L'Í', 'i'}, {L'í', 'i'},
+    {L'Ň', 'n'}, {L'ň', 'n'},
+    {L'Ó', 'o'}, {L'ó', 'o'},
+    {L'Ř', 'r'}, {L'ř', 'r'},
+    {L'Š', 's'}, {L'š', 's'},
+    {L'Ť', 't'}, {L'ť', 't'},
+    {L'Ú', 'u'}, {L'ú', 'u'},
+    {L'Ý', 'y'}, {L'ý', 'y'},
+    {L'Ž', 'z'}, {L'ž', 'z'},
+    {L'ů', 'u'}
+};
+    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+    std::wstring wstr = converter.from_bytes(str);
+
+    for (int i = 0; i < wstr.size(); i++)  {
+      // convert cz characters to ascii
+      if (cz_chars.count(wstr[i]))  {
+        wstr[i] = cz_chars[wstr[i]];
+      }
+      
+      // convert capitals into low letters
+      if (wstr[i] > 64 && wstr[i] < 91)  {
+        wstr[i] += 32; 
+      }
+    }
+
+  std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converter2;
+  return converter2.to_bytes(wstr);
+} 

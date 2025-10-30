@@ -61,6 +61,11 @@ run:
 compile:
 	@$(COMPILER) $(foreach hdir,$(H_DIRS),-I $(hdir)) -c $(SOURCES) -lcurl -l sqlite3
 
+.PHONY: booklet
+booklet:
+	@(cd bard/ && ./bard make)
+	@./lib/pdfbook2/pdfbook2/pdfbook2 bard/output/songbook.pdf --signature=8
+
 .PHONY: clean
 clean:
 	@rm -f *.o

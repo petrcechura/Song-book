@@ -26,6 +26,8 @@ class SongBookUtils
     /** Prepares a string for saving into sql database */
     static std::string txt2sql(std::string txt);
 
+    static std::string convert_to_ascii(std::string str);
+
   private:
     static nlohmann::json config;
     static SongBookUtils* _utils;

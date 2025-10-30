@@ -65,11 +65,9 @@ int GatherTask::executeCommand(int error_code)
 		return err;
 	}
 
-	// TODO
-	if (false)  {
-		if (SongBookUtils::getInstance()->getConfigItem("paths/songs_dir") == "")  {
-			return SONG_DIR_NOT_DEFINED;
-		}
+	/*
+	TODO contemplate this argument
+	if (SongBookUtils::getInstance()->getConfigItem("paths/songs_dir") != "")  {
 		
 		// convert title to file name friendly format
 		std::string title = song["TITLE"];
@@ -82,25 +80,22 @@ int GatherTask::executeCommand(int error_code)
 		artist = parent->getDatabase()->convert_to_ascii(artist);
 		
 		// TODO make it OS independent
-		std::string fname = SongBookUtils::getInstance()->getConfigItem("paths/songs_dir") + "/" + artist + "-" + title + ".txt";
+		std::string fname = SongBookUtils::getInstance()->getConfigItem("paths/songs_dir") + "/" + artist + "-" + title + ".md";
 
 		// save lyrics to file
   		std::ofstream songFile(fname);
   		songFile << this->lyrics_reg;
   		songFile.close();
 	}
-	else {
-		song["LYRICS"] = this->lyrics_reg;
-		std::cout << this->lyrics_reg << std::endl;
-
-		if (parent->getDatabase()->addSong(song, true)) {
-			return ADD_SONG_FAILED;
-		}
+	*/
+	
+	song["LYRICS"] = this->lyrics_reg;
+	std::cout << this->lyrics_reg << std::endl;
+	if (parent->getDatabase()->addSong(song, true)) {
+		return ADD_SONG_FAILED;
 	}
 
-
 	return SUCCESS;
-	
 }
 
 int GatherTask::startInteractive()

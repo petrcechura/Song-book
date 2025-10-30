@@ -18,14 +18,30 @@ int BardFormatter::generateSongBook(const char* output_file)
 
 	int i = 0;
 	for (auto song : this->songs)  {
-		std::string fname = std::to_string(i) + ".md";
+
+		// convert title to file name friendly format
+		std::string title = song["TITLE"];
+		std::replace(title.begin(), title.end(), ' ', '-');
+		title = SongBookUtils::getInstance()->convert_to_ascii(title);
+
+		// convert artist to file name friendly format
+		std::string artist = song["ARTIST"];
+		std::replace(artist.begin(), artist.end(), ' ', '-');
+		artist = SongBookUtils::getInstance()->convert_to_ascii(artist);
+
+		// prepare lyrics
+		std::ostringstream lyrics;
+    	lyrics << "# " << SongBookUtils::getInstance()->sql2txt(song["TITLE"]) << "\n"
+        	<< "## " << SongBookUtils::getInstance()->sql2txt(song["ARTIST"]) << "\n"
+        	<< "\n\n"
+        	<< SongBookUtils::getInstance()->sql2txt(song["LYRICS"]);
+
+		std::string fname = title + "_" + artist + ".md";
 		std::string fpath = "bard/songs/" + fname;
+		
 		// save lyrics to file
-
-		song = SongBookUtils::getInstance()->sql2txt(song);
-
 		std::ofstream songFile(fpath);
-		songFile << song;
+		songFile << lyrics.str();
 		songFile.close();
 		i++;
 
@@ -163,16 +179,15 @@ std::string BardFormatter::parseMarkdown(std::string markdown_lyrics)
 	}
 }
 
-int BardFormatter::addSongPage(std::string title, std::string artist, std::string lyrics)
+int BardFormatter::addSongPage(nlohmann::json song)
 {
-    std::ostringstream oss;
+	if (song.contains("TITLE") && song.contains("ARTIST") && song.contains("LYRICS")) {
+		this->songs.push_back(song);
+	}
+	else {
+		return 1;
+	}
 
-    oss << "# " << title << "\n"
-        << "## " << artist << "\n"
-        << "\n\n"
-        << lyrics;
-
-    this->songs.push_back(oss.str());
 
     return 0;
 }
@@ -210,13 +225,13 @@ std::string LatexListFormatter::getPrintableString(std::string str)
   return t;
 }
 
-int LatexListFormatter::addSongPage(std::string title, std::string artist, std::string lyrics)
+int LatexListFormatter::addSongPage(nlohmann::json song)
 {
 	std::ostringstream oss;    
 	
-	oss << getPrintableString(title)
+	oss << getPrintableString(song["TITLE"])
         << " & "
-		<< getPrintableString(artist) 
+		<< getPrintableString(song["ARTIST"]) 
         << R"( \\)";
 
 	songs.push_back(oss.str());

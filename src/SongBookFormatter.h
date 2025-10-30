@@ -19,7 +19,7 @@ class SongBookFormatter
 protected:
     std::string ai_api_key;
     std::string ai_model;
-    std::vector<std::string> songs;
+    nlohmann::json songs;
 
     // Callback to collect the response into a string
     static size_t write_cb(void* contents, size_t size, size_t nmemb, void* userp) {
@@ -53,7 +53,7 @@ public:
         @param artist: artist of a song
         @param lyrics: lyrics of a song in `implementation-specific` syntax
       */
-    virtual int addSongPage(std::string title, std::string artist, std::string lyrics) = 0;
+    virtual int addSongPage(nlohmann::json song) = 0; 
 
     /** Checks whether this system has all dependencies the implementation requires */
     virtual bool checkSanity() = 0;
@@ -68,11 +68,11 @@ public:
 class BardFormatter : public SongBookFormatter
 {
 protected:
-    std::vector<std::string> songs;
+    nlohmann::json songs;
 public:
     virtual int generateSongBook(const char* output_file = "") override;
     virtual std::string parseMarkdown(std::string markdown_lyrics) override;
-    virtual int addSongPage(std::string title, std::string artist, std::string lyrics);
+    virtual int addSongPage(nlohmann::json song);
     virtual bool checkSanity() override;
     virtual void clearPages() override;
 };
@@ -80,7 +80,7 @@ public:
 class LatexListFormatter : public SongBookFormatter
 {
 protected:
-    std::vector<std::string> songs;
+    nlohmann::json songs;
     const int SONGS_PER_PAGE = 25;
 
     const char* title_page = R"(
@@ -139,7 +139,7 @@ protected:
 public:
     virtual int generateSongBook(const char* output_file = "") override;
     virtual std::string parseMarkdown(std::string markdown_lyrics) override;
-    virtual int addSongPage(std::string title, std::string artist, std::string lyrics);
+    virtual int addSongPage(nlohmann::json song);
     virtual bool checkSanity() override;
     virtual void clearPages() override;
 };
