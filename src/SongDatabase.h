@@ -34,6 +34,10 @@ class SongDatabase
 
         std::string order = "ID";
 
+        static int czech_collation(void*,
+                           int len1, const void* str1,
+                           int len2, const void* str2);
+
     public:
 
         SongDatabase(nlohmann::json _config);
@@ -59,6 +63,7 @@ class SongDatabase
         bool songExists(int id);
 
         int SendQuery(std::string query);
+
         
         // TODO
         int getSongCount() { return getJson().size(); };

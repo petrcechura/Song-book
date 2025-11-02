@@ -5,6 +5,7 @@
 #include <iostream>
 #include <fstream>
 #include <ctime>
+#include <clocale>
 #include "SongBookUtils.h"
 #include <sqlite3.h>
 #include <filesystem>
@@ -28,6 +29,13 @@ SongDatabase::SongDatabase(nlohmann::json _config)  {
 
     int exit = sqlite3_open(db_file_path.c_str(), &DB);
 
+    // Set Czech locale for czech sort
+    if (!std::setlocale(LC_COLLATE, "cs_CZ.UTF-8")) {
+        std::cerr << "ERROR: Failed to set Czech locale!" << std::endl;
+    } else {
+      sqlite3_create_collation(DB, "CZECH", SQLITE_UTF8, nullptr, SongDatabase::czech_collation);
+    }
+
     if (exit) {
         std::cout << "Couldn't open SQL database `" <<  db_file_path << "`!" << std::endl;
     }
@@ -43,6 +51,8 @@ SongDatabase::SongDatabase(nlohmann::json _config)  {
       
       char* messaggeError;
       exit = sqlite3_exec(DB, sql.c_str(), NULL, 0, &messaggeError);
+
+
       
       if (exit == SQLITE_OK) {
           std::cout << "Could not find SQL database file, created empty one ..." << std::endl;
@@ -67,12 +77,22 @@ static int sql_cb(void* data, int argc, char** argv, char** azColName)
     return 0;
 }
 
+int SongDatabase::czech_collation(void*,
+                                  int len1, const void* str1,
+                                  int len2, const void* str2) 
+{
+    // Copy strings into null-terminated buffers
+    std::string a((const char*)str1, len1);
+    std::string b((const char*)str2, len2);
+    return strcoll(a.c_str(), b.c_str());
+}
+
 int SongDatabase::SendQuery(std::string query)  {
     char* messageError;
     int exit = sqlite3_exec(DB, query.c_str(), sql_cb, 0, &messageError);
 
     std::cout << "exit code: " << exit << std::endl;
-    if (!exit)  {
+    if (exit)  {
       std::cout << "Message: " << messageError << std::endl;
     }
 
@@ -239,7 +259,7 @@ int SongDatabase::addSong(nlohmann::json json_string, bool override)  {
 nlohmann::json SongDatabase::getSqlJson(std::string query)  {
 
     if (query == "") {
-        query = "SELECT * FROM SONGS ORDER BY " + order;
+        query = "SELECT * FROM SONGS ORDER BY " + order + " COLLATE CZECH";
     }
 
     int exit = sqlite3_exec(DB, query.c_str(), sql_cb, nullptr, nullptr);

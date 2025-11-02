@@ -13,6 +13,7 @@ An SQL-based song database CLI application, able to:
   * pdflatex
   * pandoc
   * rust
+  * locale cs_CZ.UTF-8 (for czech sort)
 ## How to build an app
 ### Linux
 ```
