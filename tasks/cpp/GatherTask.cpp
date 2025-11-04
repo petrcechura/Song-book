@@ -90,7 +90,6 @@ int GatherTask::executeCommand(int error_code)
 	*/
 	
 	song["LYRICS"] = this->lyrics_reg;
-	std::cout << this->lyrics_reg << std::endl;
 	if (parent->getDatabase()->addSong(song, true)) {
 		return ADD_SONG_FAILED;
 	}

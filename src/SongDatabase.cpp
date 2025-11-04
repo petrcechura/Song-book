@@ -234,7 +234,6 @@ int SongDatabase::addSong(nlohmann::json json_string, bool override)  {
         
         }
         query += "\n WHERE ID=" + song["ID"].get<std::string>() + ";";
-        std::cout << query << std::endl;
       }
       else  {
       // song is already present and override is false, hence don't do anything...

@@ -117,8 +117,6 @@ int ModifyTask::startInteractive()
 				
 				std::string cmd = cmd_oss.str();
 
-				std::cout << cmd << std::endl;
-
 				system(cmd.c_str());
 				cmd = std::format("cat {}", tmpfile);
 				lyrics = SongBookUtils::getInstance()->execSystemCommand(cmd.c_str());
