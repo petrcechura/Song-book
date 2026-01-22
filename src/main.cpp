@@ -54,6 +54,13 @@ int main(int argc, char* argsv[])
   }
   SongBookApp app = SongBookApp(data);
   SongBookUtils::getInstance()->setJson(data);
+  
+  
+  std::string error_log_path = SongBookUtils::getInstance()->getConfigItem("commons/error_file");
+  if (error_log_path != "") {
+    static std::ofstream error_file(error_log_path);
+    std::cerr.rdbuf(error_file.rdbuf());
+  }
 
 
   // *************

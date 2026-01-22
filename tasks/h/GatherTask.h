@@ -66,8 +66,8 @@ class GatherTask : public Task<SongBookApp>
     std::string google_api_key = "";
     std::string google_search_engine = "";
     std::string allowed_urls[2] = {
-      "pisnicky-akordy.cz",
-      "www.velkyzpevnik.cz"
+      "Písničky s akordy",
+      "Velký zpěvník"
     };
 
     // Ai parsing related properties

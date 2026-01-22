@@ -28,6 +28,9 @@ class SongBookUtils
 
     static std::string convert_to_ascii(std::string str);
 
+    /** Prints the error message into std::cerr */
+    static void printError(std::string msg);
+
   private:
     static nlohmann::json config;
     static SongBookUtils* _utils;
