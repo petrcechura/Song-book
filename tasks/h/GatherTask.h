@@ -56,7 +56,8 @@ class GatherTask : public Task<SongBookApp>
       PARSE_WEBSITE_FAILED,
       INVALID_GOOGLE_RESPONSE,
       LYRICS_NOT_SAVED,
-      SONG_DIR_NOT_DEFINED
+      SONG_DIR_NOT_DEFINED,
+      INVALID_WEBSITE_PARSE
     } ErrorCode;
 
     // TODO 
@@ -65,7 +66,7 @@ class GatherTask : public Task<SongBookApp>
     // Google search related properties
     std::string google_api_key = "";
     std::string google_search_engine = "";
-    std::string allowed_urls[2] = {
+    std::string allowed_websites[2] = {
       "Písničky s akordy",
       "Velký zpěvník"
     };

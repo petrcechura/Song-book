@@ -197,6 +197,8 @@ void GatherTask::endInteractive(int error_code)
 			parent->printInteractive("Failed to get a link from Google search json!"); break;
 		case NO_ID:
 			parent->printInteractive("No ID passed as an argument..."); break;
+		case INVALID_WEBSITE_PARSE:
+			parent->printInteractive("Could not parse lyrics from a website..."); break;
 		default:
 			std::cout << "Unspecified error code occured: " << error_code << std::endl;
 	}
@@ -212,59 +214,60 @@ int GatherTask::searchForLyrics(std::string title,
 	std::replace(artist.begin(), artist.end(), ' ', '+'); 
 	
 
-	for (auto& url : this->allowed_urls)  {
-		std::replace(url.begin(), url.end(), ' ', '+'); 
-
-		std::ostringstream query;
-		query << "https://serpapi.com/search?engine=google"
-			  << "&api_key="
-			  << SongBookUtils::getInstance()->getConfigItem("google/api_key")
-			  << "&q="
-			  << parent->getDatabase()->convert_to_ascii(title) << "+"
-			  << parent->getDatabase()->convert_to_ascii(artist) <<  "+"
-			  << parent->getDatabase()->convert_to_ascii(url);
-		
-		// search for valid websites
-		std::string response = curlQuery(query.str().c_str());
-	
-		nlohmann::json response_json = nlohmann::json::parse(response);
-	
-		if (response_json.empty())  {
-		  SongBookUtils::getInstance()->printError("GatherTask: The JSON query response is empty object!");
-		  return INVALID_GOOGLE_RESPONSE;
-		}
-	
-		if (response_json.contains("organic_results") && response_json["organic_results"].is_array()) {
-			for (auto& url : this->allowed_urls)  {
-			  for (const auto& item : response_json["organic_results"]) {
-				  if (item["source"] == url)  {
-					  std::string link;
-					  try  {
-						  link = item["link"].get<std::string>();
-					  }
-					  catch(const std::exception& e)  {
-						  SongBookUtils::getInstance()->printError("GatherTask: Could not obtain valid value for key 'link', not a std::string");
-						  return LINK_GET_FAILED;
-					  }
-					  
-					  std::string raw_lyrics = parseWebsite(link, url);
-					  if (raw_lyrics != "")  {
-						  std::cout << "Parsing by AI (" << SongBookUtils::getInstance()->getConfigItem("ai/model") << ")" << std::endl;
-						  // TODO make this a thread
-						  this->lyrics_reg = formatter->parseMarkdown(raw_lyrics);
-						  if (!this->lyrics_reg.empty()) {
-							  return SUCCESS;
-						  }
-					  }
-				  }
+	for (auto& website : this->allowed_websites)  {
+	  std::string lowered_website = website;
+	  std::replace(lowered_website.begin(), lowered_website.end(), ' ', '+');   
+	  std::ostringstream query;
+	  query << "https://serpapi.com/search?engine=google"
+	  	  << "&api_key="
+	  	  << SongBookUtils::getInstance()->getConfigItem("google/api_key")
+	  	  << "&q="
+	  	  << parent->getDatabase()->convert_to_ascii(title) << "+"
+	  	  << parent->getDatabase()->convert_to_ascii(artist) <<  "+"
+	  	  << parent->getDatabase()->convert_to_ascii(lowered_website);
+	  
+	  // search for valid websites
+	  std::string response = curlQuery(query.str().c_str());
+  
+	  nlohmann::json response_json = nlohmann::json::parse(response);
+  
+	  if (response_json.empty())  {
+	    SongBookUtils::getInstance()->printError("GatherTask: The JSON query response is empty object!");
+	    return INVALID_GOOGLE_RESPONSE;
+	  }
+  
+	  if (response_json.contains("organic_results") && response_json["organic_results"].is_array()) {
+	  	for (const auto& item : response_json["organic_results"]) {
+		  if (item["source"] == website)  {
+		    std::string link;
+		    try  {
+		  	  link = item["link"].get<std::string>();
+		    }
+		    catch(const std::exception& e)  {
+		  	  SongBookUtils::getInstance()->printError("GatherTask: Could not obtain valid value for key 'link', not a std::string");
+		  	  return LINK_GET_FAILED;
+		    }
+		    
+		    std::string raw_lyrics = parseWebsite(link, website);
+		    if (raw_lyrics != "")  {
+		  	  std::cout << "Parsing by AI (" << SongBookUtils::getInstance()->getConfigItem("ai/model") << ")" << std::endl;
+		  	  // TODO make this a thread
+		  	  this->lyrics_reg = formatter->parseMarkdown(raw_lyrics);
+		  	  if (!this->lyrics_reg.empty()) {
+		  	    return SUCCESS;
+		  	  }
+			  else {
+				return INVALID_WEBSITE_PARSE;
 			  }
-			}
-			return SEARCH_NO_VALID_WEBSITE;
-			  }
-		else {
-		  SongBookUtils::getInstance()->printError(std::format("GatherTask: Invalid google response: '{}', missing 'items' key", response));
-		  return INVALID_GOOGLE_RESPONSE;
-		}
+		    }
+		  }
+	  	}
+	  	return SEARCH_NO_VALID_WEBSITE;
+	  	  }
+	  else {
+	    SongBookUtils::getInstance()->printError(std::format("GatherTask: Invalid google response: '{}', missing 'items' key", response));
+	    return INVALID_GOOGLE_RESPONSE;
+	  }
 
 	}
 
