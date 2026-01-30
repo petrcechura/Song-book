@@ -7,7 +7,6 @@
 
 int main(int argc, char* argsv[])
 {
-
   // Parse command-line arguments
   std::map<std::string, std::string> args;
   std::string str = "";
@@ -52,7 +51,8 @@ int main(int argc, char* argsv[])
       std::cout << "Could not read file '" << args.at("-config") << "'" <<std::endl;
     }
   }
-  SongBookApp app = SongBookApp(data);
+  
+  SongBookApp* app = new SongBookApp(data);
   SongBookUtils::getInstance()->setJson(data);
   
   
@@ -67,10 +67,10 @@ int main(int argc, char* argsv[])
   // argument -cmd
   // *************
   if (args.count("-cmd"))  {
-    app.executeCommands(args.at("-cmd"));
+    app->executeCommands(args.at("-cmd"));
   }
   else if (data.contains("commons") && data["commons"].contains("cmd"))  {
-    app.executeCommands(data["commons"].at("cmd"));
+    app->executeCommands(data["commons"].at("cmd"));
   }
 
   // *******************
@@ -78,13 +78,17 @@ int main(int argc, char* argsv[])
   // *******************
   if (args.count("-loop"))  {
     if (args.at("-loop") == "true")  {
-      app.startLoop();
+      app->Loop();
     }
   }
   else if (data.contains("commons") && data["commons"].contains("loop"))  {
     if (data["commons"]["loop"] == true)  {
-      app.startLoop();
+      app->Loop();
     }
   }
+    
+    delete app;
+    
+    return 0;
 }
  

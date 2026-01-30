@@ -1,13 +1,13 @@
+#ifndef SONGBOOKAPP_H
+#define SONGBOOKAPP_H
+
 #include <string>
 #include <filesystem>
 #include <iostream>
 #include "SongDatabase.h"
 #include "SongBookFormatter.h"
-#include "cmdapputils.h"
+#include "WindowServer.h"
 #include "json.hpp"
-
-#ifndef SONGBOOKAPP_H
-#define SONGBOOKAPP_H
 
 /** A specific implementation of `CommandServer` class, `SongBookApp` the main class that provides
  *  API to start/stop Command-line application where tasks can be called, thus
@@ -15,16 +15,16 @@
  *
  *  New tasks (`Task`) can be simply added via specific methods and their behaviour is encapsulated
  *  so they can be managed/deleted/added independetly. */
-class SongBookApp : public CommandServer
+class SongBookApp : public WindowServer
 {
-  using CommandServer::CommandServer;
-
-  friend class HelpTask;
+  using WindowServer::WindowServer;
 
   public:
     /** A default contructor that creates a songbook database instance
      *  and adds certains tasks to a *task container* */
-    SongBookApp(nlohmann::json _config);
+    SongBookApp(nlohmann::json _config) {};
+    SongBookApp() {};
+    virtual ~SongBookApp();
     
     /** Returns an instance of a database, allowing tasks to operate with that.
      *

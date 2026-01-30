@@ -1,8 +1,14 @@
-
 cmake_minimum_required(VERSION 4.2)
-project(sandbox CXX)
+set(CMAKE_CXX_STANDARD 20)
+project(app CXX)
 
+add_executable(app src/main.cpp)
+
+add_subdirectory(src)
 add_subdirectory(lib/window-app-utils)
 
-add_executable(sandbox main2.cpp)
-target_link_libraries(sandbox PRIVATE WindowServer::WindowServer)
+target_link_libraries(app
+    PRIVATE
+        window-app-utils
+        songbookapp
+)

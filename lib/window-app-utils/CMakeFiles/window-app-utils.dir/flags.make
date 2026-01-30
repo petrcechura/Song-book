@@ -4,7 +4,7 @@
 # compile CXX with /usr/bin/c++
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/home/petr/Documents/projects/Song-book/lib/window-app-utils/h
+CXX_INCLUDES = -I/home/petr/Documents/projects/Song-book/lib/window-app-utils -I/home/petr/Documents/projects/Song-book/lib/window-app-utils/../json
 
 CXX_FLAGS = 
 

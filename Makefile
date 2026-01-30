@@ -124,17 +124,30 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named sandbox
+# Target rules for targets named app
 
 # Build rule for target.
-sandbox: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 sandbox
-.PHONY : sandbox
+app: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 app
+.PHONY : app
 
 # fast build rule for target.
-sandbox/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/sandbox.dir/build.make CMakeFiles/sandbox.dir/build
-.PHONY : sandbox/fast
+app/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/app.dir/build.make CMakeFiles/app.dir/build
+.PHONY : app/fast
+
+#=============================================================================
+# Target rules for targets named songbookapp
+
+# Build rule for target.
+songbookapp: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 songbookapp
+.PHONY : songbookapp
+
+# fast build rule for target.
+songbookapp/fast:
+	$(MAKE) $(MAKESILENT) -f src/CMakeFiles/songbookapp.dir/build.make src/CMakeFiles/songbookapp.dir/build
+.PHONY : songbookapp/fast
 
 #=============================================================================
 # Target rules for targets named window-app-utils
@@ -149,29 +162,29 @@ window-app-utils/fast:
 	$(MAKE) $(MAKESILENT) -f lib/window-app-utils/CMakeFiles/window-app-utils.dir/build.make lib/window-app-utils/CMakeFiles/window-app-utils.dir/build
 .PHONY : window-app-utils/fast
 
-main2.o: main2.cpp.o
-.PHONY : main2.o
+src/main.o: src/main.cpp.o
+.PHONY : src/main.o
 
 # target to build an object file
-main2.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/sandbox.dir/build.make CMakeFiles/sandbox.dir/main2.cpp.o
-.PHONY : main2.cpp.o
+src/main.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/app.dir/build.make CMakeFiles/app.dir/src/main.cpp.o
+.PHONY : src/main.cpp.o
 
-main2.i: main2.cpp.i
-.PHONY : main2.i
+src/main.i: src/main.cpp.i
+.PHONY : src/main.i
 
 # target to preprocess a source file
-main2.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/sandbox.dir/build.make CMakeFiles/sandbox.dir/main2.cpp.i
-.PHONY : main2.cpp.i
+src/main.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/app.dir/build.make CMakeFiles/app.dir/src/main.cpp.i
+.PHONY : src/main.cpp.i
 
-main2.s: main2.cpp.s
-.PHONY : main2.s
+src/main.s: src/main.cpp.s
+.PHONY : src/main.s
 
 # target to generate assembly for a file
-main2.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/sandbox.dir/build.make CMakeFiles/sandbox.dir/main2.cpp.s
-.PHONY : main2.cpp.s
+src/main.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/app.dir/build.make CMakeFiles/app.dir/src/main.cpp.s
+.PHONY : src/main.cpp.s
 
 # Help Target
 help:
@@ -182,11 +195,12 @@ help:
 	@echo "... codegen"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
-	@echo "... sandbox"
+	@echo "... app"
+	@echo "... songbookapp"
 	@echo "... window-app-utils"
-	@echo "... main2.o"
-	@echo "... main2.i"
-	@echo "... main2.s"
+	@echo "... src/main.o"
+	@echo "... src/main.i"
+	@echo "... src/main.s"
 .PHONY : help
 
 

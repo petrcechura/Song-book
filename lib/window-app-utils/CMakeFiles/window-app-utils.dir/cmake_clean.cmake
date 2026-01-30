@@ -1,10 +1,10 @@
 file(REMOVE_RECURSE
-  "CMakeFiles/window-app-utils.dir/cpp/WTask.cpp.o"
-  "CMakeFiles/window-app-utils.dir/cpp/WTask.cpp.o.d"
-  "CMakeFiles/window-app-utils.dir/cpp/Window.cpp.o"
-  "CMakeFiles/window-app-utils.dir/cpp/Window.cpp.o.d"
-  "CMakeFiles/window-app-utils.dir/cpp/WindowServer.cpp.o"
-  "CMakeFiles/window-app-utils.dir/cpp/WindowServer.cpp.o.d"
+  "CMakeFiles/window-app-utils.dir/WTask.cpp.o"
+  "CMakeFiles/window-app-utils.dir/WTask.cpp.o.d"
+  "CMakeFiles/window-app-utils.dir/Window.cpp.o"
+  "CMakeFiles/window-app-utils.dir/Window.cpp.o.d"
+  "CMakeFiles/window-app-utils.dir/WindowServer.cpp.o"
+  "CMakeFiles/window-app-utils.dir/WindowServer.cpp.o.d"
   "libwindow-app-utils.a"
   "libwindow-app-utils.pdb"
 )

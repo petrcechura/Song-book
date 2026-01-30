@@ -72,60 +72,60 @@ include lib/window-app-utils/CMakeFiles/window-app-utils.dir/flags.make
 lib/window-app-utils/CMakeFiles/window-app-utils.dir/codegen:
 .PHONY : lib/window-app-utils/CMakeFiles/window-app-utils.dir/codegen
 
-lib/window-app-utils/CMakeFiles/window-app-utils.dir/cpp/WindowServer.cpp.o: lib/window-app-utils/CMakeFiles/window-app-utils.dir/flags.make
-lib/window-app-utils/CMakeFiles/window-app-utils.dir/cpp/WindowServer.cpp.o: lib/window-app-utils/cpp/WindowServer.cpp
-lib/window-app-utils/CMakeFiles/window-app-utils.dir/cpp/WindowServer.cpp.o: lib/window-app-utils/CMakeFiles/window-app-utils.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/petr/Documents/projects/Song-book/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object lib/window-app-utils/CMakeFiles/window-app-utils.dir/cpp/WindowServer.cpp.o"
-	cd /home/petr/Documents/projects/Song-book/lib/window-app-utils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT lib/window-app-utils/CMakeFiles/window-app-utils.dir/cpp/WindowServer.cpp.o -MF CMakeFiles/window-app-utils.dir/cpp/WindowServer.cpp.o.d -o CMakeFiles/window-app-utils.dir/cpp/WindowServer.cpp.o -c /home/petr/Documents/projects/Song-book/lib/window-app-utils/cpp/WindowServer.cpp
+lib/window-app-utils/CMakeFiles/window-app-utils.dir/WindowServer.cpp.o: lib/window-app-utils/CMakeFiles/window-app-utils.dir/flags.make
+lib/window-app-utils/CMakeFiles/window-app-utils.dir/WindowServer.cpp.o: lib/window-app-utils/WindowServer.cpp
+lib/window-app-utils/CMakeFiles/window-app-utils.dir/WindowServer.cpp.o: lib/window-app-utils/CMakeFiles/window-app-utils.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/petr/Documents/projects/Song-book/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object lib/window-app-utils/CMakeFiles/window-app-utils.dir/WindowServer.cpp.o"
+	cd /home/petr/Documents/projects/Song-book/lib/window-app-utils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT lib/window-app-utils/CMakeFiles/window-app-utils.dir/WindowServer.cpp.o -MF CMakeFiles/window-app-utils.dir/WindowServer.cpp.o.d -o CMakeFiles/window-app-utils.dir/WindowServer.cpp.o -c /home/petr/Documents/projects/Song-book/lib/window-app-utils/WindowServer.cpp
 
-lib/window-app-utils/CMakeFiles/window-app-utils.dir/cpp/WindowServer.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/window-app-utils.dir/cpp/WindowServer.cpp.i"
-	cd /home/petr/Documents/projects/Song-book/lib/window-app-utils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/petr/Documents/projects/Song-book/lib/window-app-utils/cpp/WindowServer.cpp > CMakeFiles/window-app-utils.dir/cpp/WindowServer.cpp.i
+lib/window-app-utils/CMakeFiles/window-app-utils.dir/WindowServer.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/window-app-utils.dir/WindowServer.cpp.i"
+	cd /home/petr/Documents/projects/Song-book/lib/window-app-utils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/petr/Documents/projects/Song-book/lib/window-app-utils/WindowServer.cpp > CMakeFiles/window-app-utils.dir/WindowServer.cpp.i
 
-lib/window-app-utils/CMakeFiles/window-app-utils.dir/cpp/WindowServer.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/window-app-utils.dir/cpp/WindowServer.cpp.s"
-	cd /home/petr/Documents/projects/Song-book/lib/window-app-utils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/petr/Documents/projects/Song-book/lib/window-app-utils/cpp/WindowServer.cpp -o CMakeFiles/window-app-utils.dir/cpp/WindowServer.cpp.s
+lib/window-app-utils/CMakeFiles/window-app-utils.dir/WindowServer.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/window-app-utils.dir/WindowServer.cpp.s"
+	cd /home/petr/Documents/projects/Song-book/lib/window-app-utils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/petr/Documents/projects/Song-book/lib/window-app-utils/WindowServer.cpp -o CMakeFiles/window-app-utils.dir/WindowServer.cpp.s
 
-lib/window-app-utils/CMakeFiles/window-app-utils.dir/cpp/Window.cpp.o: lib/window-app-utils/CMakeFiles/window-app-utils.dir/flags.make
-lib/window-app-utils/CMakeFiles/window-app-utils.dir/cpp/Window.cpp.o: lib/window-app-utils/cpp/Window.cpp
-lib/window-app-utils/CMakeFiles/window-app-utils.dir/cpp/Window.cpp.o: lib/window-app-utils/CMakeFiles/window-app-utils.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/petr/Documents/projects/Song-book/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object lib/window-app-utils/CMakeFiles/window-app-utils.dir/cpp/Window.cpp.o"
-	cd /home/petr/Documents/projects/Song-book/lib/window-app-utils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT lib/window-app-utils/CMakeFiles/window-app-utils.dir/cpp/Window.cpp.o -MF CMakeFiles/window-app-utils.dir/cpp/Window.cpp.o.d -o CMakeFiles/window-app-utils.dir/cpp/Window.cpp.o -c /home/petr/Documents/projects/Song-book/lib/window-app-utils/cpp/Window.cpp
+lib/window-app-utils/CMakeFiles/window-app-utils.dir/Window.cpp.o: lib/window-app-utils/CMakeFiles/window-app-utils.dir/flags.make
+lib/window-app-utils/CMakeFiles/window-app-utils.dir/Window.cpp.o: lib/window-app-utils/Window.cpp
+lib/window-app-utils/CMakeFiles/window-app-utils.dir/Window.cpp.o: lib/window-app-utils/CMakeFiles/window-app-utils.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/petr/Documents/projects/Song-book/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object lib/window-app-utils/CMakeFiles/window-app-utils.dir/Window.cpp.o"
+	cd /home/petr/Documents/projects/Song-book/lib/window-app-utils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT lib/window-app-utils/CMakeFiles/window-app-utils.dir/Window.cpp.o -MF CMakeFiles/window-app-utils.dir/Window.cpp.o.d -o CMakeFiles/window-app-utils.dir/Window.cpp.o -c /home/petr/Documents/projects/Song-book/lib/window-app-utils/Window.cpp
 
-lib/window-app-utils/CMakeFiles/window-app-utils.dir/cpp/Window.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/window-app-utils.dir/cpp/Window.cpp.i"
-	cd /home/petr/Documents/projects/Song-book/lib/window-app-utils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/petr/Documents/projects/Song-book/lib/window-app-utils/cpp/Window.cpp > CMakeFiles/window-app-utils.dir/cpp/Window.cpp.i
+lib/window-app-utils/CMakeFiles/window-app-utils.dir/Window.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/window-app-utils.dir/Window.cpp.i"
+	cd /home/petr/Documents/projects/Song-book/lib/window-app-utils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/petr/Documents/projects/Song-book/lib/window-app-utils/Window.cpp > CMakeFiles/window-app-utils.dir/Window.cpp.i
 
-lib/window-app-utils/CMakeFiles/window-app-utils.dir/cpp/Window.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/window-app-utils.dir/cpp/Window.cpp.s"
-	cd /home/petr/Documents/projects/Song-book/lib/window-app-utils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/petr/Documents/projects/Song-book/lib/window-app-utils/cpp/Window.cpp -o CMakeFiles/window-app-utils.dir/cpp/Window.cpp.s
+lib/window-app-utils/CMakeFiles/window-app-utils.dir/Window.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/window-app-utils.dir/Window.cpp.s"
+	cd /home/petr/Documents/projects/Song-book/lib/window-app-utils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/petr/Documents/projects/Song-book/lib/window-app-utils/Window.cpp -o CMakeFiles/window-app-utils.dir/Window.cpp.s
 
-lib/window-app-utils/CMakeFiles/window-app-utils.dir/cpp/WTask.cpp.o: lib/window-app-utils/CMakeFiles/window-app-utils.dir/flags.make
-lib/window-app-utils/CMakeFiles/window-app-utils.dir/cpp/WTask.cpp.o: lib/window-app-utils/cpp/WTask.cpp
-lib/window-app-utils/CMakeFiles/window-app-utils.dir/cpp/WTask.cpp.o: lib/window-app-utils/CMakeFiles/window-app-utils.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/petr/Documents/projects/Song-book/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object lib/window-app-utils/CMakeFiles/window-app-utils.dir/cpp/WTask.cpp.o"
-	cd /home/petr/Documents/projects/Song-book/lib/window-app-utils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT lib/window-app-utils/CMakeFiles/window-app-utils.dir/cpp/WTask.cpp.o -MF CMakeFiles/window-app-utils.dir/cpp/WTask.cpp.o.d -o CMakeFiles/window-app-utils.dir/cpp/WTask.cpp.o -c /home/petr/Documents/projects/Song-book/lib/window-app-utils/cpp/WTask.cpp
+lib/window-app-utils/CMakeFiles/window-app-utils.dir/WTask.cpp.o: lib/window-app-utils/CMakeFiles/window-app-utils.dir/flags.make
+lib/window-app-utils/CMakeFiles/window-app-utils.dir/WTask.cpp.o: lib/window-app-utils/WTask.cpp
+lib/window-app-utils/CMakeFiles/window-app-utils.dir/WTask.cpp.o: lib/window-app-utils/CMakeFiles/window-app-utils.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/petr/Documents/projects/Song-book/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object lib/window-app-utils/CMakeFiles/window-app-utils.dir/WTask.cpp.o"
+	cd /home/petr/Documents/projects/Song-book/lib/window-app-utils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT lib/window-app-utils/CMakeFiles/window-app-utils.dir/WTask.cpp.o -MF CMakeFiles/window-app-utils.dir/WTask.cpp.o.d -o CMakeFiles/window-app-utils.dir/WTask.cpp.o -c /home/petr/Documents/projects/Song-book/lib/window-app-utils/WTask.cpp
 
-lib/window-app-utils/CMakeFiles/window-app-utils.dir/cpp/WTask.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/window-app-utils.dir/cpp/WTask.cpp.i"
-	cd /home/petr/Documents/projects/Song-book/lib/window-app-utils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/petr/Documents/projects/Song-book/lib/window-app-utils/cpp/WTask.cpp > CMakeFiles/window-app-utils.dir/cpp/WTask.cpp.i
+lib/window-app-utils/CMakeFiles/window-app-utils.dir/WTask.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/window-app-utils.dir/WTask.cpp.i"
+	cd /home/petr/Documents/projects/Song-book/lib/window-app-utils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/petr/Documents/projects/Song-book/lib/window-app-utils/WTask.cpp > CMakeFiles/window-app-utils.dir/WTask.cpp.i
 
-lib/window-app-utils/CMakeFiles/window-app-utils.dir/cpp/WTask.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/window-app-utils.dir/cpp/WTask.cpp.s"
-	cd /home/petr/Documents/projects/Song-book/lib/window-app-utils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/petr/Documents/projects/Song-book/lib/window-app-utils/cpp/WTask.cpp -o CMakeFiles/window-app-utils.dir/cpp/WTask.cpp.s
+lib/window-app-utils/CMakeFiles/window-app-utils.dir/WTask.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/window-app-utils.dir/WTask.cpp.s"
+	cd /home/petr/Documents/projects/Song-book/lib/window-app-utils && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/petr/Documents/projects/Song-book/lib/window-app-utils/WTask.cpp -o CMakeFiles/window-app-utils.dir/WTask.cpp.s
 
 # Object files for target window-app-utils
 window__app__utils_OBJECTS = \
-"CMakeFiles/window-app-utils.dir/cpp/WindowServer.cpp.o" \
-"CMakeFiles/window-app-utils.dir/cpp/Window.cpp.o" \
-"CMakeFiles/window-app-utils.dir/cpp/WTask.cpp.o"
+"CMakeFiles/window-app-utils.dir/WindowServer.cpp.o" \
+"CMakeFiles/window-app-utils.dir/Window.cpp.o" \
+"CMakeFiles/window-app-utils.dir/WTask.cpp.o"
 
 # External object files for target window-app-utils
 window__app__utils_EXTERNAL_OBJECTS =
 
-lib/window-app-utils/libwindow-app-utils.a: lib/window-app-utils/CMakeFiles/window-app-utils.dir/cpp/WindowServer.cpp.o
-lib/window-app-utils/libwindow-app-utils.a: lib/window-app-utils/CMakeFiles/window-app-utils.dir/cpp/Window.cpp.o
-lib/window-app-utils/libwindow-app-utils.a: lib/window-app-utils/CMakeFiles/window-app-utils.dir/cpp/WTask.cpp.o
+lib/window-app-utils/libwindow-app-utils.a: lib/window-app-utils/CMakeFiles/window-app-utils.dir/WindowServer.cpp.o
+lib/window-app-utils/libwindow-app-utils.a: lib/window-app-utils/CMakeFiles/window-app-utils.dir/Window.cpp.o
+lib/window-app-utils/libwindow-app-utils.a: lib/window-app-utils/CMakeFiles/window-app-utils.dir/WTask.cpp.o
 lib/window-app-utils/libwindow-app-utils.a: lib/window-app-utils/CMakeFiles/window-app-utils.dir/build.make
 lib/window-app-utils/libwindow-app-utils.a: lib/window-app-utils/CMakeFiles/window-app-utils.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/petr/Documents/projects/Song-book/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Linking CXX static library libwindow-app-utils.a"

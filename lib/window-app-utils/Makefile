@@ -137,77 +137,77 @@ window-app-utils/fast:
 	cd /home/petr/Documents/projects/Song-book && $(MAKE) $(MAKESILENT) -f lib/window-app-utils/CMakeFiles/window-app-utils.dir/build.make lib/window-app-utils/CMakeFiles/window-app-utils.dir/build
 .PHONY : window-app-utils/fast
 
-cpp/WTask.o: cpp/WTask.cpp.o
-.PHONY : cpp/WTask.o
+WTask.o: WTask.cpp.o
+.PHONY : WTask.o
 
 # target to build an object file
-cpp/WTask.cpp.o:
-	cd /home/petr/Documents/projects/Song-book && $(MAKE) $(MAKESILENT) -f lib/window-app-utils/CMakeFiles/window-app-utils.dir/build.make lib/window-app-utils/CMakeFiles/window-app-utils.dir/cpp/WTask.cpp.o
-.PHONY : cpp/WTask.cpp.o
+WTask.cpp.o:
+	cd /home/petr/Documents/projects/Song-book && $(MAKE) $(MAKESILENT) -f lib/window-app-utils/CMakeFiles/window-app-utils.dir/build.make lib/window-app-utils/CMakeFiles/window-app-utils.dir/WTask.cpp.o
+.PHONY : WTask.cpp.o
 
-cpp/WTask.i: cpp/WTask.cpp.i
-.PHONY : cpp/WTask.i
+WTask.i: WTask.cpp.i
+.PHONY : WTask.i
 
 # target to preprocess a source file
-cpp/WTask.cpp.i:
-	cd /home/petr/Documents/projects/Song-book && $(MAKE) $(MAKESILENT) -f lib/window-app-utils/CMakeFiles/window-app-utils.dir/build.make lib/window-app-utils/CMakeFiles/window-app-utils.dir/cpp/WTask.cpp.i
-.PHONY : cpp/WTask.cpp.i
+WTask.cpp.i:
+	cd /home/petr/Documents/projects/Song-book && $(MAKE) $(MAKESILENT) -f lib/window-app-utils/CMakeFiles/window-app-utils.dir/build.make lib/window-app-utils/CMakeFiles/window-app-utils.dir/WTask.cpp.i
+.PHONY : WTask.cpp.i
 
-cpp/WTask.s: cpp/WTask.cpp.s
-.PHONY : cpp/WTask.s
+WTask.s: WTask.cpp.s
+.PHONY : WTask.s
 
 # target to generate assembly for a file
-cpp/WTask.cpp.s:
-	cd /home/petr/Documents/projects/Song-book && $(MAKE) $(MAKESILENT) -f lib/window-app-utils/CMakeFiles/window-app-utils.dir/build.make lib/window-app-utils/CMakeFiles/window-app-utils.dir/cpp/WTask.cpp.s
-.PHONY : cpp/WTask.cpp.s
+WTask.cpp.s:
+	cd /home/petr/Documents/projects/Song-book && $(MAKE) $(MAKESILENT) -f lib/window-app-utils/CMakeFiles/window-app-utils.dir/build.make lib/window-app-utils/CMakeFiles/window-app-utils.dir/WTask.cpp.s
+.PHONY : WTask.cpp.s
 
-cpp/Window.o: cpp/Window.cpp.o
-.PHONY : cpp/Window.o
+Window.o: Window.cpp.o
+.PHONY : Window.o
 
 # target to build an object file
-cpp/Window.cpp.o:
-	cd /home/petr/Documents/projects/Song-book && $(MAKE) $(MAKESILENT) -f lib/window-app-utils/CMakeFiles/window-app-utils.dir/build.make lib/window-app-utils/CMakeFiles/window-app-utils.dir/cpp/Window.cpp.o
-.PHONY : cpp/Window.cpp.o
+Window.cpp.o:
+	cd /home/petr/Documents/projects/Song-book && $(MAKE) $(MAKESILENT) -f lib/window-app-utils/CMakeFiles/window-app-utils.dir/build.make lib/window-app-utils/CMakeFiles/window-app-utils.dir/Window.cpp.o
+.PHONY : Window.cpp.o
 
-cpp/Window.i: cpp/Window.cpp.i
-.PHONY : cpp/Window.i
+Window.i: Window.cpp.i
+.PHONY : Window.i
 
 # target to preprocess a source file
-cpp/Window.cpp.i:
-	cd /home/petr/Documents/projects/Song-book && $(MAKE) $(MAKESILENT) -f lib/window-app-utils/CMakeFiles/window-app-utils.dir/build.make lib/window-app-utils/CMakeFiles/window-app-utils.dir/cpp/Window.cpp.i
-.PHONY : cpp/Window.cpp.i
+Window.cpp.i:
+	cd /home/petr/Documents/projects/Song-book && $(MAKE) $(MAKESILENT) -f lib/window-app-utils/CMakeFiles/window-app-utils.dir/build.make lib/window-app-utils/CMakeFiles/window-app-utils.dir/Window.cpp.i
+.PHONY : Window.cpp.i
 
-cpp/Window.s: cpp/Window.cpp.s
-.PHONY : cpp/Window.s
+Window.s: Window.cpp.s
+.PHONY : Window.s
 
 # target to generate assembly for a file
-cpp/Window.cpp.s:
-	cd /home/petr/Documents/projects/Song-book && $(MAKE) $(MAKESILENT) -f lib/window-app-utils/CMakeFiles/window-app-utils.dir/build.make lib/window-app-utils/CMakeFiles/window-app-utils.dir/cpp/Window.cpp.s
-.PHONY : cpp/Window.cpp.s
+Window.cpp.s:
+	cd /home/petr/Documents/projects/Song-book && $(MAKE) $(MAKESILENT) -f lib/window-app-utils/CMakeFiles/window-app-utils.dir/build.make lib/window-app-utils/CMakeFiles/window-app-utils.dir/Window.cpp.s
+.PHONY : Window.cpp.s
 
-cpp/WindowServer.o: cpp/WindowServer.cpp.o
-.PHONY : cpp/WindowServer.o
+WindowServer.o: WindowServer.cpp.o
+.PHONY : WindowServer.o
 
 # target to build an object file
-cpp/WindowServer.cpp.o:
-	cd /home/petr/Documents/projects/Song-book && $(MAKE) $(MAKESILENT) -f lib/window-app-utils/CMakeFiles/window-app-utils.dir/build.make lib/window-app-utils/CMakeFiles/window-app-utils.dir/cpp/WindowServer.cpp.o
-.PHONY : cpp/WindowServer.cpp.o
+WindowServer.cpp.o:
+	cd /home/petr/Documents/projects/Song-book && $(MAKE) $(MAKESILENT) -f lib/window-app-utils/CMakeFiles/window-app-utils.dir/build.make lib/window-app-utils/CMakeFiles/window-app-utils.dir/WindowServer.cpp.o
+.PHONY : WindowServer.cpp.o
 
-cpp/WindowServer.i: cpp/WindowServer.cpp.i
-.PHONY : cpp/WindowServer.i
+WindowServer.i: WindowServer.cpp.i
+.PHONY : WindowServer.i
 
 # target to preprocess a source file
-cpp/WindowServer.cpp.i:
-	cd /home/petr/Documents/projects/Song-book && $(MAKE) $(MAKESILENT) -f lib/window-app-utils/CMakeFiles/window-app-utils.dir/build.make lib/window-app-utils/CMakeFiles/window-app-utils.dir/cpp/WindowServer.cpp.i
-.PHONY : cpp/WindowServer.cpp.i
+WindowServer.cpp.i:
+	cd /home/petr/Documents/projects/Song-book && $(MAKE) $(MAKESILENT) -f lib/window-app-utils/CMakeFiles/window-app-utils.dir/build.make lib/window-app-utils/CMakeFiles/window-app-utils.dir/WindowServer.cpp.i
+.PHONY : WindowServer.cpp.i
 
-cpp/WindowServer.s: cpp/WindowServer.cpp.s
-.PHONY : cpp/WindowServer.s
+WindowServer.s: WindowServer.cpp.s
+.PHONY : WindowServer.s
 
 # target to generate assembly for a file
-cpp/WindowServer.cpp.s:
-	cd /home/petr/Documents/projects/Song-book && $(MAKE) $(MAKESILENT) -f lib/window-app-utils/CMakeFiles/window-app-utils.dir/build.make lib/window-app-utils/CMakeFiles/window-app-utils.dir/cpp/WindowServer.cpp.s
-.PHONY : cpp/WindowServer.cpp.s
+WindowServer.cpp.s:
+	cd /home/petr/Documents/projects/Song-book && $(MAKE) $(MAKESILENT) -f lib/window-app-utils/CMakeFiles/window-app-utils.dir/build.make lib/window-app-utils/CMakeFiles/window-app-utils.dir/WindowServer.cpp.s
+.PHONY : WindowServer.cpp.s
 
 # Help Target
 help:
@@ -219,15 +219,15 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... window-app-utils"
-	@echo "... cpp/WTask.o"
-	@echo "... cpp/WTask.i"
-	@echo "... cpp/WTask.s"
-	@echo "... cpp/Window.o"
-	@echo "... cpp/Window.i"
-	@echo "... cpp/Window.s"
-	@echo "... cpp/WindowServer.o"
-	@echo "... cpp/WindowServer.i"
-	@echo "... cpp/WindowServer.s"
+	@echo "... WTask.o"
+	@echo "... WTask.i"
+	@echo "... WTask.s"
+	@echo "... Window.o"
+	@echo "... Window.i"
+	@echo "... Window.s"
+	@echo "... WindowServer.o"
+	@echo "... WindowServer.i"
+	@echo "... WindowServer.s"
 .PHONY : help
 
 

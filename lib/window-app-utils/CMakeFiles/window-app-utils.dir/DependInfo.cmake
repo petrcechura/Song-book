@@ -8,9 +8,9 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/home/petr/Documents/projects/Song-book/lib/window-app-utils/cpp/WTask.cpp" "lib/window-app-utils/CMakeFiles/window-app-utils.dir/cpp/WTask.cpp.o" "gcc" "lib/window-app-utils/CMakeFiles/window-app-utils.dir/cpp/WTask.cpp.o.d"
-  "/home/petr/Documents/projects/Song-book/lib/window-app-utils/cpp/Window.cpp" "lib/window-app-utils/CMakeFiles/window-app-utils.dir/cpp/Window.cpp.o" "gcc" "lib/window-app-utils/CMakeFiles/window-app-utils.dir/cpp/Window.cpp.o.d"
-  "/home/petr/Documents/projects/Song-book/lib/window-app-utils/cpp/WindowServer.cpp" "lib/window-app-utils/CMakeFiles/window-app-utils.dir/cpp/WindowServer.cpp.o" "gcc" "lib/window-app-utils/CMakeFiles/window-app-utils.dir/cpp/WindowServer.cpp.o.d"
+  "/home/petr/Documents/projects/Song-book/lib/window-app-utils/WTask.cpp" "lib/window-app-utils/CMakeFiles/window-app-utils.dir/WTask.cpp.o" "gcc" "lib/window-app-utils/CMakeFiles/window-app-utils.dir/WTask.cpp.o.d"
+  "/home/petr/Documents/projects/Song-book/lib/window-app-utils/Window.cpp" "lib/window-app-utils/CMakeFiles/window-app-utils.dir/Window.cpp.o" "gcc" "lib/window-app-utils/CMakeFiles/window-app-utils.dir/Window.cpp.o.d"
+  "/home/petr/Documents/projects/Song-book/lib/window-app-utils/WindowServer.cpp" "lib/window-app-utils/CMakeFiles/window-app-utils.dir/WindowServer.cpp.o" "gcc" "lib/window-app-utils/CMakeFiles/window-app-utils.dir/WindowServer.cpp.o.d"
   )
 
 # Targets to which this target links which contain Fortran sources.
