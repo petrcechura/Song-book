@@ -6,6 +6,7 @@
 #include <format>
 #include "LatexTask.h"
 #include "SongBookApp.h"
+#include "SongBookUtils.h"
 #include <map>
 #include "json.hpp"
 
@@ -26,8 +27,26 @@ int LatexTask::executeCommand(int error_code)
       formatter->addSongPage(song);
     }
   }
-  formatter->generateSongBook();
+  
+  int e = formatter->generateSongBook();
   formatter->clearPages();
 
-	return 0;
+  if (e)  {
+    return GENERATE_SONGBOOK_FAILED;
+  } else {
+    return SUCCESS;
+  }
+}
+
+void LatexTask::endInteractive(int error_code)
+{
+  switch(error_code)
+  {
+    case SUCCESS:
+      SongBookUtils::getInstance()->printInteractive(std::format("Successfuly dumped Songbook contents into \'{}\' directory", SongBookUtils::getInstance()->getConfigItem("paths/bard_dir")));
+      break;
+    case GENERATE_SONGBOOK_FAILED:
+      SongBookUtils::getInstance()->printInteractive("Failed to generate a songbook..."); 
+      break;
+  }
 }

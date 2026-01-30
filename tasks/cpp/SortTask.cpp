@@ -3,6 +3,7 @@
 #include <iomanip>
 #include "SortTask.h"
 #include "SongBookApp.h"
+#include "SongBookUtils.h"
 
 
 int SortTask::executeCommand(int error_code)
@@ -30,7 +31,7 @@ int SortTask::startInteractive()
 {
   std::string criteria;
 
-  parent->printInteractive("Type a sorting criteria");
+  SongBookUtils::getInstance()->printInteractive("Type a sorting criteria");
   criteria = parent->getInput(1);
 
   if (criteria != "")  {
@@ -46,15 +47,15 @@ void SortTask::endInteractive(int error_code)
   switch(error_code)
   {
       case SUCCESS: 
-        parent->printInteractive("Sort has been made succesfully!", 1); break;
+        SongBookUtils::getInstance()->printInteractive("Sort has been made succesfully!", 1); break;
       case OK_EXIT_CHAR:
         break;
       case CRITERIA_NOT_FOUND: 
-        parent->printInteractive("This sorting criteria does not exist!", 1); break;
+        SongBookUtils::getInstance()->printInteractive("This sorting criteria does not exist!", 1); break;
       case ARG_EMPTY: 
-        parent->printInteractive("Argument -criteria is empty!", 1); break;
+        SongBookUtils::getInstance()->printInteractive("Argument -criteria is empty!", 1); break;
       default:
-        parent->printInteractive("Could not sort a database due to unknown error", 1);
+        SongBookUtils::getInstance()->printInteractive("Could not sort a database due to unknown error", 1);
 
   }
 }

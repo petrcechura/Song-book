@@ -1,0 +1,2 @@
+/usr/bin/ar qc libwindow-app-utils.a "CMakeFiles/window-app-utils.dir/cpp/WindowServer.cpp.o" "CMakeFiles/window-app-utils.dir/cpp/Window.cpp.o" "CMakeFiles/window-app-utils.dir/cpp/WTask.cpp.o"
+/usr/bin/ranlib libwindow-app-utils.a

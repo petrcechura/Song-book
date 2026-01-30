@@ -75,6 +75,8 @@ public:
     virtual int addSongPage(nlohmann::json song);
     virtual bool checkSanity() override;
     virtual void clearPages() override;
+
+    std::string processChordLines(std::string lyrics);
 };
 
 class LatexListFormatter : public SongBookFormatter

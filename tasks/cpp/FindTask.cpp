@@ -3,6 +3,7 @@
 #include <iomanip>
 #include "FindTask.h"
 #include "SongBookApp.h"
+#include "SongBookUtils.h"
 #include "json.hpp"
 
 int FindTask::startInteractive()
@@ -12,7 +13,7 @@ int FindTask::startInteractive()
   std::string regex;
   json_t data;
 
-  parent->printInteractive("Type a pattern to find");
+  SongBookUtils::getInstance()->printInteractive("Type a pattern to find");
   std::getline(std::cin, regex);
 
   std::vector<std::string> v = {regex};
@@ -27,12 +28,12 @@ int FindTask::executeCommand(int error_code)
     arg_store_t a = this->getArgument("-pattern");
     nlohmann::json data = parent->getDatabase()->findSong(a.values[0]);
 
-    parent->printInteractive("Matched songs");
-    parent->printSongListHeader();
+    SongBookUtils::getInstance()->printInteractive("Matched songs");
+    SongBookUtils::getInstance()->printSongListHeader();
     for(const auto& [key, item] : data.items())  {
-      parent->printSong(item.at("NO"), item.at("ID"), item.at("TITLE"), item.at("ARTIST"), item.count("LYRICS"));
+      SongBookUtils::getInstance()->printSong(item.at("NO"), item.at("ID"), item.at("TITLE"), item.at("ARTIST"), item.count("LYRICS"));
 	  }
-    parent->printSongListBottom();
+    SongBookUtils::getInstance()->printSongListBottom();
     return SUCCESS;
   }
   else {
@@ -47,6 +48,6 @@ void FindTask::endInteractive(int error_code)
     case SUCCESS:
       break;
     case SONG_NOT_FOUND:
-      parent->printInteractive("Could not find a song under this pattern..."); break;
+      SongBookUtils::getInstance()->printInteractive("Could not find a song under this pattern..."); break;
   }
 }

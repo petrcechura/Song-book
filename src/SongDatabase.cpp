@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include <iostream>
+#include <format>
 #include <fstream>
 #include <ctime>
 #include <clocale>
@@ -132,49 +133,10 @@ SongDatabase::~SongDatabase()  {
     }
 }
 
-
-std::string SongDatabase::convert_to_ascii(std::string str)  {
-std::map<wchar_t, char> cz_chars = {
-    {L'Á', 'a'}, {L'á', 'a'},
-    {L'Č', 'c'}, {L'č', 'c'},
-    {L'Ď', 'd'}, {L'ď', 'd'},
-    {L'É', 'e'}, {L'é', 'e'},
-    {L'Ě', 'e'}, {L'ě', 'e'},
-    {L'Í', 'i'}, {L'í', 'i'},
-    {L'Ň', 'n'}, {L'ň', 'n'},
-    {L'Ó', 'o'}, {L'ó', 'o'},
-    {L'Ř', 'r'}, {L'ř', 'r'},
-    {L'Š', 's'}, {L'š', 's'},
-    {L'Ť', 't'}, {L'ť', 't'},
-    {L'Ú', 'u'}, {L'ú', 'u'},
-    {L'Ý', 'y'}, {L'ý', 'y'},
-    {L'Ž', 'z'}, {L'ž', 'z'},
-    {L'ů', 'u'}
-};
-    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-    std::wstring wstr = converter.from_bytes(str);
-
-    for (int i = 0; i < wstr.size(); i++)  {
-      // convert cz characters to ascii
-      if (cz_chars.count(wstr[i]))  {
-        wstr[i] = cz_chars[wstr[i]];
-      }
-      
-      // convert capitals into low letters
-      if (wstr[i] > 64 && wstr[i] < 91)  {
-        wstr[i] += 32; 
-      }
-    }
-
-  std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converter2;
-  return converter2.to_bytes(wstr);
-} 
-
-
 int SongDatabase::compare(std::string firstString, std::string secondString)  {
 
-    std::string str1 = convert_to_ascii(firstString);
-    std::string str2 = convert_to_ascii(secondString);
+    std::string str1 = SongBookUtils::getInstance()->convert_to_ascii(firstString);
+    std::string str2 = SongBookUtils::getInstance()->convert_to_ascii(secondString);
 
 
     for (int i = 0; i < str1.size(); i++)  {
@@ -200,6 +162,11 @@ int SongDatabase::compare(std::string firstString, std::string secondString)  {
     }
 
     return 0;
+}
+
+nlohmann::json SongDatabase::getCollection(std::string collection)
+{
+  return getSqlJson(std::format("SELECT * FROM SONGS WHERE COLLECTION = '{}';", collection));
 }
 
 
@@ -350,47 +317,4 @@ int SongDatabase::removeSong(int id)
     // TODO fatal error! There cannot be two items with same ID!
     return 2;
   }
-}
-
-
-int SongDatabase::makeBackup()
-{
-  time_t timestamp;
-  time(&timestamp);
-
-  std::string backupDir;
-  
-  
-  if (config.contains("paths") && config["paths"].contains("backup_dir"))  {
-      backupDir = config["paths"].at("backup_dir");
-    }
-    else  {
-      backupDir = ".";
-  }
-  
-  // TODO make it universal for OS
-  std::string backup_name = backupDir + "/" + "backup-" + ctime(&timestamp);
-  
-  std::string db_file_path;
-  if (config.contains("paths") && config["paths"].contains("db_file_path"))  {
-    db_file_path = config["paths"].at("db_file_path");
-  }
-  else  {
-    db_file_path = "db.sql";
-  }
-  // if the `database file` does not exist, return 1
-  if (!std::filesystem::exists(db_file_path))  {
-    return 1;
-  }
-  
-  // if the backup dir does not exist, create it
-  if (!std::filesystem::exists(backupDir))  {
-    std::cout << "creating backup dir " << backupDir << " ...\n";
-    std::filesystem::create_directories(backupDir);
-  }
-
-  std::filesystem::copy_file(db_file_path, backup_name);
-
-  return 0;
-
 }

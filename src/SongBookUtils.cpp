@@ -7,6 +7,7 @@
 SongBookUtils* SongBookUtils::_utils = nullptr;
 const char SongBookUtils::config_delimiter = '/';
 nlohmann::json SongBookUtils::config = nullptr;
+
 SongBookUtils* SongBookUtils::getInstance()
 {
   if (_utils == nullptr)  {
@@ -23,6 +24,50 @@ std::string SongBookUtils::getConfigItem(std::string _path)
   else {
     return "";
   }
+}
+
+void SongBookUtils::printSong(const std::string& no,
+                            const std::string& id, 
+                            const std::string& name, 
+                            const std::string& author, 
+                            bool has_lyrics)
+{
+  
+	std::cout << std::setw(4) << std::left << no
+            << std::setw(4) << std::left << id
+				    << std::left << alignString(name, 	' ', TITLE_WIDTH)
+				    << std::left << alignString(author, ' ', ARTIST_WIDTH)
+            << "    " << (has_lyrics ? "X" : " ")
+				    << std::endl;
+}
+
+void SongBookUtils::printSongListHeader()
+{
+  std::cout << std::string(4 + 4 + TITLE_WIDTH + ARTIST_WIDTH + 11, '+')
+			  << std::endl;	
+	std::cout << std::setw(4) << std::left << "NO"
+            << std::setw(4) << std::left << "ID"
+			      << std::setw(TITLE_WIDTH) << "Title "
+			      << std::setw(ARTIST_WIDTH) << "Artist "
+            << "Has lyrics?"
+			      << std::endl;
+	std::cout << std::string(4 + 4 + TITLE_WIDTH + ARTIST_WIDTH + 11, '+')
+			      << std::endl;
+}
+
+void SongBookUtils::printSongListBottom()
+{
+  std::cout << std::string(4 + 4 + TITLE_WIDTH + ARTIST_WIDTH+ 11, '+') << std::endl;
+}
+
+void SongBookUtils::printInteractive(const std::string& text, unsigned int indentation, bool newline)
+{
+  std::string t = "#";
+  t += std::string(indentation, '#');
+  
+  std::cout << t << " " <<  text;
+  if (newline) 
+    std::cout << std::endl;
 }
 
 std::string SongBookUtils::parseConfigPath(nlohmann::json j, std::string _path)
@@ -173,4 +218,24 @@ std::string SongBookUtils::convert_to_ascii(std::string str)  {
 void SongBookUtils::printError(std::string msg)
 {
     std::cerr << msg << std::endl;
+}
+
+/** This function returns number of characters inside string variable, regardless of character format (UNICODE/ASCII) */
+int SongBookUtils::countStringChars(const std::string& _str)
+{
+  std::wstring str = std::wstring_convert<std::codecvt_utf8<wchar_t>>()
+    .from_bytes(_str);
+  return str.size();
+}
+
+/** This function returns an aligned string with set width, regardless of characters format (UNICODE/ASCII) */
+std::string SongBookUtils::alignString(const std::string& _str, char fill, int maxWidth)
+{	
+  std::string str = "CANT DISPLAY (too long)" + std::string(maxWidth-23, fill);
+
+  if (_str.size() < maxWidth)  {
+    str = _str + std::string(TITLE_WIDTH - countStringChars(_str), fill);
+  }
+
+  return str;
 }

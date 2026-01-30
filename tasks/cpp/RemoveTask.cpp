@@ -5,6 +5,7 @@
 #include "RemoveTask.h"
 #include "json.hpp"
 #include "SongBookApp.h"
+#include "SongBookUtils.h"
 
 int RemoveTask::executeCommand(int error_code)
 {
@@ -47,7 +48,7 @@ int RemoveTask::startInteractive()
 {
 	std::string str_id;
 	int id;
-	parent->printInteractive("Type an ID of song you wish to remove");
+	SongBookUtils::getInstance()->printInteractive("Type an ID of song you wish to remove");
 	str_id = parent->getInput(1);
 
   	if (str_id == std::string(1,parent->getExitChar()))  {
@@ -58,7 +59,7 @@ int RemoveTask::startInteractive()
 			id = std::stoi(str_id);
 		}
 		catch (const std::invalid_argument& e)  {
-			parent->printInteractive(std::format("'{}' does not contain valid ID to parse!", str_id), 1);
+			SongBookUtils::getInstance()->printInteractive(std::format("'{}' does not contain valid ID to parse!", str_id), 1);
 			return INVALID_ID;
 		}
 		std::vector<std::string> s = {str_id.data()};
@@ -73,18 +74,18 @@ void RemoveTask::endInteractive(int error_code)
 	switch(error_code)
 	{
 		case SUCCESS:
-			parent->printInteractive("Song removed succesfully.", 1); break;
+			SongBookUtils::getInstance()->printInteractive("Song removed succesfully.", 1); break;
       	case OK_EXIT_CHAR:
 			break;
       	case INVALID_ID:
-			parent->printInteractive("Invalid -id passed as an argument...", 1); break;
+			SongBookUtils::getInstance()->printInteractive("Invalid -id passed as an argument...", 1); break;
       	case NO_ID:
-			parent->printInteractive("No -id passed as an argument...", 1); break;
+			SongBookUtils::getInstance()->printInteractive("No -id passed as an argument...", 1); break;
       	case DB_ERROR:
-			parent->printInteractive("Could not remove a song due to internal database error.", 1); break;
+			SongBookUtils::getInstance()->printInteractive("Could not remove a song due to internal database error.", 1); break;
       	case SONG_NOT_FOUND:
-			parent->printInteractive("Could not find this song in database, hence can't remove...", 1); break;
+			SongBookUtils::getInstance()->printInteractive("Could not find this song in database, hence can't remove...", 1); break;
 		default:
-			parent->printInteractive("Could not remove a song due to unknown error...", 1); break;
+			SongBookUtils::getInstance()->printInteractive("Could not remove a song due to unknown error...", 1); break;
 	}
 }

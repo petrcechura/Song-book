@@ -41,6 +41,8 @@ class Task : public TaskBase
      */
     int executeCommand(int error_code) override;
 
+    void executeInterractive() override; 
+
     void endInteractive(int error_code) override;
     
     /** An aux. setter for a description */
@@ -61,8 +63,6 @@ class Task : public TaskBase
     */
     int updateArgument(std::string arg, arg_store_t arg_contents={false, {}}, bool forceCreate=true);
     
-
-    
     /** Attempts to parse a command line string (arguments separation) and stores its contents into this class.
      * 
      *  Returns 0 when cmd string has successfully been parsed, otherwise returns 1.
@@ -77,12 +77,16 @@ class Task : public TaskBase
 
     bool argumentExists(const char* arg, bool checkIfValExists=false);
 
+    void AddTrigger(const char* trigger, std::string descr="No description provided");
+
     static std::string values2string(arg_store_t arg);
 
   protected:
     t_cmd* parent;
     std::string task_name;
     std::string description;
+
+    std::map<char, std::string> triggers;
     
     std::map<std::string, arg_store_t> arguments;
 
@@ -92,11 +96,18 @@ class Task : public TaskBase
 };
 
 template<class t_cmd>
+Task<t_cmd>::AddTrigger(const char* trigger, std::string descr="No description provided")
+{
+    triggers[trigger] = descr;
+}
+
+template<class t_cmd>
 Task<t_cmd>::Task(std::string cmd, t_cmd* parent, std::string descr)
 {
     this->task_name = cmd;
     this->parent = parent;
     this->description = descr;
+
 }
 
 template<class t_cmd>
@@ -129,8 +140,6 @@ int Task<t_cmd>::updateArgument(std::string arg, arg_store_t arg_contents, bool 
     }
     return 0;
 }
-
-
 
 template<class t_cmd>
 int Task<t_cmd>::parseCommand(std::string cmd_line)

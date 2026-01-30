@@ -26,6 +26,7 @@ SongBookApp::SongBookApp(nlohmann::json _config)
   add->setDescription("Adds a new song to database");
   add->updateArgument("-title");
   add->updateArgument("-artist");
+  add->updateArgument("-collection");
   add->updateArgument("-force");
 
   RemoveTask* remove = new RemoveTask("remove", this);
@@ -62,8 +63,11 @@ SongBookApp::SongBookApp(nlohmann::json _config)
   ExitTask* exit = new ExitTask("exit", this);
   exit->setDescription("Exits a program");
 
-  BackupTask* backup = new BackupTask("backup", this);
-  backup->setDescription("TODO");
+  DumpTask* dump = new DumpTask("dump", this);
+  dump->setDescription("Dumps the database in selected format into directory to be processed by pdf generation app");
+  dump->updateArgument("-format");
+  dump->updateArgument("-selection");
+  dump->updateArgument("-out_dir");
 
   TestTask* test = new TestTask("query", this);
   test->setDescription("TODO");
@@ -77,33 +81,12 @@ SongBookApp::SongBookApp(nlohmann::json _config)
   this->addTask(find);
   this->addTask(latex);
   this->addTask(exit);
-  this->addTask(backup);
   this->addTask(test);
+  this->addTask(dump);
 
   if (gather->checkSanity()) {
     this->addTask(gather);
   }
-}
-
-
-/** This function returns number of characters inside string variable, regardless of character format (UNICODE/ASCII) */
-int SongBookApp::countStringChars(const std::string& _str)
-{
-  std::wstring str = std::wstring_convert<std::codecvt_utf8<wchar_t>>()
-    .from_bytes(_str);
-  return str.size();
-}
-
-/** This function returns an aligned string with set width, regardless of characters format (UNICODE/ASCII) */
-std::string SongBookApp::alignString(const std::string& _str, char fill, int maxWidth)
-{	
-  std::string str = "CANT DISPLAY (too long)" + std::string(maxWidth-23, fill);
-
-  if (_str.size() < maxWidth)  {
-    str = _str + std::string(TITLE_WIDTH - SongBookApp::countStringChars(_str), fill);
-  }
-
-  return str;
 }
 
 void SongBookApp::startHook()
@@ -145,47 +128,3 @@ void SongBookApp::executeCommands(std::string commands_string, bool exitWhenDone
     }
 }
 
-
-void SongBookApp::printSong(const std::string& no,
-                            const std::string& id, 
-                            const std::string& name, 
-                            const std::string& author, 
-                            bool has_lyrics)
-{
-  
-	std::cout << std::setw(4) << std::left << no
-            << std::setw(4) << std::left << id
-				    << std::left << SongBookApp::alignString(name, 	' ', TITLE_WIDTH)
-				    << std::left << SongBookApp::alignString(author, ' ', ARTIST_WIDTH)
-            << "    " << (has_lyrics ? "X" : " ")
-				    << std::endl;
-}
-
-void SongBookApp::printSongListHeader()
-{
-  std::cout << std::string(4 + 4 + TITLE_WIDTH + ARTIST_WIDTH + 11, '+')
-			  << std::endl;	
-	std::cout << std::setw(4) << std::left << "NO"
-            << std::setw(4) << std::left << "ID"
-			      << std::setw(TITLE_WIDTH) << "Title "
-			      << std::setw(ARTIST_WIDTH) << "Artist "
-            << "Has lyrics?"
-			      << std::endl;
-	std::cout << std::string(4 + 4 + TITLE_WIDTH + ARTIST_WIDTH + 11, '+')
-			      << std::endl;
-}
-
-void SongBookApp::printSongListBottom()
-{
-  std::cout << std::string(4 + 4 + TITLE_WIDTH + ARTIST_WIDTH+ 11, '+') << std::endl;
-}
-
-void SongBookApp::printInteractive(const std::string& text, unsigned int indentation, bool newline)
-{
-  std::string t = "#";
-  t += std::string(indentation, '#');
-  
-  std::cout << t << " " <<  text;
-  if (newline) 
-    std::cout << std::endl;
-}

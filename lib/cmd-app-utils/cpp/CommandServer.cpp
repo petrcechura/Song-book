@@ -4,22 +4,13 @@
 #include <sstream>
 #include "../h/CommandServer.h"
 #include "../h/TaskBase.h"
+#include <ncurses.h>
 
 int CommandServer::addTask(TaskBase* task)
 {
   tasks[task->getCommandString()] = task;
 
   return 0;
-}
-
-std::string CommandServer::getInput(unsigned int indentation)
-{
-  std::string user_input;
-
-  std::cout << std::string(indentation*2, ' ') + ">> ";
-	std::getline(std::cin, user_input);
-
-  return user_input;
 }
 
 void CommandServer::unknownInput()
@@ -118,4 +109,14 @@ int CommandServer::executeTaskString(std::string task_string)
     return 1;
   }
   return 0;
+}
+
+std::string CommandServer::getInput(unsigned int indentation)
+{
+  std::string user_input;
+
+  std::cout << std::string(indentation*2, ' ') + ">> ";
+	std::getline(std::cin, user_input);
+
+  return user_input;
 }

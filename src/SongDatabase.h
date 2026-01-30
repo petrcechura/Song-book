@@ -26,10 +26,11 @@ class SongDatabase
             std::string type;
         } t_property;
 
-        t_property properties[3] = {
+        t_property properties[4] = {
                 {"TITLE",  "TEXT NOT NULL"},
                 {"ARTIST", "TEXT NOT NULL"},
-                {"LYRICS", "TEXT"}
+                {"LYRICS", "TEXT"},
+                {"COLLECTION", "TEXT"}
         };
 
         std::string order = "ID";
@@ -45,19 +46,13 @@ class SongDatabase
 
         int addSong(nlohmann::json json_string, bool override=false);
         int removeSong(int id);
-        /** Creates a backup file of a json `database` into `backupDir`
-         *
-         *  Backup file has the following name format: <backup-(current time&date)>
-         */
-        int makeBackup();
         /** Takes a `regex` as a argument, 
          * returns json representation of songs that match this regex */
         nlohmann::json findSong(std::string pattern);
 
-        std::string convert_to_ascii(std::string str);
-
         nlohmann::json getSong(int id);
         nlohmann::json getSong(std::string title, std::string artist="");
+        nlohmann::json getCollection(std::string collection);
 
         bool songExists(std::string title, std::string artist="");
         bool songExists(int id);

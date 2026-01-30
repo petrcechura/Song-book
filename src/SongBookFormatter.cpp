@@ -1,9 +1,12 @@
 #include <iostream>
 #include <string>
 #include <sstream>
+#include <codecvt>
+#include <locale>
 #include <curl/curl.h>
 #include <format>
 #include <fstream>
+#include <map>
 #include "json.hpp"
 #include "SongBookFormatter.h"
 #include "SongBookUtils.h"
@@ -60,24 +63,77 @@ int BardFormatter::generateSongBook(const char* output_file)
 
 	std::string bard_dir = SongBookUtils::getInstance()->getConfigItem("paths/bard_dir");
 	
-	if (bard_dir != "") {
-		if (SongBookUtils::getInstance()->systemCommandExists(std::format("{}/bard", bard_dir).c_str()))  {
-			std::ofstream tomlFile(std::format("{}/bard.toml", bard_dir).c_str());
-			tomlFile << toml_oss.str();
-			tomlFile.close();
-			system(std::format("(cd {} && ./bard make )", bard_dir).c_str());
-		}
-		else {
-			std::cout << "Command `bard` not found in bard dir" << std::endl;
-		}
-		
+	if (!bard_dir.empty()) {
+		std::ofstream tomlFile(std::format("{}/bard.toml", bard_dir).c_str());
+		tomlFile << toml_oss.str();
+		tomlFile.close();
 	}
 	else {
-		std::cout << "bard dir not found under `paths/bard_dir`" << std::endl;
+		SongBookUtils::getInstance()->printError("bard dir not found under `paths/bard_dir`");
+		return 1;
 	}
 
     return 0;
 }
+
+// TODO remove
+std::string BardFormatter::processChordLines(std::string lyrics)
+{
+    bool is_chord_line = false;
+
+    std::map<int, std::string> chord_marks;
+
+    std::string chord = "";
+    int mark = 0;
+    std::string lines = "";
+
+    std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> conv;
+    std::u32string width_lyrics = conv.from_bytes(lyrics);
+
+    int c_num = 0;
+    for (char32_t c : width_lyrics)
+    {
+        std::string utf8_char = conv.to_bytes(c);
+
+        if (c == U'\n') {
+            if (!is_chord_line) {
+                lines += "\n";
+                chord_marks.clear();
+            }
+            c_num = 0;
+            is_chord_line = false;
+        }
+        else if (c == U'$') {
+            is_chord_line = true;
+        }
+        else {
+            if (is_chord_line) {
+                if (c == U' ') {
+                    if (!chord.empty()) {
+                        chord_marks[mark] = chord;
+                        chord.clear();
+                    }
+                }
+                else {
+                    if (chord.empty())
+                        mark = c_num;
+                    chord += utf8_char;
+                }
+            }
+            else {
+                if (chord_marks.count(c_num)) {
+                    lines += "`" + chord_marks[c_num] + "`" + utf8_char;
+                }
+                else {
+                    lines += utf8_char;
+                }
+            }
+        }
+        c_num++;
+    }
+    return lines;
+}
+
 
 std::string BardFormatter::parseMarkdown(std::string markdown_lyrics)
 {
@@ -93,13 +149,13 @@ std::string BardFormatter::parseMarkdown(std::string markdown_lyrics)
     	{"messages", {
         	{{"role", "system"},
          		{"content", 
-					"You are a strict formatter for songbook application. Input is lyrics with chords, you parse it into different syntax with lyrics only.\
+					"You are a strict formatter for songbook application. Input is lyrics with chords, you parse it into different syntax.\
 						Always preserve newlines. \
 						Input syntax: \
 						- there are chord lines and lyrics lines \
 						Output syntax: \
 						- Copy the lyrics lines. \
-						- Ignore the chord lines.\
+						- Don't copy the chord lines \
 						Other Rules: \
 						1. Verse begins with number and dot (e.g., '1. ...'). \
 						2. Verses are enumerated (first starts with 1., then 2. ) \
@@ -107,7 +163,7 @@ std::string BardFormatter::parseMarkdown(std::string markdown_lyrics)
 						4. Chorus begins with '>' (e.g., '> ...'). \
 						5. If the chorus with 'ref', it's replace by '>' \
 						6. Preserve lyric words and line breaks exactly. \
-						7. Output only the transformed lyrics, no explanations"}},
+						8. Output only the transformed lyrics, no explanations"}},
             	{{"role", "user"},
             	{"content", markdown_lyrics}}
     		}}
@@ -147,7 +203,7 @@ std::string BardFormatter::parseMarkdown(std::string markdown_lyrics)
 	if (!read_json.empty())  {
 		if (read_json.contains("error"))  {
 			if (read_json["error"].contains("message"))  {
-				std::cout << "** " << read_json["error"].at("message") << " **" << std::endl;
+				SongBookUtils::getInstance()->printError(std::format("** {} **", read_json["error"].at("message").get<std::string>()));
 			}
 			// ai response is error
 			//return AI_ERROR_RESPONSE;

@@ -15,6 +15,7 @@ public:
   };
 
   int executeCommand(int error_code) override;
+  void endInteractive(int error_code) override;
 
   /** Replaces special charactes in string to printable alternatives. */
   std::string getPrintableString(std::string str);
@@ -23,5 +24,10 @@ public:
 private:
   std::filesystem::path out_path = "database.pdf";
   SongBookFormatter* formatter;
+
+  enum {
+    SUCCESS,
+    GENERATE_SONGBOOK_FAILED
+  } ErrorCode;
 
 };
