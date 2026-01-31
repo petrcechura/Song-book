@@ -22,9 +22,9 @@ class SongBookApp : public WindowServer
   public:
     /** A default contructor that creates a songbook database instance
      *  and adds certains tasks to a *task container* */
-    SongBookApp(nlohmann::json _config) {};
+    SongBookApp(nlohmann::json _config);
     SongBookApp() {};
-    virtual ~SongBookApp();
+    virtual ~SongBookApp() = default;
     
     /** Returns an instance of a database, allowing tasks to operate with that.
      *
@@ -38,9 +38,9 @@ class SongBookApp : public WindowServer
 
   protected:
     /** A `startHook()` implementation */
-    void startHook() override;
+    virtual void StartHook() override;
     /** A `stopHook()` implementation */
-    void stopHook() override;
+    virtual void StopHook() override;
 
     //====================
     // DATABASE MANAGEMENT

@@ -16,6 +16,7 @@ public:
       switch(command)  {
         case 'p': doPrint();
                   break;
+        case 'l': doPrintLog();
         default: return 1;
       }
 
@@ -32,6 +33,15 @@ public:
         cnt++;
       }
     };
+
+    void doPrintLog()  {
+      if (this->windows.count("Log Screen") > 0)  {
+        std::string s = "Written " + std::to_string(cnt);
+        windows["Log Screen"]->Clear();
+        windows["Log Screen"]->Print(s);
+        windows["Log Screen"]->Refresh();
+      }
+    }
 
 protected:
     int cnt = 0;

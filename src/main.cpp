@@ -3,6 +3,8 @@
 #include <fstream>
 #include "json.hpp"
 #include "SongBookUtils.h"
+#include "WindowServer.h"
+#include "Window.h"
 
 
 int main(int argc, char* argsv[])
@@ -52,7 +54,9 @@ int main(int argc, char* argsv[])
     }
   }
   
+
   SongBookApp* app = new SongBookApp(data);
+
   SongBookUtils::getInstance()->setJson(data);
   
   
@@ -62,7 +66,10 @@ int main(int argc, char* argsv[])
     std::cerr.rdbuf(error_file.rdbuf());
   }
 
+  app->Init();
+  app->Loop();
 
+  /*
   // *************
   // argument -cmd
   // *************
@@ -86,7 +93,7 @@ int main(int argc, char* argsv[])
       app->Loop();
     }
   }
-    
+    */
     delete app;
     
     return 0;

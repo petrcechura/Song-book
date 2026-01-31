@@ -8,7 +8,7 @@
 #include "json.hpp"
 #include <ncurses.h>
 
-int ListTask::executeCommand(int error_code)
+int ListTask::Execute(char command)
 { 
 	nlohmann::json data = parent->getDatabase()->getJson();
 
@@ -26,11 +26,4 @@ int ListTask::executeCommand(int error_code)
 	SongBookUtils::getInstance()->printSongListBottom();
 
 	return 0;
-}
-
-int startInteractive()
-{
-	initscr();
-
-	
 }

@@ -9,7 +9,7 @@
 #include <vector>
 #include "WindowServer.h"
 
-/*
+
 SongBookApp::SongBookApp(nlohmann::json _config)
 {
   this->config = _config.size()>0 ? _config : nlohmann::json();
@@ -26,8 +26,8 @@ SongBookApp::SongBookApp(nlohmann::json _config)
   // ==================================
   // ====== INIT WINDOWS ==============
   // ==================================
-  Window* main_window = new Window("Main Screen", 40, 15, 10, 10);
-  Window* log_window = new Window("Log Screen", 40, 10, 60, 10);
+  Window* main_window = new Window("Main Screen", 100, 20, 5, 2);
+  Window* log_window = new Window("Log Screen", 100, 10, 5, 23);
 
   this->AddWindow(main_window);
   this->AddWindow(log_window);
@@ -107,13 +107,12 @@ SongBookApp::SongBookApp(nlohmann::json _config)
   //  this->addTask(gather);
   //}
 }
-*/
-void SongBookApp::startHook()
+void SongBookApp::StartHook()
 {
 
 }
 
-void SongBookApp::stopHook()
+void SongBookApp::StopHook()
 {
 	std::cout << "exiting program..." << std::endl;
 	exit(0);

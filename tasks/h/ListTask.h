@@ -1,15 +1,16 @@
 #include <string>
 #include <filesystem>
-#include "cmdapputils.h"
+#include "WindowServer.h"
+#include "Window.h"
+#include "WTask.h"
 
 class SongBookApp;
 
-class ListTask : public Task<SongBookApp>
+class ListTask : public WTask<WindowServer>
 {
 public:
-  ListTask(std::string cmd, SongBookApp* parent) 
-    : Task<SongBookApp>(cmd, parent) {};
-
+    ListTask(std::string name, WindowServer* parent, std::string description) 
+      : WTask<WindowServer>(name, parent, description) {};
 
   void printSong(const std::string& id, const std::string& name, const std::string& author);
   
@@ -19,6 +20,6 @@ public:
   /** This function returns number of characters inside string variable, regardless of character format (UNICODE/ASCII) */
   inline int countStringChars(const std::string& _str);
 
-    int executeCommand(int error_code) override;
+  virtual int executeCommand(char command) override;
 
 };
