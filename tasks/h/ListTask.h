@@ -6,20 +6,21 @@
 
 class SongBookApp;
 
-class ListTask : public WTask<WindowServer>
+class ListTask : public WTask<SongBookApp>
 {
 public:
-    ListTask(std::string name, WindowServer* parent, std::string description) 
-      : WTask<WindowServer>(name, parent, description) {};
+  ListTask(std::string name, SongBookApp* parent, std::string description) 
+    : WTask<SongBookApp>(name, parent, description) { up_no = 0; down_no = MAX_ITEMS_PER_PAGE; };
+  virtual int Execute(char command) override;
+  virtual int ParseCommand(std::string cmd_line) override { return 0; };
+  void moveUp();
+  void moveDown();
+  void listSongs();
 
-  void printSong(const std::string& id, const std::string& name, const std::string& author);
-  
-  /** This function returns an aligned string with set width, regardless of characters format (UNICODE/ASCII) */
-  inline std::string alignString(const std::string& _str, char fill = ' ', int maxWidth = 30);
-
-  /** This function returns number of characters inside string variable, regardless of character format (UNICODE/ASCII) */
-  inline int countStringChars(const std::string& _str);
-
-  virtual int executeCommand(char command) override;
-
+private:
+  int select;
+  int up_no;
+  int down_no;
+  const int MAX_ITEMS_PER_PAGE = 17;
+  int current_id;
 };

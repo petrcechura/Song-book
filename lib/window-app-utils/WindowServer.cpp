@@ -3,6 +3,7 @@
 #include "WindowServer.h"
 #include "TaskBase.h"
 #include "Window.h"
+#include <locale.h>
 #include <iostream>
 
 
@@ -26,6 +27,7 @@ WindowServer::WindowServer()
 
 void WindowServer::Init()
 {   
+    setlocale(LC_ALL, "");
     initscr();
     noecho();
     cbreak();

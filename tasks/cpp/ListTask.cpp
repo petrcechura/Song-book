@@ -8,22 +8,75 @@
 #include "json.hpp"
 #include <ncurses.h>
 
-int ListTask::Execute(char command)
+void ListTask::listSongs()
 { 
 	nlohmann::json data = parent->getDatabase()->getJson();
 
-	SongBookUtils::getInstance()->printSongListHeader();
+	windows["Main Screen"]->Clear();
+
+	std::string s = SongBookUtils::getInstance()->printSongListHeader();
+	windows["Main Screen"]->Print(s, 21, -1, true);
 	
+	int i = 0;
 	for(const auto& [key, item] : data.items())  {
-		std::string title = item.count("TITLE") ? item.at("TITLE") : "NULL";
-		std::string artist = item.count("ARTIST") ? item.at("ARTIST") : "NULL";
-		std::string id = item.count("ID") ? item.at("ID") : "NULL";
-		std::string no = item.count("NO") ? item.at("NO") : "NULL";
-		bool has_lyrics = item.count("LYRICS") ? !(item["LYRICS"] == "NULL") : false;
-    	SongBookUtils::getInstance()->printSong(no, id, title, artist, has_lyrics);
+		if (i > up_no && i < down_no)  {
+			std::string title = item.count("TITLE") ? item.at("TITLE") : "NULL";
+			std::string artist = item.count("ARTIST") ? item.at("ARTIST") : "NULL";
+			std::string id = item.count("ID") ? item.at("ID") : "NULL";
+			std::string no = item.count("NO") ? item.at("NO") : "NULL";
+			bool has_lyrics = item.count("LYRICS") ? !(item["LYRICS"] == "NULL") : false;
+
+			if (i == select)  {
+				windows["Main Screen"]->Print(SongBookUtils::getInstance()->printSong(no, title, artist, has_lyrics), 1, 1, true);
+				this->current_id = stoi(id);
+			}
+			else {
+				windows["Main Screen"]->Print(SongBookUtils::getInstance()->printSong(no, title, artist, has_lyrics));
+			}
+		}
+		i++;
 	}
 
-	SongBookUtils::getInstance()->printSongListBottom();
+	windows["Main Screen"]->Refresh();
+}
 
-	return 0;
+int ListTask::Execute(char command)
+{
+      switch(command)  {
+        case 'w': moveUp();
+				  listSongs();
+                  break;
+        case 's': moveDown();
+				  listSongs();
+				  break;
+        default: return 1;
+      }
+
+      return 0;
+}
+
+void ListTask::moveDown()
+{	
+	static int SONGS_CNT = parent->getDatabase()->getJson().size();
+
+	if (this->select < SONGS_CNT-1)  {
+		this->select++;
+	}
+
+	if (this->select == down_no)  {
+		down_no++;
+		up_no++;
+	}
+}
+
+void ListTask::moveUp()
+{
+	if (this->select > 0)  {
+		this->select--;
+	}
+	
+	if (this->select == up_no)  {
+		up_no--;
+		down_no--;
+	}
 }

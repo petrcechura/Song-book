@@ -1,5 +1,6 @@
 #include <string>
 #include <iostream>
+#include <sstream>
 #include "SongBookUtils.h"
 #include "json.hpp"
 #include <filesystem>
@@ -26,38 +27,39 @@ std::string SongBookUtils::getConfigItem(std::string _path)
   }
 }
 
-void SongBookUtils::printSong(const std::string& no,
-                            const std::string& id, 
-                            const std::string& name, 
-                            const std::string& author, 
-                            bool has_lyrics)
+std::string SongBookUtils::printSong(const std::string& no,
+                                     const std::string& name, 
+                                     const std::string& author, 
+                                     bool has_lyrics)
 {
-  
-	std::cout << std::setw(4) << std::left << no
-            << std::setw(4) << std::left << id
-				    << std::left << alignString(name, 	' ', TITLE_WIDTH)
-				    << std::left << alignString(author, ' ', ARTIST_WIDTH)
-            << "    " << (has_lyrics ? "X" : " ")
-				    << std::endl;
+ 
+  std::ostringstream string_cont;
+	string_cont << std::setw(4) << std::left << no
+				      << std::left << alignString(name, 	' ', TITLE_WIDTH)
+				      << std::left << alignString(author, ' ', ARTIST_WIDTH)
+              << "    " << (has_lyrics ? "X" : " ");
+
+  return string_cont.str().c_str();
 }
 
-void SongBookUtils::printSongListHeader()
+std::string SongBookUtils::printSongListHeader()
 {
-  std::cout << std::string(4 + 4 + TITLE_WIDTH + ARTIST_WIDTH + 11, '+')
-			  << std::endl;	
-	std::cout << std::setw(4) << std::left << "NO"
-            << std::setw(4) << std::left << "ID"
-			      << std::setw(TITLE_WIDTH) << "Title "
-			      << std::setw(ARTIST_WIDTH) << "Artist "
-            << "Has lyrics?"
-			      << std::endl;
-	std::cout << std::string(4 + 4 + TITLE_WIDTH + ARTIST_WIDTH + 11, '+')
-			      << std::endl;
+  std::ostringstream string_cont;
+
+	string_cont << std::setw(4) << std::left << "NO"
+			        << std::setw(TITLE_WIDTH) << "Title "
+			        << std::setw(ARTIST_WIDTH) << "Artist "
+              << "Has lyrics?";
+
+  return string_cont.str().c_str();
 }
 
-void SongBookUtils::printSongListBottom()
+std::string SongBookUtils::printSongListBottom()
 {
-  std::cout << std::string(4 + 4 + TITLE_WIDTH + ARTIST_WIDTH+ 11, '+') << std::endl;
+  std::ostringstream string_cont;
+  string_cont << std::string(4 + 4 + TITLE_WIDTH + ARTIST_WIDTH+ 11, '-') << std::endl;
+
+  return string_cont.str().c_str();
 }
 
 void SongBookUtils::printInteractive(const std::string& text, unsigned int indentation, bool newline)

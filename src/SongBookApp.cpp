@@ -6,6 +6,7 @@
 #include "SongBookUtils.h"
 #include "json.hpp"
 #include "PrintTask.h"
+#include "ListTask.h"
 #include <vector>
 #include "WindowServer.h"
 
@@ -17,17 +18,17 @@ SongBookApp::SongBookApp(nlohmann::json _config)
 
   std::string exit_char = SongBookUtils::getInstance()->getConfigItem("commons/exit_char");
   if (exit_char.empty())  {
-    this->EXIT_CHAR = '-';
+    this->EXIT_CHAR = char(27);
   } 
   else {
-    this->EXIT_CHAR = exit_char[0];
+    this->EXIT_CHAR = char(exit_char[0]);
   }
 
   // ==================================
   // ====== INIT WINDOWS ==============
   // ==================================
-  Window* main_window = new Window("Main Screen", 100, 20, 5, 2);
-  Window* log_window = new Window("Log Screen", 100, 10, 5, 23);
+  Window* main_window = new Window("Main Screen", 110, 20, 5, 2);
+  Window* log_window = new Window("Log Screen", 110, 10, 5, 23);
 
   this->AddWindow(main_window);
   this->AddWindow(log_window);
@@ -36,10 +37,12 @@ SongBookApp::SongBookApp(nlohmann::json _config)
   print_task->AddWindow(main_window);
   print_task->AddWindow(log_window);
 
-
-
+  ListTask* list_task = new ListTask("List", this, "descr");
+  list_task->AddWindow(main_window);
+  list_task->AddWindow(log_window);
 
   this->AddTask(print_task);
+  this->AddTask(list_task);
 
   //AddTask* add = new AddTask("add", this);
   //add->setDescription("Adds a new song to database");

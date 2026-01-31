@@ -3,9 +3,13 @@
 
 #include <string>
 #include <ncurses.h>
+#include <cwchar>
 
 class Window
 {
+
+public:
+
 private:
     int width;
     int height;
@@ -14,19 +18,13 @@ private:
     std::string name;
     WINDOW* win;
 
-    typedef enum {
-        BLACK,
-        BLUE,
-        WHITE,
-        CYAN,
-        YELLOW
-    } textColor_t;
 public:
     Window(std::string name, int width, int height, int pos_x, int pos_y);
 
+    std::wstring utf8_to_wstring(const std::string& s);
 
     void Print(const std::string& txt, bool newline=true);
-    void Print(const std::string& txt, textColor_t background_color, textColor_t foreground_color, bool bold = false);
+    void Print(const std::string& txt, short background_color, short foreground_color, bool bold = false);
     void Clear();
 
     void Init();
@@ -39,9 +37,7 @@ public:
     int GetWidth() { return width; };
     int GetHeight() { return height; };
 
-
     std::string GetName() { return name; };
-
 };
 
 #endif

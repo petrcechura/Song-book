@@ -69,7 +69,7 @@ int main(int argc, char* argsv[])
   app->Init();
   app->Loop();
 
-  /*
+  
   // *************
   // argument -cmd
   // *************
@@ -93,7 +93,7 @@ int main(int argc, char* argsv[])
       app->Loop();
     }
   }
-    */
+    
     delete app;
     
     return 0;

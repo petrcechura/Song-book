@@ -57,9 +57,9 @@ class SongBookUtils
     // ====== PRINTING METHODS ======
     // ==============================
 
-    static void printSong(const std::string& no, const std::string& id, const std::string& name, const std::string& author, bool has_lyrics);
-    static void printSongListHeader();
-    static void printSongListBottom();   
+    static std::string printSong(const std::string& no, const std::string& name, const std::string& author, bool has_lyrics);
+    static std::string printSongListHeader();
+    static std::string printSongListBottom();   
     static void printInteractive(const std::string& text, unsigned int indentation=0, bool newline=true);
     /** Prints the error message into std::cerr */
     static void printError(std::string msg);

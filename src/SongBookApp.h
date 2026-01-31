@@ -50,7 +50,6 @@ class SongBookApp : public WindowServer
     nlohmann::json config;
 
     std::string order = "ID";
-
 };
 
 #endif

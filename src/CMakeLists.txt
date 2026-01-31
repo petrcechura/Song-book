@@ -28,6 +28,11 @@ target_include_directories(songbookapp PRIVATE ${CURSES_INCLUDE_DIRS})
 target_include_directories(songbookapp PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../lib/json)
 target_include_directories(songbookapp PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../tasks/h)
 
+target_sources(songbookapp
+    PUBLIC ../tasks/h/ListTask.h
+    PRIVATE ../tasks/cpp/ListTask.cpp
+)
+
 target_link_libraries(songbookapp 
     PRIVATE 
         SQLite::SQLite3
