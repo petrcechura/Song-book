@@ -30,7 +30,9 @@ target_include_directories(songbookapp PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../tas
 
 target_sources(songbookapp
     PUBLIC ../tasks/h/ListTask.h
+    PUBLIC ../tasks/h/CRUDTask.h
     PRIVATE ../tasks/cpp/ListTask.cpp
+    PRIVATE ../tasks/cpp/CRUDTask.cpp
 )
 
 target_link_libraries(songbookapp 

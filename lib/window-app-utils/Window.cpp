@@ -79,6 +79,22 @@ void Window::Print(const std::string& txt, bool newline)
     wrefresh(win);
 }
 
+std::string Window::GetString(int max_length)
+{   
+    if (max_length > 100 || max_length < 1)  {
+        std::cerr << "max_length cannot exceed 100 for memory safety reason!" << std::endl;
+        return "";
+    }
+
+    echo();
+
+    char input[100];
+
+    wgetnstr(this->win, input, 99);   // Read string
+    noecho();
+
+    return std::string(input);
+}
 
 
 void Window::Init()

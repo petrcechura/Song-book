@@ -22,6 +22,7 @@ class SongBookUtils
     // =============================
 
     static std::string getConfigItem(std::string _path);
+    static void setConfigItem(std::string _path, std::string item);
     static int setJson(nlohmann::json _json) { config = _json; return 0; };
     static nlohmann::json getJson() {return config; };
 
@@ -73,7 +74,7 @@ class SongBookUtils
     SongBookUtils() {};
     static const char config_delimiter;
 
-    static std::string parseConfigPath(nlohmann::json j, std::string _path);
+    static std::string* parseConfigPath(nlohmann::json* j, std::string _path);
 };
 
 

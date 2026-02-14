@@ -20,12 +20,26 @@ SongBookUtils* SongBookUtils::getInstance()
 std::string SongBookUtils::getConfigItem(std::string _path)
 {
   if (config != nullptr) {
-    return parseConfigPath(config, _path);
+    std::string* ptr = parseConfigPath(&config, _path);
+
+    if (ptr)  {
+      return *(ptr);
+    }
   }
-  else {
-    return "";
+  return "";
+}
+
+void SongBookUtils::setConfigItem(std::string _path, std::string item)
+{
+  if (config != nullptr)  {
+    std::string* ptr = parseConfigPath(&config, _path);
+
+    if (ptr)  {
+      *(ptr) = item;
+    }
   }
 }
+
 
 std::string SongBookUtils::printSong(const std::string& no,
                                      const std::string& name, 
@@ -72,7 +86,7 @@ void SongBookUtils::printInteractive(const std::string& text, unsigned int inden
     std::cout << std::endl;
 }
 
-std::string SongBookUtils::parseConfigPath(nlohmann::json j, std::string _path)
+std::string* SongBookUtils::parseConfigPath(nlohmann::json* j, std::string _path)
 {
   std::string item = "";
   bool del = false;
@@ -85,24 +99,24 @@ std::string SongBookUtils::parseConfigPath(nlohmann::json j, std::string _path)
     item += _path[i];
   }
   _path.erase(0, i+1);
-  if (j.contains(item))  {
+  if (j->contains(item))  {
     if (del)  {
-      return parseConfigPath(j[item], _path);
+      return parseConfigPath(&(j->at(item)), _path);
     }
     else {
       std::string ret;
       try {
         // no other than string argument is allowed!
-        ret = j[item].get<std::string>();
+        ret = j->at(item).get<std::string>();
       }
       catch (const std::exception& e)  {
         ret = "";
       }
-      return ret;
+      return j->at(item).get_ptr<std::string*>();
     } 
   }
   else {
-    return "";
+    return nullptr;
   }
 }
 

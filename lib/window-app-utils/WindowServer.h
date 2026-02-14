@@ -8,7 +8,6 @@
 #include "json.hpp"
 #include "TaskBase.h"
 
-
 class WindowServer
 {
 public:

@@ -43,11 +43,12 @@ void WindowServer::Loop()
 {
     int c = 'x';
 
+    int lock = 0;
     while(c != this->EXIT_CHAR) {
         c = getch();
 
         for (auto const& [name, task] : tasks)  {
-            task->Execute(c);
+            lock = task->Execute(c);
         }
     }
 

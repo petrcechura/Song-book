@@ -9,8 +9,7 @@ class TaskBase {
     virtual int Execute(char command) = 0;
     virtual std::string GetName() = 0;
     virtual std::string GetDescription() = 0;
+    //virtual void ChangeConfig(nlohmann::json& config) = 0;
 };
-
-
 
 #endif

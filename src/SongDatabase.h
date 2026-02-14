@@ -26,11 +26,10 @@ class SongDatabase
             std::string type;
         } t_property;
 
-        t_property properties[4] = {
+        t_property properties[3] = {
                 {"TITLE",  "TEXT NOT NULL"},
                 {"ARTIST", "TEXT NOT NULL"},
-                {"LYRICS", "TEXT"},
-                {"COLLECTION", "TEXT"}
+                {"LYRICS", "TEXT"}
         };
 
         std::string order = "ID";

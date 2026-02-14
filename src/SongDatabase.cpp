@@ -214,7 +214,15 @@ int SongDatabase::addSong(nlohmann::json json_string, bool override)  {
       }
       query += ");";
     }
-    int exit = sqlite3_exec(DB, query.c_str(), sql_cb, nullptr, nullptr);
+
+    std::cerr << query.c_str() << std::endl;
+
+    char* messageError;
+    int exit = sqlite3_exec(DB, query.c_str(), sql_cb, nullptr, &messageError);
+
+    if (exit)  {
+      std::cerr << messageError << std::endl;
+    }
 
     return exit;
 }

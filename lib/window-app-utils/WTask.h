@@ -6,6 +6,7 @@
 #include <string>
 #include <functional>
 #include "TaskBase.h"
+#include "json.hpp"
 #include "WindowServer.h"
 #include <iostream>
 
@@ -25,6 +26,7 @@ public:
     virtual std::string GetName() override;
     virtual std::string GetDescription() override;
     virtual int ParseCommand(std::string cmd_line) override;
+    //virtual void ChangeConfig(nlohmann::json config) override;
     
     void AddWindow(Window* window);
 
@@ -52,6 +54,12 @@ int WTask<t_server>::Execute(char command)
 
     return 0;
 }
+
+//template<class t_server>
+//int WTask<t_server>::ChangeConfig(nlohmann::json& config) 
+//{
+//    return 0;
+//}
 
 template<class t_server>
 std::string WTask<t_server>::GetName() 

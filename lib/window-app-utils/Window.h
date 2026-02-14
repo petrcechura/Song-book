@@ -25,6 +25,7 @@ public:
 
     void Print(const std::string& txt, bool newline=true);
     void Print(const std::string& txt, short background_color, short foreground_color, bool bold = false);
+    std::string GetString(int max_length=10);
     void Clear();
 
     void Init();
