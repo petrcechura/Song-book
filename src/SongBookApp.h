@@ -22,8 +22,7 @@ class SongBookApp : public WindowServer
   public:
     /** A default contructor that creates a songbook database instance
      *  and adds certains tasks to a *task container* */
-    SongBookApp(nlohmann::json _config);
-    SongBookApp() {};
+    SongBookApp();
     virtual ~SongBookApp() = default;
     
     /** Returns an instance of a database, allowing tasks to operate with that.
@@ -47,7 +46,6 @@ class SongBookApp : public WindowServer
     //====================
     /** songbook database instance */ 
     SongDatabase* database;
-    nlohmann::json config;
 
     std::string order = "ID";
 };

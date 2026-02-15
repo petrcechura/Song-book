@@ -22,5 +22,4 @@ private:
   int up_no;
   int down_no;
   const int MAX_ITEMS_PER_PAGE = 17;
-  int current_id;
 };

@@ -28,7 +28,7 @@ void ListTask::listSongs()
 
 			if (i == select)  {
 				windows["Main Screen"]->Print(SongBookUtils::getInstance()->printSong(no, title, artist, has_lyrics), 1, 1, true);
-				this->current_id = stoi(id);
+				SongBookUtils::getInstance()->setConfigItem("workspace/current_id", id);
 			}
 			else {
 				windows["Main Screen"]->Print(SongBookUtils::getInstance()->printSong(no, title, artist, has_lyrics));
@@ -57,9 +57,9 @@ int ListTask::Execute(char command)
 
 void ListTask::moveDown()
 {	
-	static int SONGS_CNT = parent->getDatabase()->getJson().size();
+	int song_cnt = stoi(SongBookUtils::getInstance()->getConfigItem("workspace/song_count"));
 
-	if (this->select < SONGS_CNT-1)  {
+	if (this->select < song_cnt-1)  {
 		this->select++;
 	}
 

@@ -12,18 +12,11 @@
 #include "WindowServer.h"
 
 
-SongBookApp::SongBookApp(nlohmann::json _config)
+SongBookApp::SongBookApp()
 {
-  this->config = _config.size()>0 ? _config : nlohmann::json();
-  database = new SongDatabase(this->config);
+  this->database = new SongDatabase();
 
-  std::string exit_char = SongBookUtils::getInstance()->getConfigItem("commons/exit_char");
-  if (exit_char.empty())  {
-    this->EXIT_CHAR = char(27);
-  } 
-  else {
-    this->EXIT_CHAR = char(exit_char[0]);
-  }
+  this->EXIT_CHAR = char(27);
 
   // ==================================
   // ====== INIT WINDOWS ==============
@@ -54,7 +47,7 @@ SongBookApp::SongBookApp(nlohmann::json _config)
   this->AddTask(crud_task);
 
   // set up config
-  std::string song_cnt = std::to_string(getDatabase()->getJson().size());
+  std::string song_cnt = std::to_string(this->database->getJson().size());
   SongBookUtils::setConfigItem("workspace/song_count", song_cnt);
 
 }

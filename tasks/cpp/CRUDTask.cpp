@@ -23,19 +23,84 @@ int CRUDTask::Execute(char command)
 
 void CRUDTask::modifySong()
 {
-	windows["Log Screen"]->Print("`modifySong` feature not yet implemented!");
-	return;
+
+	windows["Log Screen"]->Clear();
+	int id = stoi(SongBookUtils::getInstance()->getConfigItem("workspace/current_id", "-1"));
+
+	if (parent->getDatabase()->songExists(id))  {
+		nlohmann::json song = parent->getDatabase()->getSong(id);
+
+		windows["Log Screen"]->Print(std::format("Modifying a song: ({}, {})", song["TITLE"].get<std::string>(), song["ARTIST"].get<std::string>()));
+		windows["Log Screen"]->Print("Type a new song title (leave blank for no change)");
+		std::string title = windows["Log Screen"]->GetString();
+
+		if (!title.empty())  {
+			song["TITLE"] = title;
+		}
+
+		windows["Log Screen"]->Print("Type a new song artist (leave blank for no change)");
+		std::string artist = windows["Log Screen"]->GetString();
+
+		if (!artist.empty())  {
+			song["ARTIST"] = artist;
+		}
+
+		windows["Log Screen"]->Print("Do you want to modify lyrics as well? (y/n)");
+		std::string choice = windows["Log Screen"]->GetString();
+
+		if (choice == "y")  {
+			windows["Log Screen"]->Print("NOT YET IMPLEMENTED");
+		}
+
+		int exit = parent->getDatabase()->addSong(song, true);
+		if (!exit) {
+			windows["Log Screen"]->Print("Song successfully modified...");
+		}
+		else {
+			windows["Log Screen"]->Print("Error occured when modifying a song...");
+		}
+	}
+	else {
+		windows["Log Screen"]->Print(std::format("Unexpected error! Song with ID '{}' does not exist...", id));
+	}
 }
 
 void CRUDTask::deleteSong()
 {
-	windows["Log Screen"]->Print("`deleteSong` feature not yet implemented!");
-	return;
+
+	windows["Log Screen"]->Clear();
+
+	int id = stoi(SongBookUtils::getInstance()->getConfigItem("workspace/current_id", "-1"));
+
+	if (parent->getDatabase()->songExists(id))  {
+		windows["Log Screen"]->Print("Are you sure you want to delete this song? (y/n)");
+
+		std::string choice = windows["Log Screen"]->GetString();
+
+		if (choice == "y")  {
+			int error = parent->getDatabase()->removeSong(id);
+			if (!error)  {
+				windows["Log Screen"]->Print("Song successfully deleted...");
+				
+				// update the song count in config json
+  				std::string song_cnt = std::to_string(parent->getDatabase()->getJson().size());
+  				SongBookUtils::setConfigItem("workspace/song_count", song_cnt);
+			}
+			else {
+				windows["Log Screen"]->Print("Error occured when deleting a song...");
+			}
+		}
+	}
+	else {
+		windows["Log Screen"]->Print(std::format("Song with id '{}' does not exist!", id));
+	}
 }
 
 
 void CRUDTask::addSong()
-{
+{	
+	windows["Log Screen"]->Clear();
+
 	std::string name;
 	std::string author;
 

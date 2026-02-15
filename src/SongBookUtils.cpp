@@ -17,28 +17,71 @@ SongBookUtils* SongBookUtils::getInstance()
   return _utils;
 }
 
-std::string SongBookUtils::getConfigItem(std::string _path)
+std::string SongBookUtils::getConfigItem(std::string path, std::string def)
 {
-  if (config != nullptr) {
-    std::string* ptr = parseConfigPath(&config, _path);
+    if (config.is_null())
+        return def;
 
-    if (ptr)  {
-      return *(ptr);
+    nlohmann::json* current = &config;
+
+    size_t start = 0;
+    size_t end = path.find(config_delimiter);
+
+    while (end != std::string::npos)
+    {
+        std::string key = path.substr(start, end - start);
+
+        if (!current->contains(key))
+            return def;
+
+        current = &((*current)[key]);
+
+        start = end + 1;
+        end = path.find(config_delimiter, start);
     }
-  }
-  return "";
+
+    std::string finalKey = path.substr(start);
+
+    if (current->contains(finalKey) && (*current)[finalKey].is_string())
+        return (*current)[finalKey].get<std::string>();
+
+    return def;
 }
 
-void SongBookUtils::setConfigItem(std::string _path, std::string item)
-{
-  if (config != nullptr)  {
-    std::string* ptr = parseConfigPath(&config, _path);
 
-    if (ptr)  {
-      *(ptr) = item;
+
+void SongBookUtils::setConfigItem(std::string path, std::string value)
+{
+    if (config.is_null())
+        return;
+
+    nlohmann::json* current = &config;
+
+    size_t start = 0;
+    size_t end = path.find(config_delimiter);
+
+    while (end != std::string::npos)
+    {
+        std::string key = path.substr(start, end - start);
+
+        // Create object if it doesn't exist
+        if (!current->contains(key) || !(*current)[key].is_object())
+        {
+            (*current)[key] = nlohmann::json::object();
+        }
+
+        current = &((*current)[key]);
+
+        start = end + 1;
+        end = path.find(config_delimiter, start);
     }
-  }
+
+    // Final key
+    std::string finalKey = path.substr(start);
+    (*current)[finalKey] = value;
 }
+
+
 
 
 std::string SongBookUtils::printSong(const std::string& no,
@@ -84,40 +127,6 @@ void SongBookUtils::printInteractive(const std::string& text, unsigned int inden
   std::cout << t << " " <<  text;
   if (newline) 
     std::cout << std::endl;
-}
-
-std::string* SongBookUtils::parseConfigPath(nlohmann::json* j, std::string _path)
-{
-  std::string item = "";
-  bool del = false;
-  int i = 0;
-  for (; i < _path.size(); i++)  {
-    if (_path[i] == config_delimiter)  {
-      del = true;
-      break;
-    }
-    item += _path[i];
-  }
-  _path.erase(0, i+1);
-  if (j->contains(item))  {
-    if (del)  {
-      return parseConfigPath(&(j->at(item)), _path);
-    }
-    else {
-      std::string ret;
-      try {
-        // no other than string argument is allowed!
-        ret = j->at(item).get<std::string>();
-      }
-      catch (const std::exception& e)  {
-        ret = "";
-      }
-      return j->at(item).get_ptr<std::string*>();
-    } 
-  }
-  else {
-    return nullptr;
-  }
 }
 
 // Aux. command that calls a system command and returns its output as an std::string 

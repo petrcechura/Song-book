@@ -14,17 +14,11 @@
 
 static std::vector<std::map<std::string, std::string>> sql_contents;
 
-SongDatabase::SongDatabase(nlohmann::json _config)  {
+SongDatabase::SongDatabase()  {
 
-    this->config = (_config.size()>0) ? _config : nlohmann::json();
+    std::string db_file_path = SongBookUtils::getInstance()->getConfigItem("paths/db_file_path");
 
-    std::string db_file_path;
-    if (config.contains("paths")) {
-      if (config["paths"].contains("db_file_path"))  {
-        db_file_path = config["paths"].at("db_file_path");
-      }
-    }
-    else  {
+    if (db_file_path.empty())  {
       db_file_path = "db.sql";
     }
 

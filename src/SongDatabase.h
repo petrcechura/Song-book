@@ -12,8 +12,6 @@ class SongDatabase
 
     private:
         sqlite3 *DB;
-        /** config holding paths and other settings for database */
-        nlohmann::json config;
         
         /** Own private implementation of `compare` function, supporting czech characters
          *
@@ -40,7 +38,7 @@ class SongDatabase
 
     public:
 
-        SongDatabase(nlohmann::json _config);
+        SongDatabase();
         ~SongDatabase();
 
         int addSong(nlohmann::json json_string, bool override=false);
