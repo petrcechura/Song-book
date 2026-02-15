@@ -23,46 +23,42 @@ size_t write_cb(void* contents, size_t size, size_t nmemb, void* userp) {
     return size * nmemb;
 }
 
+int GatherTask::Execute(char command)
+{
+      switch(command)  {
+        case 'g': gatherSong();
+				  break;
+        default: return 1;
+      }
 
-int GatherTask::executeCommand(int error_code)
-{	
+      return 0;
+}
+
+void GatherTask::gatherSong()
+{
 	CURL* curl;
     CURLcode err_code;
     std::string read_buffer;
-	nlohmann::json song;
-
-	if (argumentExists("-id", true))  {
-		arg_store_t a = getArgument("-id");
-
-		int id;
-		try
-		{
-			id = std::stoi(a.values[0]);
-		}
-		catch(const std::exception& e)
-		{
-			// -id is invalid to parse
-			return INVALID_ID;
-		}
-
-		if (parent->getDatabase()->songExists(id))  {
-			song = parent->getDatabase()->getSong(id);
-		}
-		else  {
-			// song with -id does not exist
-			return SONG_NOT_FOUND;
-		}
-		
-	}
-	else  {
-		// -id not set
-		return NO_ID;
-	}
-
-	int err = searchForLyrics(song["TITLE"], song["ARTIST"]);
 	
-	if (err != SUCCESS) {
-		return err;
+
+	windows["Log Screen"]->Clear();
+	int id = stoi(SongBookUtils::getInstance()->getConfigItem("workspace/current_id", "-1"));
+
+	if (parent->getDatabase()->songExists(id))  {
+		nlohmann::json song;
+
+		song = parent->getDatabase()->getSong(id);
+		
+		windows["Log Screen"]->Print(std::format("Searching lyrics for song ({}, {})...", song["TITLE"].get<std::string>(), song["ARTIST"].get<std::string>()));
+		int err = searchForLyrics(song["TITLE"], song["ARTIST"]);
+
+		if (!err)  {
+			song["LYRICS"] = this->lyrics_reg;
+		}
+		if (!parent->getDatabase()->addSong(song, true)) {
+			windows["Log Screen"]->Print("Song successfully gathered...");
+		}
+
 	}
 
 	/*
@@ -88,120 +84,6 @@ int GatherTask::executeCommand(int error_code)
   		songFile.close();
 	}
 	*/
-	
-	song["LYRICS"] = this->lyrics_reg;
-	if (parent->getDatabase()->addSong(song, true)) {
-		return ADD_SONG_FAILED;
-	}
-
-	return SUCCESS;
-}
-
-int GatherTask::startInteractive()
-{
-	std::string str_id;
-	SongBookUtils::getInstance()->printInteractive("Type an ID of song you want to gather lyrics for");
-	str_id = parent->getInput(1);
-
-	int id;
-
-  	if (str_id == std::string(1,parent->getExitChar()))  {
-    	return OK_EXIT_CHAR;
-  	}
-	else  {
-		try {
-			id = std::stoi(str_id);
-		}
-		catch (const std::invalid_argument& e)  {
-			SongBookUtils::getInstance()->printInteractive(std::format("'{}' does not contain valid ID to parse!", str_id), 1);
-			return INVALID_ID;
-		}
-		std::vector<std::string> s = {str_id.data()};
-		updateArgument("-id", {false, s});
-		
-	}
-	
-	if (parent->getDatabase()->songExists(id))  {
-		nlohmann::json song = parent->getDatabase()->getSong(id);
-		SongBookUtils::getInstance()->printInteractive(std::format("Searching lyrics for '{}' : '{}' ...", 
-												song["TITLE"].get<std::string>(), 
-												song["ARTIST"].get<std::string>()));
-		return SUCCESS;
-
-	}
-	else  {
-		return SONG_NOT_FOUND;
-	}
-}
-
-void GatherTask::endInteractive(int error_code)
-{
-
-	if (error_code == SUCCESS)  {
-		arg_store_t a = getArgument("-id");
-
-		int id;
-		try
-		{
-			id = std::stoi(a.values[0]);
-		}
-		catch(const std::exception& e)
-		{
-			return;
-		}
-		nlohmann::json song = parent->getDatabase()->getSong(id);
-
-		SongBookUtils::getInstance()->printInteractive("Found these lyrics:", 1);
-		std::cout << this->lyrics_reg << std::endl;
-		SongBookUtils::getInstance()->printInteractive("Do you want to keep them? (y/n)", 1);
-		std::string i = parent->getInput();
-		if (i != "y")  {
-			song.erase("LYRICS");
-			if (parent->getDatabase()->addSong(song, true))  {
-				error_code = ADD_SONG_FAILED;
-			}
-			else {
-				error_code = LYRICS_NOT_SAVED;
-			}
-		}
-	}
-
-	switch (error_code)
-	{
-		case SUCCESS:
-			SongBookUtils::getInstance()->printInteractive("Successfuly added lyrics to database..."); break;
-		case INVALID_ID:
-			SongBookUtils::getInstance()->printInteractive("Invalid ID to parse!", 2); break;
-		case AI_ERROR_RESPONSE: 
-			SongBookUtils::getInstance()->printInteractive("Failed to gather lyrics due to ai returning error...", 2); break;
-		case AI_EMPTY_RESPONSE: 
-			SongBookUtils::getInstance()->printInteractive("Failed to gather lyrics due to not returing proper response ...", 2); break;
-		case ADD_SONG_FAILED: 
-			SongBookUtils::getInstance()->printInteractive("Failed to update song in database with lyrics ...", 2); break;
-		case LYRICS_NOT_SAVED:
-			SongBookUtils::getInstance()->printInteractive("Lyrics not saved...", 2); break; 
-		case SEARCH_NO_VALID_WEBSITE: 
-			SongBookUtils::getInstance()->printInteractive("Cannot find lyrics for this song on valid websites!", 2); break;
-		case PARSE_WEBSITE_FAILED:
-			SongBookUtils::getInstance()->printInteractive("Error occured when trying to parse a website"); break;
-		case INVALID_GOOGLE_RESPONSE:
-			SongBookUtils::getInstance()->printInteractive("Google search contains unexpected items!"); break;
-		case CURL_ERROR:
-			SongBookUtils::getInstance()->printInteractive("Internal curl error"); break;
-		case OK_EXIT_CHAR: break;
-		case SONG_NOT_FOUND:
-			SongBookUtils::getInstance()->printInteractive("Song with such ID not found in database"); break;
-		case SEARCH_EMPTY_RESPONSE:
-			SongBookUtils::getInstance()->printInteractive("Google search returned an empty response..."); break;
-		case LINK_GET_FAILED:
-			SongBookUtils::getInstance()->printInteractive("Failed to get a link from Google search json!"); break;
-		case NO_ID:
-			SongBookUtils::getInstance()->printInteractive("No ID passed as an argument..."); break;
-		case INVALID_WEBSITE_PARSE:
-			SongBookUtils::getInstance()->printInteractive("Could not parse lyrics from a website..."); break;
-		default:
-			SongBookUtils::getInstance()->printError(std::format("Unspecified error code occured: {}", error_code));
-	}
 }
 
 int GatherTask::searchForLyrics(std::string title, 
@@ -250,7 +132,7 @@ int GatherTask::searchForLyrics(std::string title,
 		    
 		    std::string raw_lyrics = parseWebsite(link, website);
 		    if (raw_lyrics != "")  {
-		  	  std::cout << "Parsing by AI (" << SongBookUtils::getInstance()->getConfigItem("ai/model") << ")" << std::endl;
+		  	  windows["Log Screen"]->Print(std::format("Parsing by AI ({})", SongBookUtils::getInstance()->getConfigItem("ai/model")));
 		  	  // TODO make this a thread
 		  	  this->lyrics_reg = formatter->parseMarkdown(raw_lyrics);
 		  	  if (!this->lyrics_reg.empty()) {
@@ -322,7 +204,7 @@ std::string GatherTask::parseWebsite(std::string website_url, std::string base_u
 	std::string md_content = SongBookUtils::getInstance()->execSystemCommand(cmd.c_str());
 
 	std::istringstream iss(md_content);
-	std::cout << "Parsing website " << website_url << std::endl;
+	windows["Log Screen"]->Print(std::format("Parsing website '{}'", website_url));
 	if (base_url == "Velký zpěvník")  {
 
 		bool gather_lyrics = false;
@@ -376,7 +258,7 @@ bool GatherTask::checkSanity()
 
 	for (int i = 0; i < 3; i++)  {
 		if (!SongBookUtils::getInstance()->systemCommandExists(cmds[i].c_str()))  {
-			std::cout << "**Cannot use 'GatherTask', missing " << cmds[i] << " command!" << std::endl;
+			windows["Log Screen"]->Print(std::format("**Cannot use 'GatherTask', missing '{}' command", cmds[i]));
 			success = false;
 		}
 	}

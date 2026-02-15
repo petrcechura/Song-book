@@ -1,26 +1,24 @@
 #include <string>
 #include <filesystem>
 #include <iostream>
-#include "cmdapputils.h"
 #include "SongBookFormatter.h"
+#include "WindowServer.h"
+#include "Window.h"
+#include "WTask.h"
 
 class SongBookApp;
 
 
-/** Gather lyrics for particular song using AI tool */
-class GatherTask : public Task<SongBookApp>
+class GatherTask : public WTask<SongBookApp>
 {
-  public:
-
-    GatherTask(std::string cmd, SongBookApp* parent) 
-      : Task<SongBookApp>(cmd, parent) {
-        this->formatter = new BardFormatter();
-      };
+public:
+  GatherTask(std::string name, SongBookApp* parent, std::string description) 
+    : WTask<SongBookApp>(name, parent, description) { this->formatter = new BardFormatter(); };
 
     // virtual functions override
-    int startInteractive() override;
-    int executeCommand(int error_code) override;
-    void endInteractive(int error_code) override;
+    virtual int Execute(char command) override;
+
+    void gatherSong();
 
     std::string curlQuery(const char* query);
 

@@ -8,6 +8,7 @@
 #include "PrintTask.h"
 #include "ListTask.h"
 #include "CRUDTask.h"
+#include "GatherTask.h"
 #include <vector>
 #include "WindowServer.h"
 
@@ -42,9 +43,14 @@ SongBookApp::SongBookApp()
   crud_task->AddWindow(log_window);
 
 
+  GatherTask* gather_task = new GatherTask("gather", this, "descr");
+  gather_task->AddWindow(main_window);
+  gather_task->AddWindow(log_window);
+
   this->AddTask(print_task);
   this->AddTask(list_task);
   this->AddTask(crud_task);
+  this->AddTask(gather_task);
 
   // set up config
   std::string song_cnt = std::to_string(this->database->getJson().size());
