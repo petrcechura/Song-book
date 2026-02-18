@@ -51,13 +51,36 @@ void GatherTask::gatherSong()
 		
 		windows["Log Screen"]->Print(std::format("Searching lyrics for song ({}, {})...", song["TITLE"].get<std::string>(), song["ARTIST"].get<std::string>()));
 		int err = searchForLyrics(song["TITLE"], song["ARTIST"]);
-
+		
 		if (!err)  {
-			song["LYRICS"] = this->lyrics_reg;
+			windows["Log Screen"]->Print("Found these lyrics... Do you want to keep them? (y/n)");
+			windows["Main Screen"]->Clear();
+			windows["Main Screen"]->Print(this->lyrics_reg);
+			std::string choice = windows["Log Screen"]->GetString();
+			
+			if (choice == "y")  {
+				song["LYRICS"] = this->lyrics_reg;
+				if (!parent->getDatabase()->addSong(song, true)) {
+					windows["Log Screen"]->Print("Song successfully gathered...");
+					return;
+				}
+				else {
+					windows["Log Screen"]->Print("Unexpected error when adding song back to database...");
+				}
+			} else {
+				return;
+			}
 		}
-		if (!parent->getDatabase()->addSong(song, true)) {
-			windows["Log Screen"]->Print("Song successfully gathered...");
+		else {
+			windows["Log Screen"]->Print("Error when gathering lyrics...");
+			return;
 		}
+		
+
+
+
+
+
 
 	}
 
@@ -200,7 +223,7 @@ std::string GatherTask::parseWebsite(std::string website_url, std::string base_u
 	std::string html_content = curlQuery(website_url.c_str());
 	// This is just wrong, but none of other options I found did not work better than this.
     // Pandoc is best tool for parsing html to markdown and it cannot be used as a lib.	
-	std::string cmd = "curl " + website_url + " | pandoc -f html -t markdown";
+	std::string cmd = "curl -s " + website_url + " | pandoc -f html -t markdown";
 	std::string md_content = SongBookUtils::getInstance()->execSystemCommand(cmd.c_str());
 
 	std::istringstream iss(md_content);
