@@ -11,10 +11,12 @@
 #include <sstream>
 #include <cstdarg>
 #include <thread>
+#include <form.h>
 #include <fstream>
 #include "GatherTask.h"
 #include "SongBookApp.h"
 #include "SongBookUtils.h"
+#include "SongEditorServer.hpp"
 
 
 // Callback to collect the response into a string
@@ -51,11 +53,12 @@ void GatherTask::gatherSong()
 		
 		windows["Log Screen"]->Print(std::format("Searching lyrics for song ({}, {})...", song["TITLE"].get<std::string>(), song["ARTIST"].get<std::string>()));
 		int err = searchForLyrics(song["TITLE"], song["ARTIST"]);
-		
+
 		if (!err)  {
-			windows["Log Screen"]->Print("Found these lyrics... Do you want to keep them? (y/n)");
+			windows["Log Screen"]->Print("Found these lyrics...");
 			windows["Main Screen"]->Clear();
-			windows["Main Screen"]->Print(this->lyrics_reg);
+			parent->SongEditor(this->lyrics_reg);
+			windows["Log Screen"]->Print("Do you want to keep those lyrics? (y/n)");
 			std::string choice = windows["Log Screen"]->GetString();
 			
 			if (choice == "y")  {
@@ -75,38 +78,7 @@ void GatherTask::gatherSong()
 			windows["Log Screen"]->Print("Error when gathering lyrics...");
 			return;
 		}
-		
-
-
-
-
-
-
 	}
-
-	/*
-	TODO contemplate this argument
-	if (SongBookUtils::getInstance()->getConfigItem("paths/songs_dir") != "")  {
-		
-		// convert title to file name friendly format
-		std::string title = song["TITLE"];
-		std::replace(title.begin(), title.end(), ' ', '_');
-		title = parent->getDatabase()->convert_to_ascii(title);
-
-		// convert artist to file name friendly format
-		std::string artist = song["ARTIST"];
-		std::replace(artist.begin(), artist.end(), ' ', '_');
-		artist = parent->getDatabase()->convert_to_ascii(artist);
-		
-		// TODO make it OS independent
-		std::string fname = SongBookUtils::getInstance()->getConfigItem("paths/songs_dir") + "/" + artist + "-" + title + ".md";
-
-		// save lyrics to file
-  		std::ofstream songFile(fname);
-  		songFile << this->lyrics_reg;
-  		songFile.close();
-	}
-	*/
 }
 
 int GatherTask::searchForLyrics(std::string title, 

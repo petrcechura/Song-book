@@ -24,6 +24,7 @@ public:
     std::wstring utf8_to_wstring(const std::string& s);
 
     void Print(const std::string& txt, bool newline=true);
+    void Print(const std::wstring& txt, bool newline=true);
     void Print(const std::string& txt, short background_color, short foreground_color, bool bold = false);
     std::string GetString(int max_length=10);
     void Clear();

@@ -43,15 +43,19 @@ void WindowServer::Loop()
 {
     int c = 'x';
 
-    int lock = 0;
+    StartHook();
+
     while(c != this->EXIT_CHAR) {
         c = getch();
 
         for (auto const& [name, task] : tasks)  {
-            lock = task->Execute(c);
+            task->Execute(c);
         }
+        
+        afterExecuteHook();
     }
 
+    StopHook();
 }
 
 void WindowServer::AddWindow(Window* window)
@@ -98,6 +102,11 @@ void WindowServer::StartHook()
 }
 
 void WindowServer::StopHook()
+{
+
+}
+
+void WindowServer::afterExecuteHook()
 {
 
 }

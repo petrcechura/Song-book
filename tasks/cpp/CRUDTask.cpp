@@ -5,6 +5,7 @@
 #include "CRUDTask.h"
 #include "SongBookApp.h"
 #include "SongBookUtils.h"
+#include "SongEditorServer.hpp"
 
 int CRUDTask::Execute(char command)
 {
@@ -49,7 +50,8 @@ void CRUDTask::modifySong()
 		std::string choice = windows["Log Screen"]->GetString();
 
 		if (choice == "y")  {
-			windows["Log Screen"]->Print("NOT YET IMPLEMENTED");
+			windows["Main Screen"]->Clear();
+			song["LYRICS"] = parent->SongEditor(song["LYRICS"]);
 		}
 
 		int exit = parent->getDatabase()->addSong(song, true);

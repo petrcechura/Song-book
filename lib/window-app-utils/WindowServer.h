@@ -38,6 +38,8 @@ protected:
 
     virtual void StartHook();
     virtual void StopHook();
+
+    virtual void afterExecuteHook();
 };
 
 #endif

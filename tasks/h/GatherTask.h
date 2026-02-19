@@ -1,6 +1,8 @@
 #include <string>
 #include <filesystem>
 #include <iostream>
+#include <functional>
+#include <map>
 #include "SongBookFormatter.h"
 #include "WindowServer.h"
 #include "Window.h"

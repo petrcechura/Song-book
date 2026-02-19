@@ -35,11 +35,15 @@ class SongBookApp : public WindowServer
     /** This function executes serie of commands separated by ';' character. */
     void executeCommands(std::string cmd_line, bool exitWhenDone=false);
 
+    std::string SongEditor(std::string lyrics);
+
   protected:
     /** A `startHook()` implementation */
     virtual void StartHook() override;
     /** A `stopHook()` implementation */
     virtual void StopHook() override;
+
+    virtual void afterExecuteHook() override;
 
     //====================
     // DATABASE MANAGEMENT

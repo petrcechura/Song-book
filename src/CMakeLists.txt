@@ -32,6 +32,8 @@ target_include_directories(songbookapp PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../tas
 target_sources(songbookapp
     PUBLIC SongBookFormatter.h
     PRIVATE SongBookFormatter.cpp
+    PUBLIC SongEditorServer.hpp
+    PRIVATE SongEditorServer.cpp
 
     PUBLIC ../tasks/h/ListTask.h
     PUBLIC ../tasks/h/CRUDTask.h

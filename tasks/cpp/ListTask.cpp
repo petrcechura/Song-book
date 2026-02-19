@@ -49,6 +49,8 @@ int ListTask::Execute(char command)
         case 's': moveDown();
 				  listSongs();
 				  break;
+		case '-': listSongs();
+				  break;
         default: return 1;
       }
 

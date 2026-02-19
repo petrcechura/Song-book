@@ -7,6 +7,7 @@
 #include "ModifyTask.h"
 #include "SongBookApp.h"
 #include "SongBookUtils.h"
+#include "SongEditorServer.hpp"
 
 int ModifyTask::executeCommand(int error_code)
 {	

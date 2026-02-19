@@ -8,6 +8,8 @@
 #include "PrintTask.h"
 #include "ListTask.h"
 #include "CRUDTask.h"
+#include "SongEditorServer.hpp"
+#include <format>
 #include "GatherTask.h"
 #include <vector>
 #include "WindowServer.h"
@@ -59,13 +61,17 @@ SongBookApp::SongBookApp()
 }
 void SongBookApp::StartHook()
 {
-
+  this->tasks["List"]->Execute('-');
 }
 
 void SongBookApp::StopHook()
 {
-	std::cout << "exiting program..." << std::endl;
-	exit(0);
+
+}
+
+void SongBookApp::afterExecuteHook()
+{
+  this->tasks["List"]->Execute('-');
 }
 
 void SongBookApp::executeCommands(std::string commands_string, bool exitWhenDone)
@@ -96,3 +102,33 @@ void SongBookApp::executeCommands(std::string commands_string, bool exitWhenDone
     }
 }
 
+std::string SongBookApp::SongEditor(std::string lyrics)
+{
+	
+	std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> conv;
+    std::wstring width_lyrics = conv.from_bytes(lyrics);
+	
+	bool running = true;
+	SongEditorServer* editor = new SongEditorServer(&width_lyrics, &running);
+	
+	windows["Main Screen"]->Print(width_lyrics, false);
+
+	wint_t c;
+	int e;
+	windows["Main Screen"]->Clear();
+	while(running)  {
+		e = get_wch(&c);
+		if (e)  {
+			windows["Log Screen"]->Print("ERROR: Invalid input!");
+			continue;
+		}
+		SongBookUtils::getInstance()->printError(std::format("input: {}", c));
+		editor->Edit(static_cast<wchar_t>(c));
+		windows["Main Screen"]->Clear();
+		windows["Main Screen"]->Print(width_lyrics, false);
+	}
+
+	delete editor;
+
+	return conv.to_bytes(width_lyrics);
+}
