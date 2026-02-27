@@ -10,10 +10,15 @@
 #include <map>
 #include "json.hpp"
 
-int LatexTask::executeCommand(int error_code)
+void LatexTask::exportToPdf()
 {
 
-	nlohmann::json data = parent->getDatabase()->getJson();
+  
+  
+  nlohmann::json data = parent->getDatabase()->getJson();
+
+  int size = data.size();
+  windows["Log Screen"]->Print(std::format("Exporting {} songs to pdf using external Bard tool", size));
 
   int i = 0;
   std::string title;
@@ -32,21 +37,20 @@ int LatexTask::executeCommand(int error_code)
   formatter->clearPages();
 
   if (e)  {
-    return GENERATE_SONGBOOK_FAILED;
+    windows["Log Screen"]->Print("Error occured!");
+
   } else {
-    return SUCCESS;
+    windows["Log Screen"]->Print("Done.");
   }
 }
 
-void LatexTask::endInteractive(int error_code)
+int LatexTask::Execute(char command)
 {
-  switch(error_code)
-  {
-    case SUCCESS:
-      SongBookUtils::getInstance()->printInteractive(std::format("Successfuly dumped Songbook contents into \'{}\' directory", SongBookUtils::getInstance()->getConfigItem("paths/bard_dir")));
-      break;
-    case GENERATE_SONGBOOK_FAILED:
-      SongBookUtils::getInstance()->printInteractive("Failed to generate a songbook..."); 
-      break;
-  }
+      switch(command)  {
+        case 'l': exportToPdf();
+				  break;
+        default: return 1;
+      }
+
+      return 0;
 }

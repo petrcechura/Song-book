@@ -1,21 +1,20 @@
 #include <string>
 #include <filesystem>
-#include "cmdapputils.h"
 #include "SongBookFormatter.h"
 #include "json.hpp"
+#include "WindowServer.h"
+#include "Window.h"
+#include "WTask.h"
 
 class SongBookApp;
 
-class LatexTask : public Task<SongBookApp>
+class LatexTask : public WTask<SongBookApp>
 {
 public:
-  LatexTask(std::string cmd, SongBookApp* parent) 
-    : Task<SongBookApp>(cmd, parent) {
-      this->formatter = new BardFormatter();
-  };
-
-  int executeCommand(int error_code) override;
-  void endInteractive(int error_code) override;
+  LatexTask(std::string name, SongBookApp* parent, std::string description) 
+    : WTask<SongBookApp>(name, parent, description) { this->formatter = new BardFormatter(); };
+  
+  virtual int Execute(char command) override;
 
   /** Replaces special charactes in string to printable alternatives. */
   std::string getPrintableString(std::string str);
@@ -25,9 +24,6 @@ private:
   std::filesystem::path out_path = "database.pdf";
   SongBookFormatter* formatter;
 
-  enum {
-    SUCCESS,
-    GENERATE_SONGBOOK_FAILED
-  } ErrorCode;
+  void exportToPdf();
 
 };

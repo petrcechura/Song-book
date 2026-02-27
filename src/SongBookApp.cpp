@@ -8,6 +8,7 @@
 #include "PrintTask.h"
 #include "ListTask.h"
 #include "CRUDTask.h"
+#include "LatexTask.h"
 #include "SongEditorServer.hpp"
 #include <format>
 #include "GatherTask.h"
@@ -49,10 +50,15 @@ SongBookApp::SongBookApp()
   gather_task->AddWindow(main_window);
   gather_task->AddWindow(log_window);
 
+  LatexTask* latex_task = new LatexTask("latex", this, "descr");
+  latex_task->AddWindow(main_window);
+  latex_task->AddWindow(log_window);
+
   this->AddTask(print_task);
   this->AddTask(list_task);
   this->AddTask(crud_task);
   this->AddTask(gather_task);
+  this->AddTask(latex_task);
 
   // set up config
   std::string song_cnt = std::to_string(this->database->getJson().size());

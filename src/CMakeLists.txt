@@ -38,9 +38,11 @@ target_sources(songbookapp
     PUBLIC ../tasks/h/ListTask.h
     PUBLIC ../tasks/h/CRUDTask.h
     PUBLIC ../tasks/h/GatherTask.h
+    PUBLIC ../tasks/h/LatexTask.h
     PRIVATE ../tasks/cpp/ListTask.cpp
     PRIVATE ../tasks/cpp/CRUDTask.cpp
     PRIVATE ../tasks/cpp/GatherTask.cpp
+    PRIVATE ../tasks/cpp/LatexTask.cpp
 )
 
 target_link_libraries(songbookapp 
