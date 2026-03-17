@@ -12,9 +12,6 @@
 
 void LatexTask::exportToPdf()
 {
-
-  
-  
   nlohmann::json data = parent->getDatabase()->getJson();
 
   int size = data.size();

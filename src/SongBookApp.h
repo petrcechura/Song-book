@@ -52,6 +52,7 @@ class SongBookApp : public WindowServer
     SongDatabase* database;
 
     std::string order = "ID";
+    std::map<std::string, std::string> task_legend;
 };
 
 #endif

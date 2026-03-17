@@ -5,11 +5,10 @@
 #include "SongBookApp.h"
 #include "SongBookUtils.h"
 #include "json.hpp"
-#include "PrintTask.h"
+#include <map>
 #include "ListTask.h"
 #include "CRUDTask.h"
 #include "LatexTask.h"
-#include "SongEditorServer.hpp"
 #include <format>
 #include "GatherTask.h"
 #include <vector>
@@ -27,34 +26,35 @@ SongBookApp::SongBookApp()
   // ==================================
   Window* main_window = new Window("Main Screen", 110, 20, 5, 2);
   Window* log_window = new Window("Log Screen", 110, 10, 5, 23);
-  Window* commands_window = new Window("Commands Screen", 10, 20, 117, 2);
+  Window* commands_window = new Window("Commands Screen", 20, 20, 117, 2);
 
   this->AddWindow(main_window);
   this->AddWindow(log_window);
   this->AddWindow(commands_window);
 
-  PrintTask* print_task = new PrintTask("Print", this, "descr");
-  print_task->AddWindow(main_window);
-  print_task->AddWindow(log_window);
-
   ListTask* list_task = new ListTask("List", this, "descr");
   list_task->AddWindow(main_window);
   list_task->AddWindow(log_window);
+  task_legend["w"] = "move up";
+  task_legend["s"] = "move down";
 
   CRUDTask* crud_task = new CRUDTask("Crud", this, "descr");
   crud_task->AddWindow(main_window);
   crud_task->AddWindow(log_window);
-
+  task_legend["m"] = "modify song";
+  task_legend["d"] = "delete song";
+  task_legend["a"] = "add song";
 
   GatherTask* gather_task = new GatherTask("gather", this, "descr");
   gather_task->AddWindow(main_window);
   gather_task->AddWindow(log_window);
+  task_legend["g"] = "gather song";
 
   LatexTask* latex_task = new LatexTask("latex", this, "descr");
   latex_task->AddWindow(main_window);
   latex_task->AddWindow(log_window);
+  task_legend["l"] = "export (pdf) song";
 
-  this->AddTask(print_task);
   this->AddTask(list_task);
   this->AddTask(crud_task);
   this->AddTask(gather_task);
@@ -65,6 +65,7 @@ SongBookApp::SongBookApp()
   SongBookUtils::setConfigItem("workspace/song_count", song_cnt);
 
 }
+
 void SongBookApp::StartHook()
 {
   this->tasks["List"]->Execute('-');
@@ -78,6 +79,11 @@ void SongBookApp::StopHook()
 void SongBookApp::afterExecuteHook()
 {
   this->tasks["List"]->Execute('-');
+
+  windows["Commands Screen"]->Clear();
+  for (const auto& [k, v] : task_legend)  {
+    windows["Commands Screen"]->Print(std::format("{} = {}", k, v));
+  }
 }
 
 void SongBookApp::executeCommands(std::string commands_string, bool exitWhenDone)
@@ -110,31 +116,30 @@ void SongBookApp::executeCommands(std::string commands_string, bool exitWhenDone
 
 std::string SongBookApp::SongEditor(std::string lyrics)
 {
-	
-	std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> conv;
-    std::wstring width_lyrics = conv.from_bytes(lyrics);
-	
-	bool running = true;
-	SongEditorServer* editor = new SongEditorServer(&width_lyrics, &running);
-	
-	windows["Main Screen"]->Print(width_lyrics, false);
+	std::string tmpfile = std::tmpnam(nullptr);
+  std::ostringstream cmd_oss;
 
-	wint_t c;
-	int e;
-	windows["Main Screen"]->Clear();
-	while(running)  {
-		e = get_wch(&c);
-		if (e)  {
-			windows["Log Screen"]->Print("ERROR: Invalid input!");
-			continue;
-		}
-		SongBookUtils::getInstance()->printError(std::format("input: {}", c));
-		editor->Edit(static_cast<wchar_t>(c));
-		windows["Main Screen"]->Clear();
-		windows["Main Screen"]->Print(width_lyrics, false);
+	std::string editor = SongBookUtils::getInstance()->getConfigItem("commons/text_editor");
+	if (editor == "")  {
+    windows["Log Screen"]->Print("Unable to edit lyrics, text editor not found under commons/text_editor!");
+    return lyrics;
 	}
+	
+	if (lyrics != "NULL")  {
+		cmd_oss << "echo \'" 
+				<< lyrics
+				<< "\' > "
+				<< tmpfile
+				<< " && ";
+	}
+	cmd_oss << editor
+			<< " "
+			<< tmpfile;
+	
+	std::string cmd = cmd_oss.str();
+	system(cmd.c_str());
+	cmd = std::format("cat {}", tmpfile);
+	lyrics = SongBookUtils::getInstance()->execSystemCommand(cmd.c_str());
 
-	delete editor;
-
-	return conv.to_bytes(width_lyrics);
+	return lyrics;
 }

@@ -26,9 +26,10 @@ public:
     virtual std::string GetName() override;
     virtual std::string GetDescription() override;
     virtual int ParseCommand(std::string cmd_line) override;
-    //virtual void ChangeConfig(nlohmann::json config) override;
     
     void AddWindow(Window* window);
+    void SetLegend(std::map<std::string, std::string> task_legend);
+    std::map<std::string, std::string> GetLegend();
 
 protected:
     std::map<char, std::function<void(void)>> commands;
@@ -36,6 +37,7 @@ protected:
 
     std::string name;
     std::string description;
+    std::map<std::string, std::string> task_legend;
     t_server* parent;
 };
 
@@ -48,18 +50,18 @@ WTask<t_server>::WTask(std::string cmd, t_server* parent, std::string descr)
 }
 
 template<class t_server>
+std::map<std::string, std::string> WTask<t_server>::GetLegend()
+{   
+    return this->task_legend;
+}
+
+template<class t_server>
 int WTask<t_server>::Execute(char command) 
 {
     this->commands[command]();
 
     return 0;
 }
-
-//template<class t_server>
-//int WTask<t_server>::ChangeConfig(nlohmann::json& config) 
-//{
-//    return 0;
-//}
 
 template<class t_server>
 std::string WTask<t_server>::GetName() 
