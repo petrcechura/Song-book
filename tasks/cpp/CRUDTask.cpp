@@ -8,25 +8,29 @@
 #include "SongEditorServer.hpp"
 
 int CRUDTask::Execute(char command)
-{
-      switch(command)  {
-        case 'a': addSong();
-				  break;
-		case 'm': modifySong();
-				  break;
-		case 'd': deleteSong();
-				  break;
-        default: return 1;
-      }
+{	
+	switch(parent->getState())  {
+		case SongBookApp::app_state_t::SONG_BROWSE:
+      		switch(command)  {
+        		case 'a': addSong();
+						  break;
+				case 'm': modifySong();
+						  break;
+				case 'd': deleteSong();
+						  break;
+        		default: return 1;
+      		}
+		break;
+	}
 
-      return 0;
+    return 0;
 }
 
 void CRUDTask::modifySong()
 {
 
 	windows["Log Screen"]->Clear();
-	int id = stoi(SongBookUtils::getInstance()->getConfigItem("workspace/current_id", "-1"));
+	int id = stoi(SongBookUtils::getInstance()->getConfigItem("workspace/current_song_id", "-1"));
 
 	if (parent->getDatabase()->songExists(id))  {
 		nlohmann::json song = parent->getDatabase()->getSong(id);
@@ -65,6 +69,13 @@ void CRUDTask::modifySong()
 	else {
 		windows["Log Screen"]->Print(std::format("Unexpected error! Song with ID '{}' does not exist...", id));
 	}
+
+	// update the song count in config json
+  	std::string song_cnt = std::to_string(parent->getDatabase()->getJson().size());
+  	SongBookUtils::setConfigItem("workspace/song_count", song_cnt);
+  	nlohmann::json songs = parent->getDatabase()->getJson();
+  	SongBookUtils::setConfigJson("workspace/songs", songs);
+
 }
 
 void CRUDTask::deleteSong()
@@ -72,7 +83,7 @@ void CRUDTask::deleteSong()
 
 	windows["Log Screen"]->Clear();
 
-	int id = stoi(SongBookUtils::getInstance()->getConfigItem("workspace/current_id", "-1"));
+	int id = stoi(SongBookUtils::getInstance()->getConfigItem("workspace/current_song_id", "-1"));
 
 	if (parent->getDatabase()->songExists(id))  {
 		windows["Log Screen"]->Print("Are you sure you want to delete this song? (y/n)");
@@ -96,6 +107,13 @@ void CRUDTask::deleteSong()
 	else {
 		windows["Log Screen"]->Print(std::format("Song with id '{}' does not exist!", id));
 	}
+
+	// update the song count in config json
+  	std::string song_cnt = std::to_string(parent->getDatabase()->getJson().size());
+  	SongBookUtils::setConfigItem("workspace/song_count", song_cnt);
+  	nlohmann::json songs = parent->getDatabase()->getJson();
+  	SongBookUtils::setConfigJson("workspace/songs", songs);
+
 }
 
 
@@ -153,6 +171,6 @@ void CRUDTask::addSong()
 	// update the song count in config json
   	std::string song_cnt = std::to_string(parent->getDatabase()->getJson().size());
   	SongBookUtils::setConfigItem("workspace/song_count", song_cnt);
-
-	return;
+  	nlohmann::json songs = parent->getDatabase()->getJson();
+  	SongBookUtils::setConfigJson("workspace/songs", songs);
 }

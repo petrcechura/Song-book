@@ -1,6 +1,7 @@
 #include <string>
 #include <iostream>
 #include <sstream>
+#include <format>
 #include "SongBookUtils.h"
 #include "json.hpp"
 #include <filesystem>
@@ -48,7 +49,41 @@ std::string SongBookUtils::getConfigItem(std::string path, std::string def)
     return def;
 }
 
+nlohmann::json SongBookUtils::getConfigJson(std::string path, nlohmann::json def)
+{
+    if (config.is_null())
+        return def;
 
+    nlohmann::json* current = &config;
+    if (current == nullptr)
+      return def;
+
+    size_t start = 0;
+    size_t end = path.find(config_delimiter);
+
+    while (end != std::string::npos)
+    {
+        std::string key = path.substr(start, end - start);
+
+        if (!current->contains(key))
+            return def;
+
+        current = &((*current)[key]);
+
+        start = end + 1;
+        end = path.find(config_delimiter, start);
+    }
+
+    std::string finalKey = path.substr(start);
+
+    if (current->contains(finalKey))  {
+        // copy the object
+        nlohmann::json ret((*current)[finalKey]);
+        return ret;
+    }
+
+    return def;
+}
 
 void SongBookUtils::setConfigItem(std::string path, std::string value)
 {
@@ -81,42 +116,35 @@ void SongBookUtils::setConfigItem(std::string path, std::string value)
     (*current)[finalKey] = value;
 }
 
-
-
-
-std::string SongBookUtils::printSong(const std::string& no,
-                                     const std::string& name, 
-                                     const std::string& author, 
-                                     bool has_lyrics)
+void SongBookUtils::setConfigJson(std::string path, nlohmann::json value)
 {
- 
-  std::ostringstream string_cont;
-	string_cont << std::setw(4) << std::left << no
-				      << std::left << alignString(name, 	' ', TITLE_WIDTH)
-				      << std::left << alignString(author, ' ', ARTIST_WIDTH)
-              << "    " << (has_lyrics ? "X" : " ");
+    if (config.is_null())
+        return;
 
-  return string_cont.str().c_str();
-}
+    nlohmann::json* current = &config;
 
-std::string SongBookUtils::printSongListHeader()
-{
-  std::ostringstream string_cont;
+    size_t start = 0;
+    size_t end = path.find(config_delimiter);
 
-	string_cont << std::setw(4) << std::left << "NO"
-			        << std::setw(TITLE_WIDTH) << "Title "
-			        << std::setw(ARTIST_WIDTH) << "Artist "
-              << "Has lyrics?";
+    while (end != std::string::npos)
+    {
+        std::string key = path.substr(start, end - start);
 
-  return string_cont.str().c_str();
-}
+        // Create object if it doesn't exist
+        if (!current->contains(key) || !(*current)[key].is_object())
+        {
+            (*current)[key] = nlohmann::json::object();
+        }
 
-std::string SongBookUtils::printSongListBottom()
-{
-  std::ostringstream string_cont;
-  string_cont << std::string(4 + 4 + TITLE_WIDTH + ARTIST_WIDTH+ 11, '-') << std::endl;
+        current = &((*current)[key]);
 
-  return string_cont.str().c_str();
+        start = end + 1;
+        end = path.find(config_delimiter, start);
+    }
+
+    // Final key
+    std::string finalKey = path.substr(start);
+    (*current)[finalKey] = value;
 }
 
 void SongBookUtils::printInteractive(const std::string& text, unsigned int indentation, bool newline)

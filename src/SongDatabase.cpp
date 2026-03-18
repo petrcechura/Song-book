@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include <iostream>
+#include <sstream>
 #include <format>
 #include <fstream>
 #include <ctime>
@@ -35,19 +36,31 @@ SongDatabase::SongDatabase()  {
         std::cout << "Couldn't open SQL database `" <<  db_file_path << "`!" << std::endl;
     }
     else {
+      std::ostringstream sql;
+      
+      // table SONGS contains all the songs with title, artist and lyrics (in bard format)
+      sql << "CREATE TABLE SONGS(";
+      sql << "ID INT PRIMARY KEY NOT NULL,\n";
+      sql << "TITLE TEXT NOT NULL,\n";
+      sql << "ARTIST TEXT NOT NULL,\n";
+      sql << "LYRICS TEXT);\n\n";
+      
+      // table COLLECTIONS contains all collections present in database
+      sql << "CREATE TABLE COLLECTIONS(";
+      sql << "ID INT PRIMARY KEY,\n";
+      sql << "NAME TEXT UNIQUE\n";
+      sql << ");";
 
-      std::string sql = "CREATE TABLE SONGS(ID INT PRIMARY KEY NOT NULL";
-
-      for (const auto& c : properties)  {
-          sql += ",\n" + c.name + " " + c.type;
-      }
-
-      sql += " );";
+      // this aux. table maps individual songs to collections
+      sql << "CREATE TABLE COLLECTION_MAP(";
+      sql << "SONG_ID INT,\n";
+      sql << "COLLECTION_ID INT,\n";
+      sql << "PRIMARY KEY (SONG_ID, COLLECTION_ID),\n";
+      sql << "FOREIGN KEY (SONG_ID) REFERENCES SONGS(ID),\n";
+      sql << "FOREIGN KEY (COLLECTION_ID) REFERENCES COLLECTIONS(ID));";
       
       char* messaggeError;
-      exit = sqlite3_exec(DB, sql.c_str(), NULL, 0, &messaggeError);
-
-
+      exit = sqlite3_exec(DB, sql.str().c_str(), NULL, 0, &messaggeError);
       
       if (exit == SQLITE_OK) {
           std::cout << "Could not find SQL database file, created empty one ..." << std::endl;
@@ -55,8 +68,6 @@ SongDatabase::SongDatabase()  {
       }
     }
 }
-
-
 
 /** Aux. SQL callback function that returns all contents from sql table as vector */
 static int sql_cb(void* data, int argc, char** argv, char** azColName)
@@ -104,8 +115,8 @@ int SongDatabase::changeOrder(std::string order)  {
 
     // Check if property is present...
     bool isProp = false;
-    for (const auto& prop : properties)  {
-      if (order == prop.name)  {
+    for (const auto& prop : song_properties)  {
+      if (order == prop)  {
         isProp = true;
       }
     }
@@ -158,9 +169,16 @@ int SongDatabase::compare(std::string firstString, std::string secondString)  {
     return 0;
 }
 
-nlohmann::json SongDatabase::getCollection(std::string collection)
+nlohmann::json SongDatabase::getCollections()
 {
-  return getSqlJson(std::format("SELECT * FROM SONGS WHERE COLLECTION = '{}';", collection));
+  std::string pattern = SongBookUtils::getConfigItem("workspace/filter_pattern", "");
+
+  if (pattern == "")  {
+    return getSqlJson("SELECT * FROM COLLECTIONS");
+  }
+  else  {
+    return getSqlJson(std::format("SELECT * FROM COLLECTIONS WHERE NAME LIKE '%{}%'", pattern));
+  }
 }
 
 
@@ -190,8 +208,8 @@ int SongDatabase::addSong(nlohmann::json json_string, bool override)  {
       if (override)  {
         query = "UPDATE SONGS SET ";
         int i = 0;
-        for (const auto& p : properties) {
-          query += (i++ ? ",\n" : "\n") + (j.contains(p.name) ? (p.name + " = \'" + SongBookUtils::txt2sql(j[p.name].get<std::string>()) + "\'") : (p.name + " = NULL"));
+        for (const auto& p : song_properties) {
+          query += (i++ ? ",\n" : "\n") + (j.contains(p) ? (p + " = \'" + SongBookUtils::txt2sql(j[p].get<std::string>()) + "\'") : (p + " = NULL"));
         
         }
         query += "\n WHERE ID=" + song["ID"].get<std::string>() + ";";
@@ -203,8 +221,8 @@ int SongDatabase::addSong(nlohmann::json json_string, bool override)  {
     }
     else {
       query = "INSERT INTO SONGS VALUES(" + available_id;
-      for (const auto& p : properties) {
-        query += (j.contains(p.name)) ? (", '" + SongBookUtils::txt2sql(j[p.name].get<std::string>()) + "'") : (", NULL");
+      for (const auto& p : song_properties) {
+        query += (j.contains(p)) ? (", '" + SongBookUtils::txt2sql(j[p].get<std::string>()) + "'") : (", NULL");
       }
       query += ");";
     }
@@ -237,18 +255,15 @@ nlohmann::json SongDatabase::getSqlJson(std::string query)  {
     if (exit)  {
         return data;
     }
-
+    
     int i = 0;
     for (const auto& content : sql_contents)  {
         nlohmann::json item  = nlohmann::json();
 
-        item["ID"] = content.at("ID");
         item["NO"] = std::to_string(i);
 
-        for (const auto& p : properties)  {
-          if (content.count(p.name))  {
-            item[p.name] = content.at(p.name);
-          }
+        for (const auto& [k, v] : content)  {
+            item[k] = v;
         }
 
         data[i++] = item;
@@ -261,7 +276,14 @@ nlohmann::json SongDatabase::getSqlJson(std::string query)  {
 
 nlohmann::json SongDatabase::getJson()
 {
-    return getSqlJson();
+  std::string pattern = SongBookUtils::getConfigItem("workspace/filter_pattern", "");
+
+  if (pattern == "")  {
+    return getSqlJson("SELECT * FROM SONGS");
+  }
+  else  {
+    return getSqlJson(std::format("SELECT * FROM SONGS WHERE TITLE LIKE '%{}%'", pattern));
+  }
 }
 
 nlohmann::json SongDatabase::getSong(int id)
@@ -295,6 +317,18 @@ bool SongDatabase::songExists(std::string title, std::string artist)
   return (getSong(title, artist).size() > 0);
 }
 
+bool SongDatabase::collectionExists(std::string name)
+{
+  nlohmann::json col = getSqlJson(std::format("SELECT * FROM COLLECTIONS WHERE NAME='{}'", name));
+  return (col.size() > 0);
+}
+
+bool SongDatabase::collectionExists(int id)
+{
+  nlohmann::json col = getSqlJson(std::format("SELECT * FROM COLLECTIONS WHERE ID='{}'", id));
+  return (col.size() > 0);
+}
+
 bool SongDatabase::songExists(int id)
 {
   return (getSong(id).size() > 0);
@@ -312,6 +346,68 @@ int SongDatabase::removeSong(int id)
 
   if (sql_json != nullptr; sql_json.size() == 1)  {
       query  = "DELETE FROM SONGS WHERE ID=" + std::to_string(id) + ";";
+      sqlite3_exec(DB, query.c_str(), nullptr, nullptr, nullptr);
+      return 0;
+  }
+  else {
+    // TODO fatal error! There cannot be two items with same ID!
+    return 2;
+  }
+}
+
+int SongDatabase::addCollection(std::string name)
+{
+
+    // obtain unique ID
+    nlohmann::json sql_json = getSqlJson("SELECT * FROM COLLECTIONS ORDER BY ID DESC LIMIT 1;");
+    
+    std::string available_id = (sql_json.empty()) ? "0" : sql_json[0]["ID"].get<std::string>();
+
+    try
+    {
+      available_id = std::to_string(std::stoi(available_id) + 1);
+    }
+    catch(const std::exception& e)
+    {
+      return 2;
+    }
+
+    std::ostringstream query;
+
+    if (collectionExists(name))  {
+      SongBookUtils::printError("Collection already exists...");
+      return 3;
+    }
+    else {
+      query << "INSERT INTO COLLECTIONS VALUES(" << available_id << ",\n";
+      query << "'" << name << "'";
+      query << ");";
+    }
+
+    SongBookUtils::printError(query.str());
+
+
+    char* messageError;
+    int exit = sqlite3_exec(DB, query.str().c_str(), sql_cb, nullptr, &messageError);
+
+    if (exit)  {
+      SongBookUtils::printError(messageError);
+      return 1;
+    }
+
+    return exit;
+}
+int SongDatabase::removeCollection(int id)
+{
+  std::string query  = "SELECT * FROM COLLECTIONS WHERE ID=" + std::to_string(id) + ";";
+  nlohmann::json sql_json = getSqlJson(query);
+
+  if (sql_json == nullptr)  {
+    return 1;
+  }
+
+  if (sql_json != nullptr; sql_json.size() == 1)  {
+      query  = "DELETE FROM COLLECTIONS WHERE ID=" + std::to_string(id) + ";";
       sqlite3_exec(DB, query.c_str(), nullptr, nullptr, nullptr);
       return 0;
   }

@@ -19,16 +19,7 @@ class SongDatabase
         int compare(std::string firstString, std::string secondString);
         nlohmann::json getSqlJson(std::string query = "");
 
-        typedef struct {
-            std::string name;
-            std::string type;
-        } t_property;
-
-        t_property properties[3] = {
-                {"TITLE",  "TEXT NOT NULL"},
-                {"ARTIST", "TEXT NOT NULL"},
-                {"LYRICS", "TEXT"}
-        };
+        std::string song_properties[3] = {"TITLE", "ARTIST", "LYRICS"};
 
         std::string order = "ID";
 
@@ -40,7 +31,10 @@ class SongDatabase
 
         SongDatabase();
         ~SongDatabase();
-
+        
+        // ==========================
+        // ******* SONGS ************
+        // ==========================
         int addSong(nlohmann::json json_string, bool override=false);
         int removeSong(int id);
         /** Takes a `regex` as a argument, 
@@ -49,12 +43,22 @@ class SongDatabase
 
         nlohmann::json getSong(int id);
         nlohmann::json getSong(std::string title, std::string artist="");
-        nlohmann::json getCollection(std::string collection);
 
         bool songExists(std::string title, std::string artist="");
         bool songExists(int id);
 
+        // ==========================
+        // ******* COLLECTIONS ******
+        // ==========================
+        /** Returns all collections that are present in database currently */
+        nlohmann::json getCollections();
+
+        bool collectionExists(std::string name);
+        bool collectionExists(int id);
+
         int SendQuery(std::string query);
+        int addCollection(std::string name);
+        int removeCollection(int id);
 
         
         // TODO

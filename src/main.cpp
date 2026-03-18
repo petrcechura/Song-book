@@ -58,15 +58,15 @@ int main(int argc, char* argsv[])
   
   SongBookApp* app = new SongBookApp();
   
+  // set std::cerr output to either 'error.log' file (default) or custom path from '-config'
   std::string error_log_path = SongBookUtils::getInstance()->getConfigItem("commons/error_file");
-  if (error_log_path != "") {
-    static std::ofstream error_file(error_log_path);
-    std::cerr.rdbuf(error_file.rdbuf());
-  }
-
+  if (error_log_path == "")
+    error_log_path = "error.log";
+  static std::ofstream error_file(error_log_path);
+  std::cerr.rdbuf(error_file.rdbuf());
+  
+  
   app->Init();
-  app->Loop();
-
   
   // *************
   // argument -cmd

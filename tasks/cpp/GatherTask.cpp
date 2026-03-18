@@ -44,7 +44,7 @@ void GatherTask::gatherSong()
 	
 
 	windows["Log Screen"]->Clear();
-	int id = stoi(SongBookUtils::getInstance()->getConfigItem("workspace/current_id", "-1"));
+	int id = stoi(SongBookUtils::getInstance()->getConfigItem("workspace/current_song_id", "-1"));
 
 	if (parent->getDatabase()->songExists(id))  {
 		nlohmann::json song;

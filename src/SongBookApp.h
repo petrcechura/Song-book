@@ -24,6 +24,11 @@ class SongBookApp : public WindowServer
      *  and adds certains tasks to a *task container* */
     SongBookApp();
     virtual ~SongBookApp() = default;
+
+    enum class app_state_t {
+      SONG_BROWSE,
+      COLLECTION_BROWSE
+    };
     
     /** Returns an instance of a database, allowing tasks to operate with that.
      *
@@ -31,6 +36,8 @@ class SongBookApp : public WindowServer
      *        Contemplate a way how to allow only tasks to operate with database
      *        (and maybe only a certain ones)*/
     SongDatabase* getDatabase() { return database; };
+    app_state_t getState() { return state; };
+    void setState(app_state_t state) { this->state = state; };
 
     /** This function executes serie of commands separated by ';' character. */
     void executeCommands(std::string cmd_line, bool exitWhenDone=false);
@@ -52,6 +59,7 @@ class SongBookApp : public WindowServer
     SongDatabase* database;
 
     std::string order = "ID";
+    app_state_t state = app_state_t::SONG_BROWSE;
     std::map<std::string, std::string> task_legend;
 };
 

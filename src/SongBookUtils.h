@@ -22,7 +22,10 @@ class SongBookUtils
     // =============================
 
     static std::string getConfigItem(std::string path, std::string def = "");
+    static nlohmann::json getConfigJson(std::string path, nlohmann::json def = {});
     static void setConfigItem(std::string path, std::string value);
+    static void setConfigJson(std::string path, nlohmann::json value);
+
     static int setJson(nlohmann::json _json) { config = _json; return 0; };
     static nlohmann::json getJson() {return config; };
 
@@ -51,16 +54,13 @@ class SongBookUtils
     static inline int countStringChars(const std::string& _str);
 
     /** This function returns an aligned string with set width, regardless of characters format (UNICODE/ASCII) */
-    static inline std::string alignString(const std::string& _str, char fill = ' ', int maxWidth = 30);
+    static std::string alignString(const std::string& _str, char fill = ' ', int maxWidth = 30);
 
     
     // ==============================
     // ====== PRINTING METHODS ======
     // ==============================
 
-    static std::string printSong(const std::string& no, const std::string& name, const std::string& author, bool has_lyrics);
-    static std::string printSongListHeader();
-    static std::string printSongListBottom();   
     static void printInteractive(const std::string& text, unsigned int indentation=0, bool newline=true);
     /** Prints the error message into std::cerr */
     static void printError(std::string msg);
