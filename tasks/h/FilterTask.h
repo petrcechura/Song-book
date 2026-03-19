@@ -15,6 +15,7 @@ public:
   virtual int ParseCommand(std::string cmd_line) override { return 0; };
 
   void filterData();
+  void filterCollection();
 
   void sortList();
   void selectCollection();

@@ -178,5 +178,6 @@ std::string SongBookApp::SongEditor(std::string lyrics)
 	cmd = std::format("cat {}", tmpfile);
 	lyrics = SongBookUtils::getInstance()->execSystemCommand(cmd.c_str());
 
+  
 	return lyrics;
 }

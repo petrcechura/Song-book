@@ -18,4 +18,6 @@ public:
   void createCollection();
   void deleteCollection();
 
+  void addToCollection();
+
 };

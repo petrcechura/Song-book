@@ -416,3 +416,24 @@ int SongDatabase::removeCollection(int id)
     return 2;
   }
 }
+
+std::string SongDatabase::getCollection(int id)
+{
+  nlohmann::json collections = getCollections();
+  std::string s_id;
+
+  if (collections.count(s_id))  {
+    return collections.at(s_id);
+  } else {
+    return "";
+  }
+}
+
+int SongDatabase::addSongToCollection(int song_id, int collection_id)
+{
+  return 1;
+}
+int SongDatabase::removeSongFromCollection(int song_id, int collection_id)
+{
+  return 1;
+}

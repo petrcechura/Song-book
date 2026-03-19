@@ -52,6 +52,7 @@ class SongDatabase
         // ==========================
         /** Returns all collections that are present in database currently */
         nlohmann::json getCollections();
+        std::string getCollection(int id);
 
         bool collectionExists(std::string name);
         bool collectionExists(int id);
@@ -59,6 +60,10 @@ class SongDatabase
         int SendQuery(std::string query);
         int addCollection(std::string name);
         int removeCollection(int id);
+        
+        // TODO
+        int addSongToCollection(int song_id, int collection_id);
+        int removeSongFromCollection(int song_id, int collection_id);
 
         
         // TODO

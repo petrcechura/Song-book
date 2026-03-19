@@ -17,6 +17,14 @@ int FilterTask::Execute(char command)
         		default: return 1;
       		}
 			break;
+		case SongBookApp::app_state_t::COLLECTION_BROWSE:
+			switch(command)  {
+				// enter
+        		case 13: filterCollection();
+						  break;
+        		default: return 1;
+      		}
+			break;
 	}
 
     return 0;
@@ -51,7 +59,15 @@ void FilterTask::sortList()
 {
 
 }
-void FilterTask::selectCollection()
+
+void FilterTask::filterCollection()
 {
 	
+}
+
+void FilterTask::selectCollection()
+{	
+	std::string collection = SongBookUtils::getConfigItem("workspace/current_collection_id", "0");
+
+	windows["Log Screen"]->Print(std::format("Collection '{}' selected.", collection));
 }

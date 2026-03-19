@@ -27,7 +27,8 @@ class SongBookApp : public WindowServer
 
     enum class app_state_t {
       SONG_BROWSE,
-      COLLECTION_BROWSE
+      COLLECTION_BROWSE,
+      ADD_TO_COLLECTION
     };
     
     /** Returns an instance of a database, allowing tasks to operate with that.

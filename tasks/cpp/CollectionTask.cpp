@@ -19,6 +19,14 @@ int CollectionTask::Execute(char command)
 					break;
 				case 'd': deleteCollection();
 					break;
+				case 'o': addToCollection();
+					break;
+			}
+			break;
+		case SongBookApp::app_state_t::ADD_TO_COLLECTION:
+			switch(command)  {
+				case 'x': parent->setState(SongBookApp::app_state_t::COLLECTION_BROWSE);
+					break;
 			}
 			break;
 	}
@@ -109,4 +117,30 @@ void CollectionTask::deleteCollection()
 void CollectionTask::selectCollection()
 {
 	
+}
+
+void CollectionTask::addToCollection()
+{	
+	std::string s_id = SongBookUtils::getConfigItem("workspace/current_collection_id", "x");
+
+	int id;
+	if (s_id == "x") {
+		windows["Log Screen"]->Print("Error when extracting collection ID from internal database...");
+		return;
+	} else {
+		id = stoi(s_id);
+	}
+
+	std::string collection = parent->getDatabase()->getCollection(id);
+
+	if (collection.empty())  {
+		windows["Log Screen"]->Print(std::format("Collection with id '{}' does not exist!", id));
+		return;
+	}
+
+	windows["Log Screen"]->Clear();
+	windows["Log Screen"]->Print(std::format("Select songs to add to your '{}' collection.", collection));
+
+
+	parent->setState(SongBookApp::app_state_t::SONG_BROWSE);
 }
