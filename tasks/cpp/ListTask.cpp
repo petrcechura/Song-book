@@ -35,6 +35,7 @@ void ListTask::listSongs()
 { 
 
 	nlohmann::json data = SongBookUtils::getInstance()->getConfigJson("workspace/songs");
+	nlohmann::json marks = SongBookUtils::getConfigJson("workspace/marked_songs");
 
 	windows["Main Screen"]->Clear();
 
@@ -45,12 +46,14 @@ void ListTask::listSongs()
 	for(const auto& [key, item] : data.items())  {
 		if (i > upper_song_no && i < lower_song_no)  {
 
+			bool marked = (std::find(marks.begin(), marks.end(), item["ID"]) != marks.end()) ? true : false;
+
 			if (i == select_song)  {
-				windows["Main Screen"]->Print(printSong(item), 1, 1, true);
+				windows["Main Screen"]->Print(printSong(item, marked), 1, 1, true);
 				SongBookUtils::getInstance()->setConfigItem("workspace/current_song_id", item["ID"]);
 			}
 			else {
-				windows["Main Screen"]->Print(printSong(item));
+				windows["Main Screen"]->Print(printSong(item, marked));
 			}
 		}
 		i++;
@@ -87,6 +90,30 @@ void ListTask::listCollections()
 	windows["Main Screen"]->Refresh();
 }
 
+void ListTask::markSong()
+{
+	std::string song_id = SongBookUtils::getConfigItem("workspace/current_song_id");
+
+	auto marked_songs = SongBookUtils::getConfigJson("workspace/marked_songs");
+
+	if (!marked_songs.is_array())  {
+		SongBookUtils::printError("value under `workspace/marked_songs` is not an array!");
+		return;
+	}
+
+	auto it = std::find(marked_songs.begin(), marked_songs.end(), song_id);
+
+	if (it != marked_songs.end()) {
+	    marked_songs.erase(it);
+	} else {
+	    marked_songs.push_back(song_id);
+	}
+
+	SongBookUtils::setConfigJson("workspace/marked_songs", marked_songs);
+
+	return;
+}
+
 int ListTask::Execute(char command)
 {	
     switch(command)  {
@@ -98,6 +125,8 @@ int ListTask::Execute(char command)
 	  			break;
 	  case 'b': tableRight();
 	  			break;
+	  case 'x': markSong();
+				break;
 	  case '-': break;
       default: return 1;
     }
@@ -114,9 +143,7 @@ void ListTask::moveDown()
 	switch(parent->getState())
 	{
 		case SongBookApp::app_state_t::SONG_BROWSE:
-			SongBookUtils::printError("before stoi");
 			max_cnt = stoi(SongBookUtils::getConfigItem("workspace/song_count"));
-			SongBookUtils::printError("after stoi");
 			if (select_song < max_cnt-1) 
 				select_song++;
 			if (select_song == lower_song_no)  {
@@ -179,7 +206,7 @@ void ListTask::tableRight()
 	}
 }
 
-std::string ListTask::printSong(const nlohmann::json& song)
+std::string ListTask::printSong(const nlohmann::json& song, bool marked)
 {
   
   std::string title =   song.count("TITLE")   ? song.at("TITLE") : "NULL";
@@ -189,7 +216,8 @@ std::string ListTask::printSong(const nlohmann::json& song)
   bool has_lyrics =     song.count("LYRICS") ? !(song["LYRICS"] == "NULL") : false;
 
   std::ostringstream string_cont;
-	string_cont << std::setw(4) << std::left << no
+	string_cont << std::setw(3) << std::left << (marked ? " * " : "   ")
+				<< std::setw(4) << std::left << no
 				<< std::left << SongBookUtils::alignString(title, 	' ', TITLE_WIDTH)
 				<< std::left << SongBookUtils::alignString(artist,  ' ', ARTIST_WIDTH)
                 << "    " << (has_lyrics ? "X" : " ");
@@ -201,7 +229,7 @@ std::string ListTask::printCollection(const nlohmann::json& collection)
 {
   std::string id    =    collection.count("ID")      ? collection.at("ID") : "NULL";
   std::string name  =    collection.count("NAME")    ? collection.at("NAME") : "NULL";
-  std::string count =    "UNKNOWN";
+  std::string count =    std::to_string(parent->getDatabase()->getCollectionCount(stoi(id)));
 
   std::ostringstream string_cont;
   string_cont << std::setw(4) << std::left << id;
@@ -226,7 +254,8 @@ std::string ListTask::printSongListHeader()
 {
   std::ostringstream string_cont;
 
-	string_cont << std::setw(4) << std::left << "NO"
+	string_cont << std::setw(3) << std::left << "<M>"
+				<< std::setw(4) << std::left << "NO"
 			    << std::setw(TITLE_WIDTH) << "Title "
 			    << std::setw(ARTIST_WIDTH) << "Artist "
               	<< "Has lyrics?";
@@ -237,7 +266,7 @@ std::string ListTask::printSongListHeader()
 std::string ListTask::printSongListBottom()
 {
   std::ostringstream string_cont;
-  string_cont << std::string(4 + 4 + TITLE_WIDTH + ARTIST_WIDTH+ 11, '-') << std::endl;
+  string_cont << std::string(3 + 4 + 4 + TITLE_WIDTH + ARTIST_WIDTH+ 11, '-') << std::endl;
 
   return string_cont.str().c_str();
 }

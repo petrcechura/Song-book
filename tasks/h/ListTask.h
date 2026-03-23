@@ -18,6 +18,8 @@ public:
         lower_collection_no = MAX_ITEMS_PER_PAGE;
         select_song = 0;
         select_collection = 0;
+
+        SongBookUtils::setConfigJson("workspace/marked_songs", nlohmann::json::array());
       };
   virtual int Execute(char command) override;
   virtual int ParseCommand(std::string cmd_line) override { return 0; };
@@ -28,8 +30,9 @@ public:
   void listTable();
   void listSongs();
   void listCollections();
+  void markSong();
 
-  std::string printSong(const nlohmann::json& song);
+  std::string printSong(const nlohmann::json& song, bool marked);
   std::string printSongListHeader();
   std::string printSongListBottom();
   std::string printCollectionListHeader();

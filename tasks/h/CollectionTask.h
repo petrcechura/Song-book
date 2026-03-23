@@ -19,5 +19,6 @@ public:
   void deleteCollection();
 
   void addToCollection();
+  void removeFromCollection();
 
 };

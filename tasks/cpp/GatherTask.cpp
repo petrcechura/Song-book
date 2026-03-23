@@ -57,7 +57,8 @@ void GatherTask::gatherSong()
 		if (!err)  {
 			windows["Log Screen"]->Print("Found these lyrics...");
 			windows["Main Screen"]->Clear();
-			parent->SongEditor(this->lyrics_reg);
+			this->lyrics_reg = parent->SongEditor(this->lyrics_reg);
+			
 			windows["Log Screen"]->Print("Do you want to keep those lyrics? (y/n)");
 			std::string choice = windows["Log Screen"]->GetString(1);
 			

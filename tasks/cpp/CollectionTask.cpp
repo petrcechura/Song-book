@@ -23,12 +23,6 @@ int CollectionTask::Execute(char command)
 					break;
 			}
 			break;
-		case SongBookApp::app_state_t::ADD_TO_COLLECTION:
-			switch(command)  {
-				case 'x': parent->setState(SongBookApp::app_state_t::COLLECTION_BROWSE);
-					break;
-			}
-			break;
 	}
     
 	return 0;
@@ -116,31 +110,39 @@ void CollectionTask::deleteCollection()
 
 void CollectionTask::selectCollection()
 {
-	
 }
 
 void CollectionTask::addToCollection()
 {	
-	std::string s_id = SongBookUtils::getConfigItem("workspace/current_collection_id", "x");
+	int collection_id = stoi(SongBookUtils::getConfigItem("workspace/current_collection_id"));
+	auto marked_songs = SongBookUtils::getConfigJson("workspace/marked_songs");
 
-	int id;
-	if (s_id == "x") {
-		windows["Log Screen"]->Print("Error when extracting collection ID from internal database...");
-		return;
-	} else {
-		id = stoi(s_id);
-	}
-
-	std::string collection = parent->getDatabase()->getCollection(id);
-
-	if (collection.empty())  {
-		windows["Log Screen"]->Print(std::format("Collection with id '{}' does not exist!", id));
+	if (!marked_songs.is_array())  {
+		SongBookUtils::printError("Array not found under `workspace/marked_songs`!");
 		return;
 	}
 
 	windows["Log Screen"]->Clear();
-	windows["Log Screen"]->Print(std::format("Select songs to add to your '{}' collection.", collection));
+	for (std::string song_id : marked_songs)  {
+		parent->getDatabase()->addSongToCollection(stoi(song_id), collection_id);
+		windows["Log Screen"]->Print(std::format("Song ({}) added to ({})", song_id, collection_id));
+	}
 
+}
 
-	parent->setState(SongBookApp::app_state_t::SONG_BROWSE);
+void CollectionTask::removeFromCollection()
+{
+	int collection_id = stoi(SongBookUtils::getConfigItem("workspace/current_collection_id"));
+	auto marked_songs = SongBookUtils::getConfigJson("workspace/marked_songs");
+
+	if (!marked_songs.is_array())  {
+		SongBookUtils::printError("Array not found under `workspace/marked_songs`!");
+		return;
+	}
+
+	windows["Log Screen"]->Clear();
+	for (std::string song_id : marked_songs)  {
+		parent->getDatabase()->removeSongFromCollection(stoi(song_id), collection_id);
+		windows["Log Screen"]->Print(std::format("Song ({}) removed from ({})", song_id, collection_id));
+	}
 }

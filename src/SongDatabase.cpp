@@ -277,12 +277,20 @@ nlohmann::json SongDatabase::getSqlJson(std::string query)  {
 nlohmann::json SongDatabase::getJson()
 {
   std::string pattern = SongBookUtils::getConfigItem("workspace/filter_pattern", "");
+  std::string collection_id = SongBookUtils::getConfigItem("workspace/filter_collection", "-1");
 
-  if (pattern == "")  {
+  if (collection_id == "-1" && pattern == "")  {
     return getSqlJson("SELECT * FROM SONGS");
   }
-  else  {
+  else if (collection_id == "-1" && pattern != "")  {
     return getSqlJson(std::format("SELECT * FROM SONGS WHERE TITLE LIKE '%{}%'", pattern));
+  }
+  else if (collection_id != "-1" && pattern == "")  {
+    SongBookUtils::printError("dsadsa");
+    return getSqlJson(std::format("SELECT s.* FROM SONGS s JOIN COLLECTION_MAP cm ON s.id = cm.song_id WHERE cm.collection_id = {} ;", collection_id));
+  }
+  else {
+    return getSqlJson(std::format("SELECT s.* FROM SONGS s JOIN COLLECTION_MAP cm ON s.id = cm.song_id WHERE cm.collection_id = {} AND TITLE LIKE '%{}%';", collection_id, pattern));
   }
 }
 
@@ -384,8 +392,6 @@ int SongDatabase::addCollection(std::string name)
       query << ");";
     }
 
-    SongBookUtils::printError(query.str());
-
 
     char* messageError;
     int exit = sqlite3_exec(DB, query.str().c_str(), sql_cb, nullptr, &messageError);
@@ -431,9 +437,96 @@ std::string SongDatabase::getCollection(int id)
 
 int SongDatabase::addSongToCollection(int song_id, int collection_id)
 {
-  return 1;
+  if (!songExists(song_id)) {
+    return 1;
+  }
+  else if (!collectionExists(collection_id))  {
+    return 2;
+  }    
+
+  std::ostringstream query;
+
+  query << "INSERT INTO COLLECTION_MAP (SONG_ID, COLLECTION_ID) ";
+  query << "VALUES (" << song_id << ", " << collection_id << ");";
+
+  char* messageError;
+  int exit = sqlite3_exec(DB, query.str().c_str(), sql_cb, nullptr, &messageError);
+  
+  if (exit)  {
+    SongBookUtils::printError(messageError);
+    return 3;
+  }
+  
+  return 0;
+
 }
+
 int SongDatabase::removeSongFromCollection(int song_id, int collection_id)
 {
-  return 1;
+  if (!songExists(song_id)) {
+    return 1;
+  }
+  else if (!collectionExists(collection_id))  {
+    return 2;
+  }    
+
+  std::ostringstream query;
+
+  query << "DELETE FROM COLLECTION_MAP ";
+  query << "WHERE SONG_ID=" << song_id << " AND COLLECTION_ID=" << collection_id << ");";
+
+  char* messageError;
+  int exit = sqlite3_exec(DB, query.str().c_str(), sql_cb, nullptr, &messageError);
+  
+  if (exit)  {
+    SongBookUtils::printError(messageError);
+    return 3;
+  }
+  
+  return 0;
+}
+
+bool SongDatabase::isInCollection(int song_id, int collection_id)
+{
+  if (!songExists(song_id)) {
+    return false;
+  }
+  else if (!collectionExists(collection_id))  {
+    return false;
+  }    
+
+  std::ostringstream query;
+
+  query << "SELECT * FROM COLLECTION_MAP ";
+  query << "WHERE SONG_ID=" << song_id << " AND COLLECTION_ID=" << collection_id << ");";
+  
+
+  nlohmann::json j = getSqlJson(query.str());
+
+  return (j.size()>1) ? true : false;
+}
+
+int SongDatabase::getCollectionCount(int collection_id)
+{
+  
+  std::ostringstream query;
+
+  query << "SELECT COUNT(*) AS song_count ";
+  query << "FROM COLLECTION_MAP ";
+  query << "WHERE COLLECTION_ID=" << collection_id << ";";
+
+  char* messageError;
+  int exit = sqlite3_exec(DB, query.str().c_str(), sql_cb, nullptr, &messageError);
+
+  if (exit)  {
+    SongBookUtils::printError(messageError);
+    return -1;
+  }
+
+
+  int cnt = stoi(sql_contents[0]["song_count"]);
+
+  sql_contents.clear();
+  return cnt;
+
 }

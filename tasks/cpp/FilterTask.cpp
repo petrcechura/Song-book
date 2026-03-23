@@ -20,7 +20,7 @@ int FilterTask::Execute(char command)
 		case SongBookApp::app_state_t::COLLECTION_BROWSE:
 			switch(command)  {
 				// enter
-        		case 13: filterCollection();
+        		case 'f': filterCollection();
 						  break;
         		default: return 1;
       		}
@@ -62,7 +62,20 @@ void FilterTask::sortList()
 
 void FilterTask::filterCollection()
 {
-	
+	std::string collection_id = SongBookUtils::getConfigItem("workspace/current_collection_id", "-1");
+
+	if (collection_id != "-1")  {
+		SongBookUtils::setConfigItem("workspace/filter_collection", collection_id);
+	}
+
+  	nlohmann::json songs = parent->getDatabase()->getJson();
+	nlohmann::json collections = parent->getDatabase()->getCollections();
+	std::string song_count = std::to_string(songs.size());
+	std::string collection_count = std::to_string(collections.size());
+  	SongBookUtils::setConfigJson("workspace/songs", songs);
+	SongBookUtils::setConfigJson("workspace/collections", collections);
+  	SongBookUtils::setConfigJson("workspace/song_count", song_count);
+	SongBookUtils::setConfigJson("workspace/collection_count", collection_count);
 }
 
 void FilterTask::selectCollection()

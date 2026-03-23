@@ -64,7 +64,8 @@ class SongDatabase
         // TODO
         int addSongToCollection(int song_id, int collection_id);
         int removeSongFromCollection(int song_id, int collection_id);
-
+        bool isInCollection(int song_id, int collection_id);
+        int getCollectionCount(int collection_id);
         
         // TODO
         int getSongCount() { return getJson().size(); };
