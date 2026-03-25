@@ -21,6 +21,8 @@ public:
     /** Waits for an input and periodically refreshes the ncurses interface with tasks */
     void Loop();
 
+    void Refresh();
+
     /**  */
     void AddWindow(Window* window);
     /** Adds a `TaskBase` object into the *task container*, thus allow its 

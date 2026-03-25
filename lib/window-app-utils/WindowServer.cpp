@@ -19,6 +19,13 @@ WindowServer::~WindowServer()
     }
 }
 
+void WindowServer::Refresh()
+{
+    for (auto const& [name, window] : windows)  {
+        window->Refresh();
+    }
+}
+
 
 WindowServer::WindowServer() 
 {

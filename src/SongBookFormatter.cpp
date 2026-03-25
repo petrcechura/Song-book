@@ -5,20 +5,33 @@
 #include <locale>
 #include <curl/curl.h>
 #include <format>
+#include <filesystem>
 #include <fstream>
 #include <map>
 #include "json.hpp"
 #include "SongBookFormatter.h"
 #include "SongBookUtils.h"
 
-int BardFormatter::generateSongBook(const char* output_file)
+int BardFormatter::exportSongs(const char* output_dir)
 {	
+
+	// create output directory
+	if (!std::filesystem::exists(output_dir))  {
+		std::filesystem::create_directory(output_dir);
+	}
+
+	// create directory for songs
+	std::string songs_dir = std::format("{}/songs", output_dir);
+	if (!std::filesystem::exists(songs_dir))  {
+		std::filesystem::create_directory(songs_dir);
+	}
 
 	std::ostringstream toml_oss;
 
 	toml_oss << "version = 2 \n\n"
 			 << "songs = [\n";
 
+	// create a markdown file for each song
 	int i = 0;
 	for (auto song : this->songs)  {
 
@@ -40,7 +53,7 @@ int BardFormatter::generateSongBook(const char* output_file)
         	<< SongBookUtils::getInstance()->sql2txt(song["LYRICS"]);
 
 		std::string fname = title + "_" + artist + ".md";
-		std::string fpath = "bard/songs/" + fname;
+		std::string fpath = songs_dir + "/" + fname;
 		
 		// save lyrics to file
 		std::ofstream songFile(fpath);
@@ -60,20 +73,44 @@ int BardFormatter::generateSongBook(const char* output_file)
 			 << "subtitle = \"" << SongBookUtils::getInstance()->getConfigItem("songbook/subtitle") << "\"\n"
 			 << "chorus_label = \"Ref\"\n"
 			 << "title_note = \"" << SongBookUtils::getInstance()->getConfigItem("songbook/note") <<"\"";
-
-	std::string bard_dir = SongBookUtils::getInstance()->getConfigItem("paths/bard_dir");
 	
-	if (!bard_dir.empty()) {
-		std::ofstream tomlFile(std::format("{}/bard.toml", bard_dir).c_str());
-		tomlFile << toml_oss.str();
-		tomlFile.close();
-	}
-	else {
-		SongBookUtils::getInstance()->printError("bard dir not found under `paths/bard_dir`");
-		return 1;
-	}
+	
+	// create TOML file
+	std::ofstream tomlFile(std::format("{}/bard.toml", output_dir).c_str());
+	tomlFile << toml_oss.str();	
+	tomlFile.close();
+
+    std::string bard_tool = SongBookUtils::getConfigItem("paths/bard_command", "");
+    if (bard_tool.empty())  {
+      return 1;
+    }
+
+    std::string s = SongBookUtils::execSystemCommand(std::format("(cd {} && {} init)", output_dir, bard_tool).c_str());
+	SongBookUtils::printError(s);
 
     return 0;
+
+}
+
+int BardFormatter::generateSongBook(const char* output_dir)
+{	
+  std::string bard_tool = SongBookUtils::getConfigItem("paths/bard_command", "");
+
+  if (bard_tool.empty())  {
+    return 1;
+  }
+
+  if (!std::filesystem::exists(output_dir))  {
+  	return 2;
+  }	
+  
+ 
+  SongBookUtils::execSystemCommand(std::format("(cd {} && {} make)", output_dir, bard_tool).c_str());
+  SongBookUtils::printError(std::format("(cd {} && {} make)", output_dir, bard_tool).c_str());
+
+  // TODO create symbolink link to work?
+
+  return 0;
 }
 
 // TODO remove
@@ -137,6 +174,10 @@ std::string BardFormatter::processChordLines(std::string lyrics)
 
 std::string BardFormatter::parseMarkdown(std::string markdown_lyrics)
 {
+
+	SongBookUtils::printError("BEFORE AI PARSE");
+	SongBookUtils::printError(markdown_lyrics);
+
 	CURL* curl;
     CURLcode err_code;
     std::string read_buffer;
@@ -217,6 +258,8 @@ std::string BardFormatter::parseMarkdown(std::string markdown_lyrics)
 		            if (!s.empty()) {
                         // return SUCCESS
                         // TODO print error
+						SongBookUtils::printError("AFTER AI PARSE");
+						SongBookUtils::printError(s);
 						return s;
 		            }
 					
@@ -308,7 +351,7 @@ void LatexListFormatter::clearPages()
 	this->songs.clear();
 }
 
-int LatexListFormatter::generateSongBook(const char* output_file)
+int LatexListFormatter::generateSongBook(const char* output_dir)
 {
   	std::filesystem::path tex_path = "songbook.tex";
   	std::ofstream file(tex_path);
@@ -338,4 +381,9 @@ int LatexListFormatter::generateSongBook(const char* output_file)
 			".", 
             tex_path.string()
           ).c_str());
+}
+
+int LatexListFormatter::exportSongs(const char* output_dir)
+{	
+	return 0;
 }

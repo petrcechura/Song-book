@@ -36,7 +36,9 @@ public:
      *
      *  Song pages to this complete songbook shall be added via `addSongPage` method.
      */
-    virtual int generateSongBook(const char* output_file = "") = 0;
+    virtual int generateSongBook(const char* output_dir = "") = 0;
+
+    virtual int exportSongs(const char* output_dir) = 0;
     
     /** 
      * Parses markdown syntax into `SongBookFormatter` specific syntax.
@@ -70,7 +72,8 @@ class BardFormatter : public SongBookFormatter
 protected:
     nlohmann::json songs;
 public:
-    virtual int generateSongBook(const char* output_file = "") override;
+    virtual int generateSongBook(const char* output_dir = "") override;
+    virtual int exportSongs(const char* output_dir) override;
     virtual std::string parseMarkdown(std::string markdown_lyrics) override;
     virtual int addSongPage(nlohmann::json song);
     virtual bool checkSanity() override;
@@ -139,7 +142,8 @@ protected:
 
     std::string getPrintableString(std::string str);
 public:
-    virtual int generateSongBook(const char* output_file = "") override;
+    virtual int generateSongBook(const char* output_dir = "") override;
+    virtual int exportSongs(const char* output_dir) override;
     virtual std::string parseMarkdown(std::string markdown_lyrics) override;
     virtual int addSongPage(nlohmann::json song);
     virtual bool checkSanity() override;

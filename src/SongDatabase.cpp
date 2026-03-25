@@ -415,6 +415,9 @@ int SongDatabase::removeCollection(int id)
   if (sql_json != nullptr; sql_json.size() == 1)  {
       query  = "DELETE FROM COLLECTIONS WHERE ID=" + std::to_string(id) + ";";
       sqlite3_exec(DB, query.c_str(), nullptr, nullptr, nullptr);
+
+      query  = std::format("DELETE FROM COLLECTION_MAP WHERE COLLECTION_ID={};", id);
+      sqlite3_exec(DB, query.c_str(), nullptr, nullptr, nullptr);
       return 0;
   }
   else {
@@ -473,7 +476,7 @@ int SongDatabase::removeSongFromCollection(int song_id, int collection_id)
   std::ostringstream query;
 
   query << "DELETE FROM COLLECTION_MAP ";
-  query << "WHERE SONG_ID=" << song_id << " AND COLLECTION_ID=" << collection_id << ");";
+  query << "WHERE SONG_ID=" << song_id << " AND COLLECTION_ID=" << collection_id << ";";
 
   char* messageError;
   int exit = sqlite3_exec(DB, query.str().c_str(), sql_cb, nullptr, &messageError);
