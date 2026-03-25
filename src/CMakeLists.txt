@@ -5,6 +5,7 @@ project(songbook CXX)
 add_library(songbookapp)
 
 find_package(SQLite3 REQUIRED)
+find_package(LibXml2 REQUIRED)
 
 target_sources(songbookapp
     PRIVATE SongBookApp.cpp
@@ -25,6 +26,7 @@ add_library(SongBookApp::SongBookApp ALIAS songbookapp)
 
 target_link_libraries(songbookapp PRIVATE ${CURSES_LIBRARIES})
 target_link_libraries(songbookapp PRIVATE curl)
+target_link_libraries(songbookapp PRIVATE LibXml2::LibXml2)
 target_include_directories(songbookapp PRIVATE ${CURSES_INCLUDE_DIRS})
 target_include_directories(songbookapp PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../lib/json)
 target_include_directories(songbookapp PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/tasks/h)

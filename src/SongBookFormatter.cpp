@@ -16,15 +16,11 @@ int BardFormatter::exportSongs(const char* output_dir)
 {	
 
 	// create output directory
-	if (!std::filesystem::exists(output_dir))  {
-		std::filesystem::create_directory(output_dir);
-	}
+	std::filesystem::create_directory(output_dir);
 
 	// create directory for songs
 	std::string songs_dir = std::format("{}/songs", output_dir);
-	if (!std::filesystem::exists(songs_dir))  {
-		std::filesystem::create_directory(songs_dir);
-	}
+	std::filesystem::create_directory(songs_dir);
 
 	std::ostringstream toml_oss;
 
@@ -105,8 +101,8 @@ int BardFormatter::generateSongBook(const char* output_dir)
   }	
   
  
-  SongBookUtils::execSystemCommand(std::format("(cd {} && {} make)", output_dir, bard_tool).c_str());
-  SongBookUtils::printError(std::format("(cd {} && {} make)", output_dir, bard_tool).c_str());
+  std::string s = SongBookUtils::execSystemCommand(std::format("(cd {} && {} make)", output_dir, bard_tool).c_str());
+  SongBookUtils::printError(s);
 
   // TODO create symbolink link to work?
 
@@ -169,6 +165,64 @@ std::string BardFormatter::processChordLines(std::string lyrics)
         c_num++;
     }
     return lines;
+}
+
+std::string BardFormatter::processSingleChordLine(std::string& chord_line)
+{
+	std::ostringstream s;
+
+	bool chord = false;
+	for (const auto& c : chord_line) {
+		if (c == " ")  {
+			s << (chord ? "`" : "") << c;
+			chord = false;
+		}
+		else if (c != " ")  {
+			s << (chord ? "" : "`") << c;
+			chord = true;
+		}
+	}
+
+	return s.str();
+}
+std::string BardFormatter::processTextWithChords(std::string& chord_line, std::string& text_line)
+{
+	std::ostringstream s;
+	
+	std::map<int, std::string> chords;
+	int track_i = 0;
+	bool chord = false;
+	int i = 0;
+	for (const auto& c : text_line) {
+		if (c!=" ")  {
+			buffer << c;
+			if (!chord) {
+				track_i = i;
+				chord = true;
+			}
+		} else {
+			if (chord)  {
+				chords[track_i] =  buffer.str();
+				chord = false;
+			}
+		}
+		i++;
+	}
+
+	i = 0;
+	for (const auto& c : text_line) {
+		if (chord_marks.contains(i))  {
+			s << "`" << chords[i] << "`";
+		}
+		s << c;
+		i++;
+	}
+
+	return s.str();
+}
+std::string BardFormatter::processTextLine(std::string& text_line)
+{
+	return text_line;
 }
 
 
@@ -386,4 +440,17 @@ int LatexListFormatter::generateSongBook(const char* output_dir)
 int LatexListFormatter::exportSongs(const char* output_dir)
 {	
 	return 0;
+}
+
+std::string LatexListFormatter::processSingleChordLine(std::string& chord_line)
+{
+
+}
+std::string LatexListFormatter::processTextWithChords(std::string& chord_line, std::string& text_line)
+{
+
+}
+std::string LatexListFormatter::processTextLine(std::string& text_line)
+{
+	
 }
