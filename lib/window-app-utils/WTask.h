@@ -28,8 +28,6 @@ public:
     virtual int ParseCommand(std::string cmd_line) override;
     
     void AddWindow(Window* window);
-    void SetLegend(std::map<std::string, std::string> task_legend);
-    std::map<std::string, std::string> GetLegend();
 
 protected:
     std::map<char, std::function<void(void)>> commands;
@@ -47,12 +45,6 @@ WTask<t_server>::WTask(std::string cmd, t_server* parent, std::string descr)
     this->name = cmd;
     this->parent = parent;
     this->description = descr;
-}
-
-template<class t_server>
-std::map<std::string, std::string> WTask<t_server>::GetLegend()
-{   
-    return this->task_legend;
 }
 
 template<class t_server>

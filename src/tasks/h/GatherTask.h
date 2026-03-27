@@ -40,9 +40,8 @@ public:
         TODO: Not in use right now! Implement and use... */
     bool checkSanity();
 
-    int deleteThis();
-
   private:
+
 
     enum {
       SUCCESS,
@@ -81,5 +80,7 @@ public:
     std::string temp_fp = "";
     std::string lyrics_reg;
 
-    std::vector<std::pair<std::string, std::string>> parseHtmlWebsiteNo0(xmlXPathContextPtr context);
+    // písničky s akordy
+    std::string parseHtmlWebsiteNo0(xmlXPathContextPtr context);
+
 };

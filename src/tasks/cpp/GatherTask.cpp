@@ -29,56 +29,19 @@ size_t write_cb(void* contents, size_t size, size_t nmemb, void* userp) {
 }
 
 int GatherTask::Execute(char command)
-{
-      switch(command)  {
-        case 'g': gatherSong();
-				  break;
-		case 'i': deleteThis();
-        default: return 1;
-      }
-
-      return 0;
-}
-
-int GatherTask::deleteThis()
-{
-	    // 1. Načtení HTML
-    htmlDocPtr doc = htmlReadFile("/tmp/tri-cunici.html", nullptr, HTML_PARSE_NOERROR | HTML_PARSE_NOWARNING);
-    if (!doc) {
-        std::cerr << "Chyba při načítání HTML\n";
-        return 1;
-    }
-
-    // 2. XPath kontext
-    xmlXPathContextPtr context = xmlXPathNewContext(doc);
-
-    // 3. XPath dotaz (najde <pre> s textem)
-    xmlXPathObjectPtr result = xmlXPathEvalExpression(
-        (const xmlChar*)"//div[@id='songtext']//pre",
-        context
-    );
-
-    if (result && result->nodesetval) {
-        xmlNodeSetPtr nodes = result->nodesetval;
-
-        for (int i = 0; i < nodes->nodeNr; i++) {
-            xmlNodePtr node = nodes->nodeTab[i];
-
-            // 4. Získání textu
-            xmlChar* content = xmlNodeGetContent(node);
-            std::cerr << (const char*)content << "\n";
-
-            xmlFree(content);
-        }
-    }
-
-    // cleanup
-    xmlXPathFreeObject(result);
-    xmlXPathFreeContext(context);
-    xmlFreeDoc(doc);
-    xmlCleanupParser();
-
-    return 0;
+{	
+	switch(parent->getState())  {
+		case SongBookApp::app_state_t::SONG_BROWSE:
+			switch(command)  {
+				case 'g': gatherSong();
+				break;
+			}
+		parent->addTaskLegend('g', "Gather lyrics for a song");
+		break;
+		case SongBookApp::app_state_t::COLLECTION_BROWSE:
+			break;
+	}
+	return 0;
 }
 
 void GatherTask::gatherSong()
@@ -238,66 +201,6 @@ std::string GatherTask::curlQuery(const char* query)
 	return response;
 }
 
-static void processNode(xmlNode* node, std::ostringstream& out) {
-    for (xmlNode* cur = node; cur; cur = cur->next) {
-
-        // ELEMENT node
-        if (cur->type == XML_ELEMENT_NODE) {
-
-            // chord
-            if (xmlStrEqual(cur->name, (const xmlChar*)"span")) {
-                xmlChar* cls = xmlGetProp(cur, (const xmlChar*)"class");
-
-                if (cls && xmlStrEqual(cls, (const xmlChar*)"akord")) {
-
-                    xmlChar* chord = xmlNodeGetContent(cur);
-                    if (chord) {
-                        std::string chordStr = (const char*)chord;
-
-                        // print chord
-                        out << "`" << chordStr << "`";
-
-                        xmlFree(chord);
-
-                        // 🔥 skip duplicated text node after chord
-                        xmlNode* next = cur->next;
-                        if (next && next->type == XML_TEXT_NODE) {
-                            std::string text = (const char*)next->content;
-
-                            // trim left spaces
-                            text.erase(0, text.find_first_not_of(" \t"));
-
-                            // if it starts with same chord → skip it
-                            if (text.rfind(chordStr, 0) == 0) {
-                                cur = next; // skip this node
-                                continue;
-                            }
-                        }
-                    }
-                }
-
-                if (cls) xmlFree(cls);
-            }
-
-            // <br> → newline
-            if (xmlStrEqual(cur->name, (const xmlChar*)"br")) {
-                out << "\n";
-            }
-
-            // recurse
-            processNode(cur->children, out);
-        }
-
-        // TEXT node
-        else if (cur->type == XML_TEXT_NODE) {
-            if (cur->content) {
-                out << (const char*)cur->content;
-            }
-        }
-    }
-}
-
-
 std::string GatherTask::parseWebsite(std::string website_url, std::string base_url)
 {
     windows["Log Screen"]->Print(std::format("Parsing website '{}'", website_url));
@@ -321,14 +224,10 @@ std::string GatherTask::parseWebsite(std::string website_url, std::string base_u
 
     xmlXPathContextPtr context = xmlXPathNewContext(doc);
 
-	auto pairs = std::vector<std::pair<std::string, std::string>>();
+	std::string lyrics;
 	
 	if (base_url==allowed_websites[0])  {
-		pairs = parseHtmlWebsiteNo0(context);
-	}
-
-	for (const auto& i : pairs)  {
-		SongBookUtils::printError(std::format("{}: `{}`", i.first, i.second));
+		lyrics = parseHtmlWebsiteNo0(context);
 	}
 
     // cleanup
@@ -336,17 +235,14 @@ std::string GatherTask::parseWebsite(std::string website_url, std::string base_u
     xmlFreeDoc(doc);
     xmlCleanupParser();
 
-	return "";
+	return lyrics;
 }
 
 // ================================
 // Písničky s akordy (pisnicky-akordy.cz)
 // ================================
-std::vector<std::pair<std::string, std::string>> GatherTask::parseHtmlWebsiteNo0(xmlXPathContextPtr context)
+std::string GatherTask::parseHtmlWebsiteNo0(xmlXPathContextPtr context)
 {	
-	SongBookUtils::printError("0");
-	std::vector<std::pair<std::string, std::string>> lines_vector = std::vector<std::pair<std::string, std::string>>();
-
     xmlXPathObjectPtr result = xmlXPathEvalExpression(
         (const xmlChar*)"//div[@id='songtext']//pre",
         context
@@ -357,10 +253,9 @@ std::vector<std::pair<std::string, std::string>> GatherTask::parseHtmlWebsiteNo0
 
     if (result && result->nodesetval && result->nodesetval->nodeNr > 0) {
         xmlNode* pre = result->nodesetval->nodeTab[0];
-
+		
+		std::string chords = "";
    		for (xmlNode* cur = pre->children; cur; cur = cur->next) {
-
-			std::pair<std::string, std::string> pair;
 
 			// ELEMENT node
        		if (cur->type == XML_ELEMENT_NODE) {
@@ -369,18 +264,22 @@ std::vector<std::pair<std::string, std::string>> GatherTask::parseHtmlWebsiteNo0
 					xmlChar* chord = xmlNodeGetContent(inner);
 					chord_line << (const char*) chord; 
 				}
-				lines_vector.push_back({"chord", chord_line.str().c_str()});
+
+				if (!chords.empty())  {
+					lyrics << formatter->processSingleChordLine(chords);
+				}
+				chords = chord_line.str();
 			}
 
 			// TEXT node
        		else if (cur->type == XML_TEXT_NODE) {
 
-       		    if (cur->content) {
-					lines_vector.push_back({"text", (const char*)cur->content});
-       		    }
-				else {
-					lines_vector.push_back({"text", ""});
+				if (!chords.empty())  {
+					lyrics << formatter->processTextWithChords(chords, (const char*)cur->content);
+				} else {
+					lyrics << formatter->processTextLine((const char*)cur->content);
 				}
+				chords.clear();
        		}
 		}
 
@@ -388,7 +287,7 @@ std::vector<std::pair<std::string, std::string>> GatherTask::parseHtmlWebsiteNo0
 		xmlXPathFreeObject(result);
 	}
 
-	return lines_vector;
+	return lyrics.str();
 }
 
 

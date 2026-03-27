@@ -14,16 +14,19 @@ int FilterTask::Execute(char command)
       		switch(command)  {
         		case 'f': filterData();
 						  break;
-        		default: return 1;
+				case 't': sortList();
+						  break;
       		}
+			parent->addTaskLegend('f', "Filter songs");
+			parent->addTaskLegend('t', "Sort songs");
 			break;
 		case SongBookApp::app_state_t::COLLECTION_BROWSE:
 			switch(command)  {
 				// enter
         		case 'f': filterCollection();
 						  break;
-        		default: return 1;
       		}
+			parent->addTaskLegend('f', "Filter collections");
 			break;
 	}
 
@@ -55,16 +58,34 @@ void FilterTask::filterData()
 	SongBookUtils::setConfigJson("workspace/collection_count", collection_count);
 }
 
+// TODO this shall be replaced in future by another `settings` table, where sort options are select via simple ENTER
+// (as well as other options)
 void FilterTask::sortList()
 {
+	windows["Log Screen"]->Clear();
 
+	windows["Log Screen"]->Print("Type a sort pattern:");
+	std::string pattern = windows["Log Screen"]->GetString(10);
+
+	if ( pattern != "ID" && pattern != "title" && pattern != "artist")  {
+		windows["Log Screen"]->Print("Sort pattern must be one of: ID, title, artist");
+		return;
+	}
+
+	SongBookUtils::setConfigItem("workspace/order", pattern);
+	
+  	nlohmann::json songs = parent->getDatabase()->getJson();
+  	SongBookUtils::setConfigJson("workspace/songs", songs);
 }
 
 void FilterTask::filterCollection()
 {
 	std::string collection_id = SongBookUtils::getConfigItem("workspace/current_collection_id", "-1");
 
-	if (collection_id != "-1")  {
+	if (collection_id == SongBookUtils::getConfigItem("workspace/filter_collection", ""))  {
+		SongBookUtils::setConfigItem("workspace/filter_collection", "");
+	}
+	else if (collection_id != "-1")  {
 		SongBookUtils::setConfigItem("workspace/filter_collection", collection_id);
 	}
 

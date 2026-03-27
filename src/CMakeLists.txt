@@ -6,6 +6,7 @@ add_library(songbookapp)
 
 find_package(SQLite3 REQUIRED)
 find_package(LibXml2 REQUIRED)
+find_package(PoDoFo REQUIRED)
 
 target_sources(songbookapp
     PRIVATE SongBookApp.cpp
@@ -27,8 +28,10 @@ add_library(SongBookApp::SongBookApp ALIAS songbookapp)
 target_link_libraries(songbookapp PRIVATE ${CURSES_LIBRARIES})
 target_link_libraries(songbookapp PRIVATE curl)
 target_link_libraries(songbookapp PRIVATE LibXml2::LibXml2)
+target_link_libraries(songbookapp PRIVATE podofo)
 target_include_directories(songbookapp PRIVATE ${CURSES_INCLUDE_DIRS})
 target_include_directories(songbookapp PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../lib/json)
+target_include_directories(songbookapp PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../lib/utfcpp-4.0.9/source)
 target_include_directories(songbookapp PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/tasks/h)
 
 target_sources(songbookapp

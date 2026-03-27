@@ -18,8 +18,10 @@ int CRUDTask::Execute(char command)
 						  break;
 				case 'd': deleteSong();
 						  break;
-        		default: return 1;
       		}
+			parent->addTaskLegend('a', "Add a song");
+			parent->addTaskLegend('d', "Delete a song");
+			parent->addTaskLegend('m', "Modify a song");
 		break;
 	}
 

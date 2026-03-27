@@ -4,8 +4,10 @@
 #include <codecvt>
 #include <locale>
 #include <curl/curl.h>
+#include "utf8.h"
 #include <format>
 #include <filesystem>
+#include <podofo/podofo.h>
 #include <fstream>
 #include <map>
 #include "json.hpp"
@@ -69,20 +71,21 @@ int BardFormatter::exportSongs(const char* output_dir)
 			 << "subtitle = \"" << SongBookUtils::getInstance()->getConfigItem("songbook/subtitle") << "\"\n"
 			 << "chorus_label = \"Ref\"\n"
 			 << "title_note = \"" << SongBookUtils::getInstance()->getConfigItem("songbook/note") <<"\"";
-	
+
+	// init directory with bard tool
+    std::string bard_tool = SongBookUtils::getConfigItem("paths/bard_command", "");
+    std::string s = SongBookUtils::execSystemCommand(std::format("(cd {} && {} init)", output_dir, bard_tool).c_str());
+	SongBookUtils::printError(std::format("(cd {} && {} init)", output_dir, bard_tool));
+	SongBookUtils::printError(s);
 	
 	// create TOML file
 	std::ofstream tomlFile(std::format("{}/bard.toml", output_dir).c_str());
 	tomlFile << toml_oss.str();	
 	tomlFile.close();
 
-    std::string bard_tool = SongBookUtils::getConfigItem("paths/bard_command", "");
     if (bard_tool.empty())  {
       return 1;
     }
-
-    std::string s = SongBookUtils::execSystemCommand(std::format("(cd {} && {} init)", output_dir, bard_tool).c_str());
-	SongBookUtils::printError(s);
 
     return 0;
 
@@ -109,75 +112,25 @@ int BardFormatter::generateSongBook(const char* output_dir)
   return 0;
 }
 
-// TODO remove
-std::string BardFormatter::processChordLines(std::string lyrics)
+void BardFormatter::createBooklet(const char* def_songbook_path,
+                           		  const char* front_page_path,
+                           		  const char* back_page_path,
+                           		  int pages_per_shuttle)
 {
-    bool is_chord_line = false;
 
-    std::map<int, std::string> chord_marks;
-
-    std::string chord = "";
-    int mark = 0;
-    std::string lines = "";
-
-    std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> conv;
-    std::u32string width_lyrics = conv.from_bytes(lyrics);
-
-    int c_num = 0;
-    for (char32_t c : width_lyrics)
-    {
-        std::string utf8_char = conv.to_bytes(c);
-
-        if (c == U'\n') {
-            if (!is_chord_line) {
-                lines += "\n";
-                chord_marks.clear();
-            }
-            c_num = 0;
-            is_chord_line = false;
-        }
-        else if (c == U'$') {
-            is_chord_line = true;
-        }
-        else {
-            if (is_chord_line) {
-                if (c == U' ') {
-                    if (!chord.empty()) {
-                        chord_marks[mark] = chord;
-                        chord.clear();
-                    }
-                }
-                else {
-                    if (chord.empty())
-                        mark = c_num;
-                    chord += utf8_char;
-                }
-            }
-            else {
-                if (chord_marks.count(c_num)) {
-                    lines += "`" + chord_marks[c_num] + "`" + utf8_char;
-                }
-                else {
-                    lines += utf8_char;
-                }
-            }
-        }
-        c_num++;
-    }
-    return lines;
 }
 
-std::string BardFormatter::processSingleChordLine(std::string& chord_line)
+std::string BardFormatter::processSingleChordLine(const std::string& chord_line)
 {
 	std::ostringstream s;
 
 	bool chord = false;
-	for (const auto& c : chord_line) {
-		if (c == " ")  {
+	for (const auto c : chord_line) {
+		if (c == ' ')  {
 			s << (chord ? "`" : "") << c;
 			chord = false;
 		}
-		else if (c != " ")  {
+		else if (c != ' ')  {
 			s << (chord ? "" : "`") << c;
 			chord = true;
 		}
@@ -185,151 +138,52 @@ std::string BardFormatter::processSingleChordLine(std::string& chord_line)
 
 	return s.str();
 }
-std::string BardFormatter::processTextWithChords(std::string& chord_line, std::string& text_line)
+
+std::string BardFormatter::processTextWithChords(const std::string& chord_line, const std::string& text_line)
 {
-	std::ostringstream s;
+	std::ostringstream buffer;
 	
 	std::map<int, std::string> chords;
 	int track_i = 0;
-	bool chord = false;
+	bool processing_chord = false;
 	int i = 0;
-	for (const auto& c : text_line) {
-		if (c!=" ")  {
+	for (const auto& c : chord_line) {
+
+		// chord detected
+		if (c!=' ')  {
 			buffer << c;
-			if (!chord) {
+			if (!processing_chord) {
 				track_i = i;
-				chord = true;
+				processing_chord = true;
 			}
+
+		// empty char
 		} else {
-			if (chord)  {
+			if (processing_chord)  {
 				chords[track_i] =  buffer.str();
-				chord = false;
+				processing_chord = false;
+				buffer.str("");
 			}
 		}
 		i++;
 	}
 
+	std::ostringstream s;
 	i = 0;
-	for (const auto& c : text_line) {
-		if (chord_marks.contains(i))  {
+	for (auto it = text_line.begin(); it != text_line.end(); ) {
+		if (chords.contains(i))  {
 			s << "`" << chords[i] << "`";
 		}
-		s << c;
+		uint32_t cp = utf8::next(it, text_line.end());
+		utf8::append(cp, std::ostream_iterator<char>(s));
 		i++;
 	}
 
 	return s.str();
 }
-std::string BardFormatter::processTextLine(std::string& text_line)
-{
+std::string BardFormatter::processTextLine(const std::string& text_line)
+{	
 	return text_line;
-}
-
-
-std::string BardFormatter::parseMarkdown(std::string markdown_lyrics)
-{
-
-	SongBookUtils::printError("BEFORE AI PARSE");
-	SongBookUtils::printError(markdown_lyrics);
-
-	CURL* curl;
-    CURLcode err_code;
-    std::string read_buffer;
-	nlohmann::json song;
-
-	std::ostringstream query;
-
-	nlohmann::json prompt_json = {
-    	{"model", SongBookUtils::getInstance()->getConfigItem("ai/model")},
-    	{"messages", {
-        	{{"role", "system"},
-         		{"content", 
-					"You are a strict formatter for songbook application. Input is lyrics with chords, you parse it into different syntax.\
-						Always preserve newlines. \
-						Input syntax: \
-						- there are chord lines and lyrics lines \
-						Output syntax: \
-						- Copy the lyrics lines. \
-						- Don't copy the chord lines \
-						Other Rules: \
-						1. Verse begins with number and dot (e.g., '1. ...'). \
-						2. Verses are enumerated (first starts with 1., then 2. ) \
-						3. There cannot be verse without an enumeration number. \
-						4. Chorus begins with '>' (e.g., '> ...'). \
-						5. If the chorus with 'ref', it's replace by '>' \
-						6. Preserve lyric words and line breaks exactly. \
-						8. Output only the transformed lyrics, no explanations"}},
-            	{{"role", "user"},
-            	{"content", markdown_lyrics}}
-    		}}
-	};
-	std::string prompt = prompt_json.dump();
-	
-    curl_global_init(CURL_GLOBAL_DEFAULT);
-    curl = curl_easy_init();
-
-    if(curl) {
-        struct curl_slist* headers = NULL;
-        headers = curl_slist_append(headers, "Content-Type: application/json");
-        std::string auth_header = "Authorization: Bearer " + SongBookUtils::getInstance()->getConfigItem("ai/api_key");
-        headers = curl_slist_append(headers, auth_header.c_str());
-
-        curl_easy_setopt(curl, CURLOPT_URL, "https://api.openai.com/v1/chat/completions");
-        curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
-        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, prompt.c_str());
-		curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, prompt.size()); 
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, this->write_cb);
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &read_buffer);
-
-        err_code = curl_easy_perform(curl);
-        if(err_code != CURLE_OK) {
-            return "";
-            // return CURLE_ERROR
-            // TODO print error
-        }
-
-        curl_easy_cleanup(curl);
-        curl_slist_free_all(headers);
-    }
-    curl_global_cleanup();
-
-	nlohmann::json read_json = nlohmann::json::parse(read_buffer);
-
-	if (!read_json.empty())  {
-		if (read_json.contains("error"))  {
-			if (read_json["error"].contains("message"))  {
-				SongBookUtils::getInstance()->printError(std::format("** {} **", read_json["error"].at("message").get<std::string>()));
-			}
-			// ai response is error
-			//return AI_ERROR_RESPONSE;
-            // TODO print error
-            return "";
-		}
-		else if (read_json.contains("choices")) {
-		    if (!read_json["choices"].empty() && read_json["choices"][0].contains("message")) {
-		        if (read_json["choices"][0]["message"].contains("content")) {
-		            std::string s = read_json["choices"][0]["message"]["content"].get<std::string>();
-		            if (!s.empty()) {
-                        // return SUCCESS
-                        // TODO print error
-						SongBookUtils::printError("AFTER AI PARSE");
-						SongBookUtils::printError(s);
-						return s;
-		            }
-					
-		        }
-		    } 
-		}
-        //return AI_EMPTY_RESPONSE;
-        // TODO print error
-		return "";
-		
-	}
-	else {
-        // TODO print error
-		//return CURL_EMPTY_RESPONSE;
-        return "";
-	}
 }
 
 int BardFormatter::addSongPage(nlohmann::json song)
@@ -390,11 +244,6 @@ int LatexListFormatter::addSongPage(nlohmann::json song)
 	songs.push_back(oss.str());
 }
 
-std::string LatexListFormatter::parseMarkdown(std::string markdown_lyrics)
-{
-	return markdown_lyrics;
-}
-
 bool LatexListFormatter::checkSanity()
 {
 	return false;
@@ -442,15 +291,23 @@ int LatexListFormatter::exportSongs(const char* output_dir)
 	return 0;
 }
 
-std::string LatexListFormatter::processSingleChordLine(std::string& chord_line)
+std::string LatexListFormatter::processSingleChordLine(const std::string& chord_line)
 {
 
 }
-std::string LatexListFormatter::processTextWithChords(std::string& chord_line, std::string& text_line)
+std::string LatexListFormatter::processTextWithChords(const std::string& chord_line, const std::string& text_line)
 {
 
 }
-std::string LatexListFormatter::processTextLine(std::string& text_line)
+std::string LatexListFormatter::processTextLine(const std::string& text_line)
+{
+	
+}
+
+void LatexListFormatter::createBooklet(const char* def_songbook_path,
+                               		   const char* front_page_path,
+                               		   const char* back_page_path,
+                               		   int pages_per_shuttle)
 {
 	
 }

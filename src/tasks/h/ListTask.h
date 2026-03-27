@@ -29,6 +29,7 @@ public:
   void tableLeft();
   void listTable();
   void listSongs();
+  void listSettings();
   void listCollections();
   void markSong();
 
@@ -46,4 +47,5 @@ private:
   int select_song;
   int select_collection;
   const int MAX_ITEMS_PER_PAGE = 17;
+
 };
