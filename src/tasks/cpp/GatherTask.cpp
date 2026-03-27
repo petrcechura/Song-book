@@ -12,7 +12,6 @@
 #include <cstdarg>
 #include <libxml/HTMLparser.h>
 #include <libxml/xpath.h>
-#include <thread>
 #include <utility>
 #include <form.h>
 #include <fstream>
