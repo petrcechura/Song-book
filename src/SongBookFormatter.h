@@ -39,9 +39,14 @@ public:
     virtual int generateSongBook(const char* output_dir = "") = 0;
     virtual int exportSongs(const char* output_dir) = 0;
     
-    virtual std::string processSingleChordLine(std::string& chord_line) = 0;
-    virtual std::string processTextWithChords(std::string& chord_line, std::string& text_line) = 0;
-    virtual std::string processTextLine(std::string& text_line) = 0;
+    virtual std::string processSingleChordLine(const std::string& chord_line) = 0;
+    virtual std::string processTextWithChords(const std::string& chord_line, const std::string& text_line) = 0;
+    virtual std::string processTextLine(const std::string& text_line) = 0;
+
+    virtual void createBooklet(const char* def_songbook_path,
+                               const char* front_page_path,
+                               const char* back_page_path,
+                               int pages_per_shuttle) = 0;
 
     /** Adds a song into temporary database, so songbook can be generated. 
         @param title: title of a song
@@ -67,16 +72,18 @@ protected:
 public:
     virtual int generateSongBook(const char* output_dir = "") override;
     virtual int exportSongs(const char* output_dir) override;
-    virtual std::string parseMarkdown(std::string markdown_lyrics) override;
     virtual int addSongPage(nlohmann::json song);
     virtual bool checkSanity() override;
     virtual void clearPages() override;
 
-    std::string processChordLines(std::string lyrics);
+    virtual std::string processSingleChordLine(const std::string& chord_line) override;
+    virtual std::string processTextWithChords(const std::string& chord_line, const std::string& text_line) override;
+    virtual std::string processTextLine(const std::string& text_line) override;
 
-    virtual std::string processSingleChordLine(std::string& chord_line) override;
-    virtual std::string processTextWithChords(std::string& chord_line, std::string& text_line) override;
-    virtual std::string processTextLine(std::string& text_line) override;
+    virtual void createBooklet(const char* def_songbook_path,
+                               const char* front_page_path,
+                               const char* back_page_path,
+                               int pages_per_shuttle) override;
 };
 
 class LatexListFormatter : public SongBookFormatter
@@ -141,14 +148,18 @@ protected:
 public:
     virtual int generateSongBook(const char* output_dir = "") override;
     virtual int exportSongs(const char* output_dir) override;
-    virtual std::string parseMarkdown(std::string markdown_lyrics) override;
     virtual int addSongPage(nlohmann::json song);
     virtual bool checkSanity() override;
     virtual void clearPages() override;
 
-    virtual std::string processSingleChordLine(std::string& chord_line) override;
-    virtual std::string processTextWithChords(std::string& chord_line, std::string& text_line) override;
-    virtual std::string processTextLine(std::string& text_line) override;
+    virtual std::string processSingleChordLine(const std::string& chord_line) override;
+    virtual std::string processTextWithChords(const std::string& chord_line, const std::string& text_line) override;
+    virtual std::string processTextLine(const std::string& text_line) override;
+
+    virtual void createBooklet(const char* def_songbook_path,
+                               const char* front_page_path,
+                               const char* back_page_path,
+                               int pages_per_shuttle) override;
 };
 
 #endif

@@ -29,7 +29,7 @@ SongBookApp::SongBookApp()
                         //            name                         
   Window* main_window = new Window("Main Screen", 110,   20,   5,   2);
   Window* log_window = new Window("Log Screen", 110, 10, 5, 23);
-  Window* commands_window = new Window("Commands Screen", 20, 20, 117, 2);
+  Window* commands_window = new Window("Commands Screen", 40, 20, 117, 2);
   Window* stats_window = new Window("Stats Screen", 20, 10, 117, 23);
 
   this->AddWindow(main_window);
@@ -40,25 +40,18 @@ SongBookApp::SongBookApp()
   ListTask* list_task = new ListTask("List", this, "descr");
   list_task->AddWindow(main_window);
   list_task->AddWindow(log_window);
-  task_legend["w"] = "move up";
-  task_legend["s"] = "move down";
 
   CRUDTask* crud_task = new CRUDTask("Crud", this, "descr");
   crud_task->AddWindow(main_window);
   crud_task->AddWindow(log_window);
-  task_legend["m"] = "modify song";
-  task_legend["d"] = "delete song";
-  task_legend["a"] = "add song";
 
   GatherTask* gather_task = new GatherTask("gather", this, "descr");
   gather_task->AddWindow(main_window);
   gather_task->AddWindow(log_window);
-  task_legend["g"] = "gather song";
 
   LatexTask* latex_task = new LatexTask("latex", this, "descr");
   latex_task->AddWindow(main_window);
   latex_task->AddWindow(log_window);
-  task_legend["l"] = "export (pdf) song";
 
   CollectionTask* collection_task = new CollectionTask("collection", this, "descr");
   collection_task->AddWindow(main_window);
@@ -110,17 +103,19 @@ void SongBookApp::afterExecuteHook()
 {
   this->tasks["List"]->Execute('-');
 
-  windows["Commands Screen"]->Clear();
-  for (const auto& [k, v] : task_legend)  {
-    windows["Commands Screen"]->Print(std::format("{} = {}", k, v));
-  }
-
   windows["Stats Screen"]->Clear();
   windows["Stats Screen"]->Print(std::format("Song Count: {}", SongBookUtils::getConfigItem("workspace/song_count")));
   windows["Stats Screen"]->Print(std::format("Col. Count: {}", SongBookUtils::getConfigItem("workspace/collection_count")));
   windows["Stats Screen"]->Print(std::format("Filter: '{}'", SongBookUtils::getConfigItem("workspace/filter_pattern", "")));
   windows["Stats Screen"]->Print(std::format("Collection: '{}'", SongBookUtils::getConfigItem("workspace/filter_collection", "")));
-  windows["Stats Screen"]->Print(std::format("Sort: '{}'", SongBookUtils::getConfigItem("workspace/sort", "")));
+  windows["Stats Screen"]->Print(std::format("Sort: '{}'", SongBookUtils::getConfigItem("workspace/order", "")));
+
+  windows["Commands Screen"]->Clear();
+  for (const auto& [c, legend] : task_legend)  {
+    windows["Commands Screen"]->Print(std::format("{} = {}", c, legend));
+  }
+
+  task_legend.clear();
 }
 
 void SongBookApp::executeCommands(std::string commands_string, bool exitWhenDone)
@@ -180,4 +175,14 @@ std::string SongBookApp::SongEditor(std::string lyrics)
 
   
 	return lyrics;
+}
+
+void SongBookApp::clearTaskLegend()
+{
+  task_legend.clear();
+}
+
+void SongBookApp::addTaskLegend(char c, std::string task_legend)
+{
+  this->task_legend[c] = task_legend;
 }

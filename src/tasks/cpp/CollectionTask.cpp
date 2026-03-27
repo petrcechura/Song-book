@@ -24,8 +24,13 @@ int CollectionTask::Execute(char command)
 				case 'r': removeFromCollection();
 					break;
 			}
+			parent->addTaskLegend('a', "Create a collection");
+			parent->addTaskLegend('d', "Delete a collection");
+			parent->addTaskLegend('o', "Add song to coll.");
+			parent->addTaskLegend('r', "Remove song from coll.");
 			break;
 	}
+
     
 	return 0;
 }

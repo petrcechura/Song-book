@@ -28,12 +28,13 @@ void ListTask::listTable()
 		}
 		listCollections();
 	  break;
+	  case SongBookApp::app_state_t::SETTINGS_BROWSE:
+		listSettings();
 	}
 }
 
 void ListTask::listSongs()
 { 
-
 	nlohmann::json data = SongBookUtils::getInstance()->getConfigJson("workspace/songs");
 	nlohmann::json marks = SongBookUtils::getConfigJson("workspace/marked_songs");
 
@@ -58,6 +59,14 @@ void ListTask::listSongs()
 		}
 		i++;
 	}
+
+	windows["Main Screen"]->Refresh();
+}
+
+// TODO
+void ListTask::listSettings()
+{ 
+	nlohmann::json settings = SongBookUtils::getInstance()->getConfigJson("workspace/settings");
 
 	windows["Main Screen"]->Refresh();
 }
@@ -116,20 +125,45 @@ void ListTask::markSong()
 
 int ListTask::Execute(char command)
 {	
-    switch(command)  {
-      case 'w': moveUp();
-                break;
-      case 's': moveDown();
-			    break;
-	  case 'v': tableLeft();
-	  			break;
-	  case 'b': tableRight();
-	  			break;
-	  case 'x': markSong();
-				break;
-	  case '-': break;
-      default: return 1;
-    }
+	switch(parent->getState())  {
+		case SongBookApp::app_state_t::SONG_BROWSE:
+			switch(command)  {
+      			case 'w': moveUp();
+      			          break;
+      			case 's': moveDown();
+						    break;
+	  			case 'v': tableLeft();
+	  						break;
+	  			case 'b': tableRight();
+	  						break;
+	  			case 'x': markSong();
+							break;
+	  			case '-': break;
+    		}
+			parent->addTaskLegend('w', "Move up");
+			parent->addTaskLegend('s', "Move down");
+			parent->addTaskLegend('v', "Switch to collections");
+			parent->addTaskLegend('x', "Mark song");
+			break;
+		case SongBookApp::app_state_t::COLLECTION_BROWSE:
+			switch(command)  {
+      			case 'w': moveUp();
+      			          break;
+      			case 's': moveDown();
+						    break;
+	  			case 'v': tableLeft();
+	  						break;
+	  			case 'b': tableRight();
+	  						break;
+	  			case '-': break;
+    		}
+			parent->addTaskLegend('w', "Move up");
+			parent->addTaskLegend('s', "Move down");
+			parent->addTaskLegend('v', "Switch to songs");
+			break;
+
+	}
+
 
 	listTable();
 

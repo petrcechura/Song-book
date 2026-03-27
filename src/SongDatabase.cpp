@@ -277,20 +277,20 @@ nlohmann::json SongDatabase::getSqlJson(std::string query)  {
 nlohmann::json SongDatabase::getJson()
 {
   std::string pattern = SongBookUtils::getConfigItem("workspace/filter_pattern", "");
-  std::string collection_id = SongBookUtils::getConfigItem("workspace/filter_collection", "-1");
+  std::string collection_id = SongBookUtils::getConfigItem("workspace/filter_collection", "");
+  std::string order = SongBookUtils::getConfigItem("workspace/order", "ID");
 
-  if (collection_id == "-1" && pattern == "")  {
-    return getSqlJson("SELECT * FROM SONGS");
+  if (collection_id == "" && pattern == "")  {
+    return getSqlJson(std::format("SELECT * FROM SONGS ORDER BY {} COLLATE CZECH;", order));
   }
-  else if (collection_id == "-1" && pattern != "")  {
-    return getSqlJson(std::format("SELECT * FROM SONGS WHERE TITLE LIKE '%{}%'", pattern));
+  else if (collection_id == "" && pattern != "")  {
+    return getSqlJson(std::format("SELECT * FROM SONGS WHERE TITLE LIKE '%{}%' ORDER BY {};", pattern, order));
   }
-  else if (collection_id != "-1" && pattern == "")  {
-    SongBookUtils::printError("dsadsa");
-    return getSqlJson(std::format("SELECT s.* FROM SONGS s JOIN COLLECTION_MAP cm ON s.id = cm.song_id WHERE cm.collection_id = {} ;", collection_id));
+  else if (collection_id != "" && pattern == "")  {
+    return getSqlJson(std::format("SELECT s.* FROM SONGS s JOIN COLLECTION_MAP cm ON s.id = cm.song_id WHERE cm.collection_id = {} ORDER BY {} COLLATE CZECH;", collection_id, order));
   }
   else {
-    return getSqlJson(std::format("SELECT s.* FROM SONGS s JOIN COLLECTION_MAP cm ON s.id = cm.song_id WHERE cm.collection_id = {} AND TITLE LIKE '%{}%';", collection_id, pattern));
+    return getSqlJson(std::format("SELECT s.* FROM SONGS s JOIN COLLECTION_MAP cm ON s.id = cm.song_id WHERE cm.collection_id = {} AND TITLE LIKE '%{}%' ORDER BY {} COLLATE CZECH;", collection_id, pattern, order));
   }
 }
 

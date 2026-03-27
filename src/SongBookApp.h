@@ -28,6 +28,7 @@ class SongBookApp : public WindowServer
     enum class app_state_t {
       SONG_BROWSE,
       COLLECTION_BROWSE,
+      SETTINGS_BROWSE
     };
     
     /** Returns an instance of a database, allowing tasks to operate with that.
@@ -43,6 +44,9 @@ class SongBookApp : public WindowServer
     void executeCommands(std::string cmd_line, bool exitWhenDone=false);
 
     std::string SongEditor(std::string lyrics);
+
+    void clearTaskLegend();
+    void addTaskLegend(char c, std::string task_legend);
 
   protected:
     /** A `startHook()` implementation */
@@ -60,7 +64,8 @@ class SongBookApp : public WindowServer
 
     std::string order = "ID";
     app_state_t state = app_state_t::SONG_BROWSE;
-    std::map<std::string, std::string> task_legend;
+    std::map<char, std::string> task_legend;
+
 };
 
 #endif

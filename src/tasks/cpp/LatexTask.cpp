@@ -68,12 +68,18 @@ void LatexTask::exportToPdf()
 }
 
 int LatexTask::Execute(char command)
-{
-      switch(command)  {
-        case 'l': exportToPdf();
-				  break;
-        default: return 1;
-      }
+{	
+	switch(parent->getState())  {
+		case SongBookApp::app_state_t::SONG_BROWSE:
+      		switch(command)  {
+        		case 'l': exportToPdf();
+						  break;
+      		}
+			parent->addTaskLegend('l', "Export songs to PDF");
+			break;
+		case SongBookApp::app_state_t::COLLECTION_BROWSE:
+			break;
+	}
 
-      return 0;
+    return 0;
 }
