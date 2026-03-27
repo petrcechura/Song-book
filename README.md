@@ -10,26 +10,20 @@ Supported actions are:
   * Scrap chords and lyrics from specific websites automatically
   * Create collections for your songs for easy management
 
-# Installation setup
-## Dependencies
-  * g++ (20+)
-  * curl (8.16)
-  * make (4.3)
-  * rust
-  * locale cs_CZ.UTF-8 (for czech sort)
-## How to build an app
-### Linux
+# Installation
+## Install dependencies
+> [!NOTE]
+> For czech sort, please install locale cs_CZ.UTF-8 too (otherwise special characters are not handled properly).
+
+### Arch Linux
 
 ```
-2. Install all dependencies:
-
-**Arch Linux**
-```
-sudo pacman -S libxml2 curl rust ncurses
+sudo pacman -S libxml2 curl rust ncurses g++ make 
 ```
 
-3. Initialize `bard` tool as a PDF generator:
-> [!INFO]
+Initialize `bard` tool as a PDF generator:
+
+> [!NOTE]
 > Song-book uses `bard` tool to create final PDF file.
 > See original [bard repository](https://github.com/vojtechkral/bard) for more details about the project.
 
@@ -37,13 +31,13 @@ sudo pacman -S libxml2 curl rust ncurses
 cd lib/bard && cargo install -f bard && make release
 ```
 
-4. Build your application:
+Build your application:
 ```
 cmake build . && \
 cmake --build .
 ```
 
-5. Run application (full-screen is recommended):
+Run application (full-screen is recommended):
 ```
 ./app -config <your-config-file>
 ```
