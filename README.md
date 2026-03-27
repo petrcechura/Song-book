@@ -15,18 +15,39 @@ Supported actions are:
   * g++ (20+)
   * curl (8.16)
   * make (4.3)
-  * pandoc
   * rust
   * locale cs_CZ.UTF-8 (for czech sort)
 ## How to build an app
 ### Linux
 
-Run command below:
 ```
-git clone git@github.com:petrcechura/Song-book.git && \
+2. Install all dependencies:
+
+**Arch Linux**
+```
+sudo pacman -S libxml2 curl rust ncurses
+```
+
+3. Initialize `bard` tool as a PDF generator:
+> [!INFO]
+> Song-book uses `bard` tool to create final PDF file.
+> See original [bard repository](https://github.com/vojtechkral/bard) for more details about the project.
+
+```
+cd lib/bard && cargo install -f bard && make release
+```
+
+4. Build your application:
+```
 cmake build . && \
 cmake --build .
 ```
+
+5. Run application (full-screen is recommended):
+```
+./app -config <your-config-file>
+```
+
 ### Windows
 Please follow [this tutorial](https://wiki.archlinux.org/title/Installation_guide).
 
