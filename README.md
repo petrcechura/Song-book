@@ -11,6 +11,13 @@ Supported actions are:
   * Create collections for your songs for easy management
 
 # Installation
+## Clone repository
+```
+git clone git@github.com:petrcechura/Song-book.git && \
+git submodule init && \
+git submodule update
+```
+
 ## Install dependencies
 > [!NOTE]
 > For czech sort, please install locale cs_CZ.UTF-8 too (otherwise special characters are not handled properly).
@@ -30,6 +37,8 @@ Initialize `bard` tool as a PDF generator:
 ```
 cd lib/bard && cargo install -f bard && make release
 ```
+
+## Build & Run
 
 Build your application:
 ```
