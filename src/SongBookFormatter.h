@@ -37,18 +37,11 @@ public:
      *  Song pages to this complete songbook shall be added via `addSongPage` method.
      */
     virtual int generateSongBook(const char* output_dir = "") = 0;
-
     virtual int exportSongs(const char* output_dir) = 0;
     
-    /** 
-     * Parses markdown syntax into `SongBookFormatter` specific syntax.
-     *
-     * Markdown syntax is universal syntax that is parsed via `pandoc` tool by `GatherTask`.
-     * This method converts this syntax to implementation specific syntax, so songbook may be properly generated.
-     *
-     * Converted lyrics are not complete song page; such page shall be generated only via `addSongPage`.
-     */
-    virtual std::string parseMarkdown(std::string markdown_lyrics) = 0;
+    virtual std::string processSingleChordLine(std::string& chord_line) = 0;
+    virtual std::string processTextWithChords(std::string& chord_line, std::string& text_line) = 0;
+    virtual std::string processTextLine(std::string& text_line) = 0;
 
     /** Adds a song into temporary database, so songbook can be generated. 
         @param title: title of a song
@@ -80,6 +73,10 @@ public:
     virtual void clearPages() override;
 
     std::string processChordLines(std::string lyrics);
+
+    virtual std::string processSingleChordLine(std::string& chord_line) override;
+    virtual std::string processTextWithChords(std::string& chord_line, std::string& text_line) override;
+    virtual std::string processTextLine(std::string& text_line) override;
 };
 
 class LatexListFormatter : public SongBookFormatter
@@ -148,6 +145,10 @@ public:
     virtual int addSongPage(nlohmann::json song);
     virtual bool checkSanity() override;
     virtual void clearPages() override;
+
+    virtual std::string processSingleChordLine(std::string& chord_line) override;
+    virtual std::string processTextWithChords(std::string& chord_line, std::string& text_line) override;
+    virtual std::string processTextLine(std::string& text_line) override;
 };
 
 #endif
