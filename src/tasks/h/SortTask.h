@@ -1,0 +1,26 @@
+#include <string>
+#include <filesystem>
+#include <iostream>
+#include "cmdapputils.h"
+
+class SongBookApp;
+
+/** Sort a song inside database */
+class SortTask : public Task<SongBookApp>
+{
+  public:
+    SortTask(std::string cmd, SongBookApp* parent) 
+      : Task<SongBookApp>(cmd, parent) {};
+
+    int startInteractive() override;
+    int executeCommand(int error_code) override;
+    void endInteractive(int error_code) override;
+
+  private:
+    enum {
+      SUCCESS,
+      OK_EXIT_CHAR,
+      CRITERIA_NOT_FOUND,
+      ARG_EMPTY
+    };
+};
