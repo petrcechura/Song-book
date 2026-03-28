@@ -14,6 +14,7 @@ Supported actions are:
 ## Clone repository
 ```
 git clone git@github.com:petrcechura/Song-book.git && \
+cd Song-book && \
 git submodule init && \
 git submodule update
 ```
@@ -35,7 +36,7 @@ Initialize `bard` tool as a PDF generator:
 > See original [bard repository](https://github.com/vojtechkral/bard) for more details about the project.
 
 ```
-cd lib/bard && cargo install -f bard && make release
+(cd lib/bard && cargo install -f bard && make release)
 ```
 
 ## Build & Run
