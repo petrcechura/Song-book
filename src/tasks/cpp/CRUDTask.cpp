@@ -161,7 +161,6 @@ void CRUDTask::addSong()
 	song["TITLE"] = name;
 	song["ARTIST"] = author;
 	int err = parent->getDatabase()->addSong(song, true);
-	windows["Log Screen"]->Print(std::format("INPUT: {} {} (error code = {})", name, author, err));
 
 	if (!err)  {
 		windows["Log Screen"]->Print(std::format("Song with name {} successfuly added to database", name));

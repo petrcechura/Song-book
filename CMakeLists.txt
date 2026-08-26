@@ -6,6 +6,7 @@ add_executable(app src/main.cpp)
 
 add_subdirectory(src)
 add_subdirectory(lib/window-app-utils)
+set(CMAKE_BUILD_TYPE Debug)
 
 target_link_libraries(app
     PRIVATE

@@ -34,7 +34,8 @@ void ListTask::listTable()
 }
 
 void ListTask::listSongs()
-{ 
+{   
+
 	nlohmann::json data = SongBookUtils::getInstance()->getConfigJson("workspace/songs");
 	nlohmann::json marks = SongBookUtils::getConfigJson("workspace/marked_songs");
 
@@ -42,16 +43,22 @@ void ListTask::listSongs()
 
 	std::string s = printSongListHeader();
 	windows["Main Screen"]->Print(s, 21, -1, true);
-	
+
 	int i = 0;
 	for(const auto& [key, item] : data.items())  {
 		if (i > upper_song_no && i < lower_song_no)  {
 
 			bool marked = (std::find(marks.begin(), marks.end(), item["ID"]) != marks.end()) ? true : false;
 
-			if (i == select_song)  {
+
+			if (i == select_song)  {                
+                // this is problem
+                std::cerr << "pre printsong" << std::endl;
 				windows["Main Screen"]->Print(printSong(item, marked), 1, 1, true);
+                std::cerr << "post printsong" << std::endl;
+
 				SongBookUtils::getInstance()->setConfigItem("workspace/current_song_id", item["ID"]);
+
 			}
 			else {
 				windows["Main Screen"]->Print(printSong(item, marked));
@@ -242,21 +249,22 @@ void ListTask::tableRight()
 
 std::string ListTask::printSong(const nlohmann::json& song, bool marked)
 {
-  
-  std::string title =   song.count("TITLE")   ? song.at("TITLE") : "NULL";
-  std::string artist =  song.count("ARTIST")  ? song.at("ARTIST") : "NULL";
-  std::string id =      song.count("ID")      ? song.at("ID") : "NULL";
-  std::string no =      song.count("NO")      ? song.at("NO") : "NULL";
-  bool has_lyrics =     song.count("LYRICS") ? !(song["LYRICS"] == "NULL") : false;
+    std::string title =   song.count("TITLE")   ? song.at("TITLE") : "NULL";
+    std::string artist =  song.count("ARTIST")  ? song.at("ARTIST") : "NULL";
+    std::string id =      song.count("ID")      ? song.at("ID") : "NULL";
+    std::string no =      song.count("NO")      ? song.at("NO") : "NULL";
+    bool has_lyrics =     song.count("LYRICS") ? !(song["LYRICS"] == "NULL") : false;
 
-  std::ostringstream string_cont;
-	string_cont << std::setw(3) << std::left << (marked ? " * " : "   ")
-				<< std::setw(4) << std::left << no
-				<< std::left << SongBookUtils::alignString(title, 	' ', TITLE_WIDTH)
-				<< std::left << SongBookUtils::alignString(artist,  ' ', ARTIST_WIDTH)
+    std::ostringstream string_cont;
+    string_cont << std::setw(3) << std::left << (marked ? " * " : "   ")
+                << std::setw(4) << std::left << no
+                << std::left << SongBookUtils::alignString(title,  ' ', TITLE_WIDTH)
+                << std::left << SongBookUtils::alignString(artist, ' ', ARTIST_WIDTH)
                 << "    " << (has_lyrics ? "X" : " ");
 
-  return string_cont.str().c_str();
+    std::cerr << "aaa" << std::endl;
+
+    return SongBookUtils::sanitizeUtf8(string_cont.str());
 }
 
 std::string ListTask::printCollection(const nlohmann::json& collection)

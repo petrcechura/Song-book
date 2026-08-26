@@ -56,6 +56,8 @@ class SongBookUtils
     /** This function returns an aligned string with set width, regardless of characters format (UNICODE/ASCII) */
     static std::string alignString(const std::string& _str, char fill = ' ', int maxWidth = 30);
 
+    static std::string sanitizeUtf8(const std::string& input);
+
     
     // ==============================
     // ====== PRINTING METHODS ======

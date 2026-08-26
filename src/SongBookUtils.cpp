@@ -275,20 +275,95 @@ void SongBookUtils::printError(std::string msg)
 
 /** This function returns number of characters inside string variable, regardless of character format (UNICODE/ASCII) */
 int SongBookUtils::countStringChars(const std::string& _str)
-{
-  std::wstring str = std::wstring_convert<std::codecvt_utf8<wchar_t>>()
-    .from_bytes(_str);
-  return str.size();
+{   
+    int count = 0;
+    size_t i = 0;
+    const size_t len = _str.size();
+
+    while (i < len)
+    {
+        unsigned char c = static_cast<unsigned char>(_str[i]);
+        size_t charLen;
+
+        if ((c & 0x80) == 0x00)       // 0xxxxxxx -> 1-byte ASCII
+            charLen = 1;
+        else if ((c & 0xE0) == 0xC0)  // 110xxxxx -> 2-byte sequence
+            charLen = 2;
+        else if ((c & 0xF0) == 0xE0)  // 1110xxxx -> 3-byte sequence
+            charLen = 3;
+        else if ((c & 0xF8) == 0xF0)  // 11110xxx -> 4-byte sequence
+            charLen = 4;
+        else
+            charLen = 1;               // invalid leading byte, skip just this byte
+
+        // Guard against a truncated/invalid sequence running past the end
+        // or containing bytes that aren't valid continuation bytes.
+        size_t j = 1;
+        for (; j < charLen && (i + j) < len; ++j)
+        {
+            unsigned char cc = static_cast<unsigned char>(_str[i + j]);
+            if ((cc & 0xC0) != 0x80)  // not a continuation byte -> sequence is broken
+                break;
+        }
+
+        i += (j < charLen) ? 1 : charLen; // if broken, only advance by 1 byte
+        ++count;
+    }
+
+    return count;
 }
 
 /** This function returns an aligned string with set width, regardless of characters format (UNICODE/ASCII) */
 std::string SongBookUtils::alignString(const std::string& _str, char fill, int maxWidth)
-{	
-  std::string str = "CANT DISPLAY (too long)" + std::string(maxWidth-23, fill);
+{
+    int charCount = countStringChars(_str);
 
-  if (_str.size() < maxWidth)  {
-    str = _str + std::string(TITLE_WIDTH - countStringChars(_str), fill);
-  }
+    if (charCount >= maxWidth)
+    {
+        // Not enough room to display the full string
+        return "CANT DISPLAY (too long)" + std::string(std::max(0, maxWidth - 23), fill);
+    }
 
-  return str;
+    return _str + std::string(maxWidth - charCount, fill);
+}
+
+/** Replaces any invalid or truncated UTF-8 byte sequences with '?'. */
+std::string SongBookUtils::sanitizeUtf8(const std::string& input)
+{
+    std::string out;
+    out.reserve(input.size());
+    size_t i = 0;
+    const size_t len = input.size();
+
+    while (i < len)
+    {
+        unsigned char c = static_cast<unsigned char>(input[i]);
+        size_t charLen;
+
+        if ((c & 0x80) == 0x00)      charLen = 1;
+        else if ((c & 0xE0) == 0xC0) charLen = 2;
+        else if ((c & 0xF0) == 0xE0) charLen = 3;
+        else if ((c & 0xF8) == 0xF0) charLen = 4;
+        else { out += '?'; ++i; continue; } // invalid leading byte
+
+        bool valid = (i + charLen <= len);
+        for (size_t j = 1; valid && j < charLen; ++j)
+        {
+            unsigned char cc = static_cast<unsigned char>(input[i + j]);
+            if ((cc & 0xC0) != 0x80) valid = false;
+        }
+
+        if (valid)
+        {
+            out.append(input, i, charLen);
+            i += charLen;
+        }
+        else
+        {
+            out += '?';
+            ++i; // only skip the one bad byte, resync on next iteration
+        }
+    }
+
+    return out;
 }
