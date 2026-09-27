@@ -5,7 +5,6 @@
 #include <filesystem>
 #include <iostream>
 #include "SongDatabase.h"
-#include "SongBookFormatter.h"
 #include "WindowServer.h"
 #include "json.hpp"
 

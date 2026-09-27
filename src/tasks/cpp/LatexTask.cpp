@@ -34,8 +34,8 @@ void LatexTask::exportToPdf()
 
   int i = 0;
   std::string title;
-	std::string artist;
-	std::string id;
+  std::string artist;
+  std::string id;
   for (const auto& song : data)  {
     title = song.count("TITLE") ? song.at("TITLE") : "NULL";
     artist = song.count("ARTIST") ? song.at("ARTIST") : "NULL";
@@ -48,10 +48,8 @@ void LatexTask::exportToPdf()
   int e = formatter->exportSongs(songbook.c_str());
   formatter->clearPages();
 
-  std::string bard_tool = SongBookUtils::getConfigItem("paths/bard_command", "");
-
-  if (bard_tool.empty())  {
-    windows["Log Screen"]->Print("Cannot export songs to pdf file, `bard` tool not found!");
+  if (!formatter->checkSanity())  {
+    windows["Log Screen"]->Print("Cannot export songs to pdf file, required tools not found!");
     return;
   }
 

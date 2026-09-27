@@ -1,6 +1,7 @@
 #include <string>
 #include <filesystem>
 #include "SongBookFormatter.h"
+#include "LatexSongbookFormatter.h"
 #include "json.hpp"
 #include "WindowServer.h"
 #include "Window.h"
@@ -12,7 +13,7 @@ class LatexTask : public WTask<SongBookApp>
 {
 public:
   LatexTask(std::string name, SongBookApp* parent, std::string description) 
-    : WTask<SongBookApp>(name, parent, description) { this->formatter = new BardFormatter(); };
+    : WTask<SongBookApp>(name, parent, description) { this->formatter = new LatexSongbookFormatter(); };
   
   virtual int Execute(char command) override;
 

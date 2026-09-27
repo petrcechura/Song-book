@@ -1,7 +1,6 @@
 #include <string>
 #include <iostream>
 #include "SongDatabase.h"
-#include "SongBookFormatter.h"
 #include "json.hpp"
 
 #ifndef SONGBOOKUTILS_H

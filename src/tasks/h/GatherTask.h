@@ -6,6 +6,7 @@
 #include <functional>
 #include <map>
 #include "SongBookFormatter.h"
+#include "LatexSongbookFormatter.h"
 #include "WindowServer.h"
 #include "Window.h"
 #include "WTask.h"
@@ -19,7 +20,7 @@ class GatherTask : public WTask<SongBookApp>
 {
 public:
   GatherTask(std::string name, SongBookApp* parent, std::string description) 
-    : WTask<SongBookApp>(name, parent, description) { this->formatter = new BardFormatter(); };
+    : WTask<SongBookApp>(name, parent, description) { this->formatter = new LatexSongbookFormatter(); };
 
     // virtual functions override
     virtual int Execute(char command) override;

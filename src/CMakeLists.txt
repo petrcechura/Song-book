@@ -33,10 +33,13 @@ target_include_directories(songbookapp PRIVATE ${CURSES_INCLUDE_DIRS})
 target_include_directories(songbookapp PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../lib/json)
 target_include_directories(songbookapp PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../lib/utfcpp-4.0.9/source)
 target_include_directories(songbookapp PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/tasks/h)
+target_include_directories(songbookapp PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/formatters)
 
 target_sources(songbookapp
-    PUBLIC SongBookFormatter.h
-    PRIVATE SongBookFormatter.cpp
+    PUBLIC formatters/SongBookFormatter.h
+    PRIVATE formatters/SongBookFormatter.cpp
+    PUBLIC formatters/LatexSongbookFormatter.h
+    PRIVATE formatters/LatexSongbookFormatter.cpp
 
     PUBLIC tasks/h/ListTask.h
     PUBLIC tasks/h/CRUDTask.h
