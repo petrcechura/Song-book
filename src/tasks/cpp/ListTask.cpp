@@ -52,10 +52,7 @@ void ListTask::listSongs()
 
 
 			if (i == select_song)  {                
-                // this is problem
-                std::cerr << "pre printsong" << std::endl;
 				windows["Main Screen"]->Print(printSong(item, marked), 1, 1, true);
-                std::cerr << "post printsong" << std::endl;
 
 				SongBookUtils::getInstance()->setConfigItem("workspace/current_song_id", item["ID"]);
 
@@ -261,8 +258,6 @@ std::string ListTask::printSong(const nlohmann::json& song, bool marked)
                 << std::left << SongBookUtils::alignString(title,  ' ', TITLE_WIDTH)
                 << std::left << SongBookUtils::alignString(artist, ' ', ARTIST_WIDTH)
                 << "    " << (has_lyrics ? "X" : " ");
-
-    std::cerr << "aaa" << std::endl;
 
     return SongBookUtils::sanitizeUtf8(string_cont.str());
 }

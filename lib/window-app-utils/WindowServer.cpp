@@ -38,6 +38,7 @@ void WindowServer::Init()
     initscr();
     noecho();
     cbreak();
+    keypad(stdscr, TRUE);    // needed for function/arrow keys
 
     for (auto const& [name, window] : windows)  {
         window->Init();

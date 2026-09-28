@@ -101,9 +101,13 @@ std::vector<LatexSongbookFormatter::LyricBlock> LatexSongbookFormatter::parseLyr
 	std::istringstream iss(lyrics);
 	std::string line;
 
-	static const std::regex verse_re(R"(^\s*(\d+)\.\s*(.*)$)");
+	// A verse marker is any non-whitespace label followed by a literal dot,
+	// e.g. "1.", "2.", or a custom label like "*.". Chorus ("> ") and capo
+	// notes ("::") are checked first since they're more specific patterns -
+	// otherwise the generic "label." pattern could swallow them.
 	static const std::regex chorus_re(R"(^\s*>\s*(.*)$)");
 	static const std::regex note_re(R"(^\s*::\s*(.*)$)");
+	static const std::regex verse_re(R"(^\s*(\S+)\.\s*(.*)$)");
 
 	LyricBlock* current = nullptr;
 
@@ -117,7 +121,12 @@ std::vector<LatexSongbookFormatter::LyricBlock> LatexSongbookFormatter::parseLyr
 		}
 
 		if (isBlank(line)) {
-			current = nullptr;
+			// A blank line is just a visual separator in the source text. It
+			// does NOT end the current block: an unmarked line that follows
+			// (even after a blank line) still belongs to whatever block is
+			// currently open - only an explicit verse/chorus/note marker
+			// starts a new block. This only matters before the very first
+			// marker in the song, where there is no open block yet.
 			continue;
 		}
 
@@ -279,10 +288,18 @@ int LatexSongbookFormatter::exportSongs(const char* output_dir)
 		doc << "\\end{center}\n\\newpage\n\n";
 	}
 
+	// Contents page: one hyperlinked, page-numbered entry per song, filled
+	// in automatically from the \addcontentsline calls below. pdflatex is
+	// run twice by generateSongBook() so the page numbers resolve correctly.
+	doc << "\\tableofcontents\n\\newpage\n\n";
+
 	for (const auto& song : this->songs) {
 		std::string title = SongBookUtils::getInstance()->sql2txt(song["TITLE"]);
 		std::string artist = SongBookUtils::getInstance()->sql2txt(song["ARTIST"]);
 		std::string lyrics = SongBookUtils::getInstance()->sql2txt(song["LYRICS"]);
+
+		doc << "\\phantomsection\n";
+		doc << "\\addcontentsline{toc}{section}{" << escapeLatex(title) << " -- " << escapeLatex(artist) << "}\n";
 
 		doc << "\\noindent{\\Large\\bfseries " << escapeLatex(title) << "}\\\\\n";
 		doc << "{\\normalsize\\itshape " << escapeLatex(artist) << "}\n";

@@ -17,5 +17,6 @@ public:
   void addSong();
   void modifySong();
   void deleteSong();
+  void doEditor();
 
 };

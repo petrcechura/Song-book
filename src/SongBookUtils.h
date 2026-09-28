@@ -1,10 +1,11 @@
+#ifndef SONGBOOKUTILS_H
+#define SONGBOOKUTILS_H
+
 #include <string>
 #include <iostream>
 #include "SongDatabase.h"
+#include "SongBookEditor.hpp"
 #include "json.hpp"
-
-#ifndef SONGBOOKUTILS_H
-#define SONGBOOKUTILS_H
 
 #define TITLE_WIDTH 30
 #define ARTIST_WIDTH 30
@@ -57,6 +58,12 @@ class SongBookUtils
 
     static std::string sanitizeUtf8(const std::string& input);
 
+    // ==============================
+    // ======== TEXT EDITOR =========
+    // ==============================
+
+    static std::string textEditor(std::string str);
+
     
     // ==============================
     // ====== PRINTING METHODS ======
@@ -72,7 +79,8 @@ class SongBookUtils
   private:
     static nlohmann::json config;
     static SongBookUtils* _utils;
-    SongBookUtils() {};
+    std::unique_ptr<texted::TextEditor> song_editor;
+    SongBookUtils() : song_editor(std::make_unique<texted::TextEditor>()) {};
     static const char config_delimiter;
 
     static nlohmann::json* parseConfigPath(nlohmann::json* j, std::string path);

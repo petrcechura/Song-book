@@ -58,12 +58,15 @@ void GatherTask::gatherSong()
 
 		song = parent->getDatabase()->getSong(id);
 		
-		windows["Log Screen"]->Print(std::format("Searching lyrics for song ({}, {})...", song["TITLE"].get<std::string>(), song["ARTIST"].get<std::string>()));
-		int err = searchForLyrics(song["TITLE"], song["ARTIST"]);
+		windows["Log Screen"]->Print(std::format("Searching lyrics for song ({}, {})...", 
+            song["TITLE"].get<std::string>(), 
+            song["ARTIST"].get<std::string>()));
+		
+        int err = searchForLyrics(song["TITLE"], song["ARTIST"]);
 
 		if (!err)  {
 			windows["Log Screen"]->Print("Found these lyrics...");
-			this->lyrics_reg = parent->SongEditor(SongBookUtils::sql2txt(this->lyrics_reg));
+            this->lyrics_reg = SongBookUtils::getInstance()->textEditor(SongBookUtils::sql2txt(this->lyrics_reg));
 			refresh();
 			
 			windows["Log Screen"]->Clear();
@@ -87,7 +90,7 @@ void GatherTask::gatherSong()
 			}
 		}
 		else {
-			windows["Log Screen"]->Print("Error when gathering lyrics...");
+			windows["Log Screen"]->Print(std::format("Error when gathering lyrics... (error code: {})", err));
 			return;
 		}
 	}
@@ -104,61 +107,66 @@ int GatherTask::searchForLyrics(std::string title,
 	
 
 	for (auto& website : this->allowed_websites)  {
-	  std::string lowered_website = website;
-	  std::replace(lowered_website.begin(), lowered_website.end(), ' ', '+');   
-	  std::ostringstream query;
-	  query << "https://serpapi.com/search?engine=google"
-	  	  << "&api_key="
-	  	  << SongBookUtils::getInstance()->getConfigItem("google/api_key")
-	  	  << "&q="
-	  	  << SongBookUtils::getInstance()->convert_to_ascii(title) << "+"
-	  	  << SongBookUtils::getInstance()->convert_to_ascii(artist) <<  "+"
-	  	  << SongBookUtils::getInstance()->convert_to_ascii(lowered_website);
+	    std::string lowered_website = website;
+	    std::replace(lowered_website.begin(), lowered_website.end(), ' ', '+');   
+	    std::ostringstream query;
+	    query << "https://serpapi.com/search?engine=google"
+	  	    << "&api_key="
+	  	    << SongBookUtils::getInstance()->getConfigItem("google/api_key")
+            << "&gl=cz"
+            << "&hl=cs"
+            << "&location=Czechia"
+	  	    << "&q="
+	  	    << SongBookUtils::getInstance()->convert_to_ascii(title) << "+"
+	  	    << SongBookUtils::getInstance()->convert_to_ascii(artist) <<  "+"
+	  	    << SongBookUtils::getInstance()->convert_to_ascii(lowered_website);
 	  
-	  // search for valid websites
-	  std::string response = curlQuery(query.str().c_str());
+	    // search for valid websites
+	    std::string response = curlQuery(query.str().c_str());
   
-	  nlohmann::json response_json = nlohmann::json::parse(response);
+	    nlohmann::json response_json = nlohmann::json::parse(response);
   
-	  if (response_json.empty())  {
-	    SongBookUtils::getInstance()->printError("GatherTask: The JSON query response is empty object!");
-	    return INVALID_GOOGLE_RESPONSE;
-	  }
+	    if (response_json.empty())  {
+	        SongBookUtils::getInstance()->printError("GatherTask: The JSON query response is empty object!");
+	        return INVALID_GOOGLE_RESPONSE;
+	    }
   
-	  if (response_json.contains("organic_results") && response_json["organic_results"].is_array()) {
-	  	for (const auto& item : response_json["organic_results"]) {
-		  if (item["source"] == website)  {
-		    std::string link;
-		    try  {
-		  	  link = item["link"].get<std::string>();
-		    }
-		    catch(const std::exception& e)  {
-		  	  SongBookUtils::getInstance()->printError("GatherTask: Could not obtain valid value for key 'link', not a std::string");
-		  	  return LINK_GET_FAILED;
-		    }
+	    if (response_json.contains("organic_results") && response_json["organic_results"].is_array()) {
+	  	    for (const auto& item : response_json["organic_results"]) {
+		        if (item["source"] == website)  {
+		            std::string link;
+		            try  {
+		  	            link = item["link"].get<std::string>();
+		            }
+		            catch(const std::exception& e)  {
+		  	            SongBookUtils::getInstance()->printError("GatherTask: Could not obtain valid value for key 'link', not a std::string");
+		  	            return LINK_GET_FAILED;
+		            }
 		    
-		    std::string raw_lyrics = parseWebsite(link, website);
-		    if (raw_lyrics != "")  {
-		  	  windows["Log Screen"]->Print(std::format("Parsing by AI ({})", SongBookUtils::getInstance()->getConfigItem("ai/model")));
-		  	  // TODO make this a thread
-		  	  //this->lyrics_reg = formatter->parseMarkdown(raw_lyrics);
-			  this->lyrics_reg = raw_lyrics;
-		  	  if (!this->lyrics_reg.empty()) {
-		  	    return SUCCESS;
-		  	  }
-			  else {
-				return INVALID_WEBSITE_PARSE;
-			  }
-		    }
-		  }
-	  	}
-	  	return SEARCH_NO_VALID_WEBSITE;
-	  	  }
-	  else {
-	    SongBookUtils::getInstance()->printError(std::format("GatherTask: Invalid google response: '{}', missing 'items' key", response));
-	    return INVALID_GOOGLE_RESPONSE;
-	  }
-
+		            std::string raw_lyrics = parseWebsite(link, website);
+		        
+                    if (raw_lyrics != "")  {
+		  	            windows["Log Screen"]->Print(std::format("Parsing by AI ({})", SongBookUtils::getInstance()->getConfigItem("ai/model")));
+		  	            // TODO make this a thread
+		  	            //this->lyrics_reg = formatter->parseMarkdown(raw_lyrics);
+			            this->lyrics_reg = raw_lyrics;
+		  	            if (!this->lyrics_reg.empty()) {
+		  	                return SUCCESS;
+		  	            }
+			            else {
+				            return INVALID_WEBSITE_PARSE;
+			            }
+		            }
+		        }
+	  	    }
+            
+            SongBookUtils::getInstance()->printError(std::format("GatherTask: The JSON does not contain valid websites!"));
+	  	    return SEARCH_NO_VALID_WEBSITE;
+	    }
+	    else {
+	        SongBookUtils::getInstance()->printError(std::format("GatherTask: Invalid google response: '{}', missing 'items' key", response));
+	        return INVALID_GOOGLE_RESPONSE;
+	    }
 	}
 
 	SongBookUtils::getInstance()->printError("GatherTask: CURL operation returned and empty response");

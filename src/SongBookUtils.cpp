@@ -1,8 +1,10 @@
 #include <string>
 #include <iostream>
 #include <sstream>
+#include <fstream>
 #include <format>
 #include "SongBookUtils.h"
+#include "SongBookEditor.hpp"
 #include "json.hpp"
 #include <filesystem>
 
@@ -366,4 +368,48 @@ std::string SongBookUtils::sanitizeUtf8(const std::string& input)
     }
 
     return out;
+}
+
+std::string SongBookUtils::textEditor(std::string lyrics)
+{
+	std::string tmpfile = std::tmpnam(nullptr);
+    std::ostringstream cmd_editor;
+    std::string cmd_cat;
+
+	std::ofstream out_file(tmpfile);
+    std::string editor = SongBookUtils::getInstance()->getConfigItem("commons/text_editor");
+    if (editor == "")  {
+        SongBookUtils::getInstance()->printError(std::format("Unable to use \'{}\' editor", editor));
+        return "";
+    }
+
+    // save lyrics to temporary file
+    if (!out_file.is_open())  {
+        SongBookUtils::getInstance()->printError(std::format("Unable to open temporary file {} for lyrics write", tmpfile));
+        return "";
+    } else {  
+        // write current lyrics to file
+        out_file << lyrics;
+        out_file.close();
+    }
+
+    // edit lyrics via editor
+    cmd_editor << editor << " " << tmpfile;
+    system(cmd_editor.str().c_str());
+
+    // load lyrics from temporary file
+    std::ifstream in_file(tmpfile);
+    if (!in_file.is_open())  {
+        SongBookUtils::getInstance()->printError(std::format("Unable to open temporary file {} for lyrics read", tmpfile));
+        return "";
+    } else {
+        std::stringstream updated_lyrics;
+
+        updated_lyrics << in_file.rdbuf();
+        return updated_lyrics.str();
+    }
+
+
+    return "";
+    
 }

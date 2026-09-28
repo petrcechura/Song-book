@@ -7,23 +7,29 @@
 #include "SongBookFormatter.h"
 
 /** LaTeX implementation of SongBookFormatter that renders each song as its
- *  own page: title, artist, numbered verses, chorus, and inline chords.
+ *  own page: title, artist, numbered verses, chorus, and inline chords, with
+ *  a hyperlinked, page-numbered table of contents.
  *
  *  Expected internal format of song["LYRICS"] (same canonical format used
  *  across formatters):
- *    - verses start with "N. " (e.g. "1. ", "2. ")
+ *    - a verse starts with any marker followed by a dot, e.g. "1. ", "2. ",
+ *      or a custom marker like "*. "
  *    - chorus starts with "> "
  *    - a capo / performance note starts with ":: " and is rendered in italics
  *    - chords are inlined right before the word they belong to, wrapped in
  *      backticks, e.g. "I will `Ami`be there"
- *    - blocks (verses / chorus / notes) are separated by a blank line
+ *    - a blank line is just a visual separator; it does not end the current
+ *      block. An unmarked line - one that starts none of the above - is
+ *      simply treated as part of whatever block came before it (typically
+ *      the verse above), rather than being dropped or rendered in isolation.
+ *      The only exception is unmarked lines before the very first marker in
+ *      a song (e.g. intro chords played before the vocals start), which are
+ *      shown as their own small line above the first verse/chorus.
  *
  *  This is a basic implementation: chords attached to a specific word are
  *  rendered as a bold superscript right before that word. The verse/chorus
- *  number, and any chord-only line preceding a verse (e.g. intro chords
- *  played before the vocals start), are placed in a fixed-width left column
- *  so they never crowd the lyric text itself; the lyrics sit in their own
- *  column to the right.
+ *  number sits in a fixed-width left column so it never crowds the lyric
+ *  text itself; the lyrics sit in their own column to the right.
  *
  *  Two-phase contract (same as BardFormatter):
  *    - exportSongs(output_dir)   consumes this->songs and writes the full
@@ -58,7 +64,7 @@ protected:
 \usepackage[T1]{fontenc}
 \usepackage[margin=2cm]{geometry}
 \usepackage{array}
-\pagenumbering{gobble}
+\usepackage[hidelinks]{hyperref}
 
 % Chord placed right before the syllable/word it belongs to
 \newcommand{\chordmark}[1]{\textsuperscript{\textbf{#1}}}

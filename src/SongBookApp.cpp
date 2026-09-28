@@ -5,6 +5,7 @@
 #include "SongBookApp.h"
 #include "SongBookUtils.h"
 #include "json.hpp"
+#include <memory>
 #include <map>
 #include "ListTask.h"
 #include "CRUDTask.h"
@@ -75,6 +76,8 @@ SongBookApp::SongBookApp()
   nlohmann::json collections = getDatabase()->getCollections();
   SongBookUtils::setConfigJson("workspace/collections", collections);
   SongBookUtils::setConfigItem("workspace/collection_count", std::to_string(collections.size()));
+
+  
 }
 
 void SongBookApp::StartHook()
@@ -144,37 +147,6 @@ void SongBookApp::executeCommands(std::string commands_string, bool exitWhenDone
         std::cout << "Could not execute command '" << c << "'" << std::endl;
       }
     }
-}
-
-std::string SongBookApp::SongEditor(std::string lyrics)
-{
-	std::string tmpfile = std::tmpnam(nullptr);
-  std::ostringstream cmd_oss;
-
-	std::string editor = SongBookUtils::getInstance()->getConfigItem("commons/text_editor");
-	if (editor == "")  {
-    windows["Log Screen"]->Print("Unable to edit lyrics, text editor not found under commons/text_editor!");
-    return lyrics;
-	}
-	
-	if (lyrics != "NULL")  {
-		cmd_oss << "echo \'" 
-				<< lyrics
-				<< "\' > "
-				<< tmpfile
-				<< " && ";
-	}
-	cmd_oss << editor
-			<< " "
-			<< tmpfile;
-	
-	std::string cmd = cmd_oss.str();
-	system(cmd.c_str());
-	cmd = std::format("cat {}", tmpfile);
-	lyrics = SongBookUtils::getInstance()->execSystemCommand(cmd.c_str());
-
-  
-	return lyrics;
 }
 
 void SongBookApp::clearTaskLegend()

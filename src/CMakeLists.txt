@@ -9,6 +9,7 @@ find_package(LibXml2 REQUIRED)
 find_package(PoDoFo REQUIRED)
 
 target_sources(songbookapp
+    PUBLIC SongBookEditor.hpp
     PRIVATE SongBookApp.cpp
     PRIVATE SongDatabase.cpp
     PRIVATE SongBookUtils.cpp

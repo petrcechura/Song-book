@@ -2,8 +2,11 @@
 #include <iostream>
 #include <iomanip>
 #include <format>
+#include <ncurses.h>
+#include <cwchar>
 #include "CRUDTask.h"
 #include "SongBookApp.h"
+#include "SongBookEditor.hpp"
 #include "SongBookUtils.h"
 #include "SongEditorServer.hpp"
 
@@ -23,6 +26,7 @@ int CRUDTask::Execute(char command)
 			parent->addTaskLegend('d', "Delete a song");
 			parent->addTaskLegend('m', "Modify a song");
 		break;
+             
 	}
 
     return 0;
@@ -57,7 +61,7 @@ void CRUDTask::modifySong()
 
 		if (choice == "y")  {
 			windows["Main Screen"]->Clear();
-			song["LYRICS"] = parent->SongEditor(song["LYRICS"]);
+            song["LYRICS"] = SongBookUtils::getInstance()->textEditor(song["LYRICS"]);
 		}
 
 		int exit = parent->getDatabase()->addSong(song, true);

@@ -4,6 +4,7 @@
 #include <string>
 #include <filesystem>
 #include <iostream>
+#include <memory>
 #include "SongDatabase.h"
 #include "WindowServer.h"
 #include "json.hpp"
@@ -27,7 +28,7 @@ class SongBookApp : public WindowServer
     enum class app_state_t {
       SONG_BROWSE,
       COLLECTION_BROWSE,
-      SETTINGS_BROWSE
+      SETTINGS_BROWSE,
     };
     
     /** Returns an instance of a database, allowing tasks to operate with that.
@@ -41,8 +42,6 @@ class SongBookApp : public WindowServer
 
     /** This function executes serie of commands separated by ';' character. */
     void executeCommands(std::string cmd_line, bool exitWhenDone=false);
-
-    std::string SongEditor(std::string lyrics);
 
     void clearTaskLegend();
     void addTaskLegend(char c, std::string task_legend);
